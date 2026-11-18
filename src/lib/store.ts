@@ -1,0 +1,728 @@
+/**
+ * Client-side "database" for the prototype. Everything lives in localStorage,
+ * so data is per-browser. The session lives in sessionStorage so two tabs can be
+ * logged in as different users (e.g. buyer + seller chatting in "realtime").
+ */
+import { useSyncExternalStore } from 'react'
+import type {
+  Bi, Currency, DB, Deal, FileAsset, Invoice, Listing, Loi, LoiRound, Nda, Plan, Role, SearchParams, Thread, User,
+} from './types'
+import { DB_VERSION, makeSeed } from './seed'
+import { demoHash, startOfMonth, uid, DAY } from './utils'
+import { matches } from './search'
+
+const KEY = 'bizm:db'
+const SESSION_KEY = 'bizm:session'
+const LAST_SESSION_KEY = 'bizm:lastSession'
+
+export class AppError extends Error {
+  constructor(public code: string) {
+    super(code)
+  }
+}
+
+function load(): DB {
+  try {
+    const s = localStorage.getItem(KEY)
+    if (s) {
+      const parsed = JSON.parse(s) as DB
+      if (parsed.version === DB_VERSION) return parsed
+    }
+  } catch {
+    /* ignore and reseed */
+  }
+  const seed = makeSeed()
+  try {
+    localStorage.setItem(KEY, JSON.stringify(seed))
+  } catch {
+    /* storage unavailable: run in-memory */
+  }
+  return seed
+}
+
+let db: DB = load()
+
+export interface Session {
+  userId: string
+  role: Role
+}
+
+function loadSession(): Session | null {
+  try {
+    const s = sessionStorage.getItem(SESSION_KEY) ?? localStorage.getItem(LAST_SESSION_KEY)
+    return s ? (JSON.parse(s) as Session) : null
+  } catch {
+    return null
+  }
+}
+let session: Session | null = loadSession()
+
+const listeners = new Set<() => void>()
+const emit = () => listeners.forEach((l) => l())
+const subscribe = (l: () => void) => {
+  listeners.add(l)
+  return () => listeners.delete(l)
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.key === KEY && e.newValue) {
+    try {
+      db = JSON.parse(e.newValue)
+      emit()
+    } catch {
+      /* ignore */
+    }
+  }
+})
+
+function commit(mutate: (d: DB) => void) {
+  const next = structuredClone(db)
+  mutate(next)
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next))
+  } catch {
+    throw new AppError('storage_full')
+  }
+  db = next
+  emit()
+}
+
+function setSession(s: Session | null) {
+  session = s
+  try {
+    if (s) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(s))
+      localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(s))
+    } else {
+      sessionStorage.removeItem(SESSION_KEY)
+      localStorage.removeItem(LAST_SESSION_KEY)
+    }
+  } catch {
+    /* ignore */
+  }
+  emit()
+}
+
+// ---------- hooks ----------
+export const useDB = () => useSyncExternalStore(subscribe, () => db)
+export const useSession = () => useSyncExternalStore(subscribe, () => session)
+export function useMe(): User | null {
+  const d = useDB()
+  const s = useSession()
+  return s ? d.users.find((u) => u.id === s.userId) ?? null : null
+}
+export const getDB = () => db
+export const getSession = () => session
+
+// ---------- helpers ----------
+const me = () => {
+  const u = session && db.users.find((x) => x.id === session!.userId)
+  if (!u) throw new AppError('login_required')
+  if (u.suspended) throw new AppError('suspended')
+  return u
+}
+
+export function planOf(d: DB, u: User, audience: Role): Plan {
+  const id = audience === 'seller' ? u.sellerPlanId : u.buyerPlanId
+  const until = audience === 'seller' ? u.sellerPlanUntil : u.buyerPlanUntil
+  const fallback = d.plans.find((p) => p.id === `${audience}-free`)!
+  const p = d.plans.find((x) => x.id === id)
+  if (!p || (until && until < Date.now() && p.priceTHB > 0)) return fallback
+  return p
+}
+
+export function canViewFull(d: DB, userId: string | undefined, l: Listing) {
+  if (!userId) return false
+  const u = d.users.find((x) => x.id === userId)
+  if (!u) return false
+  if (u.isAdmin || l.sellerId === userId) return true
+  return d.ndas.some((n) => n.listingId === l.id && n.buyerId === userId && n.status === 'approved')
+}
+
+export function featuredIds(d: DB): Set<string> {
+  const s = new Set<string>()
+  d.listings.forEach((l) => {
+    const seller = d.users.find((u) => u.id === l.sellerId)
+    if (seller && planOf(d, seller, 'seller').featured) s.add(l.id)
+  })
+  return s
+}
+
+export function unpaidFeeInvoices(d: DB, userId: string) {
+  return d.invoices.filter((i) => i.userId === userId && i.kind === 'fee' && i.status === 'unpaid')
+}
+
+const ACTIVE_STATUSES = ['pending', 'published', 'under_offer', 'hidden']
+export function activeListingCount(d: DB, userId: string) {
+  return d.listings.filter((l) => l.sellerId === userId && ACTIVE_STATUSES.includes(l.status)).length
+}
+
+export function ndaUsedThisMonth(d: DB, userId: string) {
+  const from = startOfMonth()
+  return d.ndas.filter((n) => n.buyerId === userId && n.createdAt >= from).length
+}
+
+function notify(d: DB, userId: string, text: Bi, link: string) {
+  d.notifications.push({ id: uid('nt-'), userId, text, link, read: false, createdAt: Date.now() })
+}
+
+function sysMsg(d: DB, threadId: string, key: string, link?: string) {
+  const at = Date.now()
+  d.messages.push({ id: uid('m-'), threadId, senderId: null, text: key, link, createdAt: at })
+  const t = d.threads.find((x) => x.id === threadId)
+  if (t) t.lastMessageAt = at
+}
+
+function ensureThread(d: DB, listingId: string, buyerId: string): Thread {
+  let t = d.threads.find((x) => x.listingId === listingId && x.buyerId === buyerId)
+  if (!t) {
+    const l = d.listings.find((x) => x.id === listingId)!
+    t = { id: uid('t-'), listingId, buyerId, sellerId: l.sellerId, createdAt: Date.now(), lastMessageAt: Date.now(), lastRead: {} }
+    d.threads.push(t)
+  }
+  return t
+}
+
+function onPublished(d: DB, l: Listing) {
+  d.savedSearches.forEach((s) => {
+    const u = d.users.find((x) => x.id === s.userId)
+    if (!u || u.id === l.sellerId || !planOf(d, u, 'buyer').alerts) return
+    if (matches(l, s.params, d.fx.usdThb)) {
+      notify(d, u.id, { th: `ประกาศใหม่ตรงกับที่คุณบันทึกไว้: ${l.displayName}`, en: `New listing matches your saved search: ${l.displayName}` }, `/listing/${l.id}`)
+    }
+  })
+}
+
+// ---------- auth ----------
+export const auth = {
+  register(p: { email: string; name: string; password: string; primaryRole: Role }) {
+    const email = p.email.trim().toLowerCase()
+    if (db.users.some((u) => u.email === email)) throw new AppError('email_taken')
+    const u: User = {
+      id: uid('u-'), email, name: p.name.trim(), passwordHash: demoHash(p.password), primaryRole: p.primaryRole,
+      isAdmin: false, emailVerified: false, sellerVerified: false, suspended: false,
+      sellerPlanId: 'seller-free', buyerPlanId: 'buyer-free', provider: 'password', createdAt: Date.now(),
+    }
+    commit((d) => {
+      d.users.push(u)
+    })
+    return u
+  },
+  verifyEmail(userId: string) {
+    commit((d) => {
+      const u = d.users.find((x) => x.id === userId)
+      if (u) u.emailVerified = true
+    })
+    const u = db.users.find((x) => x.id === userId)!
+    setSession({ userId, role: u.primaryRole })
+  },
+  login(email: string, password: string) {
+    const u = db.users.find((x) => x.email === email.trim().toLowerCase())
+    if (!u || u.passwordHash !== demoHash(password)) throw new AppError('bad_credentials')
+    if (u.suspended) throw new AppError('suspended')
+    if (!u.emailVerified) throw new AppError('email_unverified')
+    setSession({ userId: u.id, role: u.primaryRole })
+    return u
+  },
+  loginGoogle() {
+    const email = 'google.user@gmail.com'
+    let u = db.users.find((x) => x.email === email)
+    if (!u) {
+      u = {
+        id: uid('u-'), email, name: 'Google Demo User', passwordHash: '', primaryRole: 'buyer', isAdmin: false,
+        emailVerified: true, sellerVerified: false, suspended: false, sellerPlanId: 'seller-free',
+        buyerPlanId: 'buyer-free', provider: 'google', createdAt: Date.now(),
+      }
+      const nu = u
+      commit((d) => {
+        d.users.push(nu)
+      })
+    }
+    if (u.suspended) throw new AppError('suspended')
+    setSession({ userId: u.id, role: u.primaryRole })
+    return u
+  },
+  logout() {
+    setSession(null)
+  },
+  setRole(role: Role) {
+    if (session) setSession({ ...session, role })
+  },
+  updateProfile(p: { name: string; phone?: string }) {
+    const u = me()
+    commit((d) => {
+      const x = d.users.find((y) => y.id === u.id)!
+      x.name = p.name
+      x.phone = p.phone
+    })
+  },
+}
+
+// ---------- listings ----------
+export type ListingInput = Omit<Listing, 'id' | 'sellerId' | 'status' | 'views' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'rejectReason'>
+
+export const listings = {
+  save(input: ListingInput, opts: { id?: string; submit: boolean }) {
+    const u = me()
+    const existing = opts.id ? db.listings.find((l) => l.id === opts.id) : undefined
+    if (existing && existing.sellerId !== u.id) throw new AppError('forbidden')
+    if (opts.submit) {
+      if (unpaidFeeInvoices(db, u.id).length) throw new AppError('unpaid_fee')
+      const wasActive = existing && ACTIVE_STATUSES.includes(existing.status)
+      const limit = planOf(db, u, 'seller').listingLimit
+      if (!wasActive && limit != null && activeListingCount(db, u.id) >= limit) throw new AppError('listing_limit')
+    }
+    const id = existing?.id ?? uid('l-')
+    commit((d) => {
+      const now = Date.now()
+      const keepPublished = existing && ['published', 'under_offer'].includes(existing.status)
+      const status = opts.submit ? (keepPublished ? existing!.status : 'pending') : existing?.status === 'published' ? 'published' : 'draft'
+      const base: Listing = existing
+        ? { ...d.listings.find((l) => l.id === id)!, ...input, status, updatedAt: now, rejectReason: undefined }
+        : { ...input, id, sellerId: u.id, status, views: 0, createdAt: now, updatedAt: now }
+      if (existing) d.listings[d.listings.findIndex((l) => l.id === id)] = base
+      else d.listings.push(base)
+      if (status === 'pending' && existing?.status !== 'pending') {
+        d.users.filter((x) => x.isAdmin).forEach((a) =>
+          notify(d, a.id, { th: `ประกาศใหม่รอตรวจ: ${input.displayName}`, en: `Listing awaiting review: ${input.displayName}` }, '/admin'),
+        )
+      }
+    })
+    return id
+  },
+  setStatus(id: string, status: 'hidden' | 'published' | 'archived') {
+    const u = me()
+    commit((d) => {
+      const l = d.listings.find((x) => x.id === id)
+      if (!l || l.sellerId !== u.id) throw new AppError('forbidden')
+      if (status === 'published' && l.status !== 'hidden') throw new AppError('forbidden')
+      l.status = status
+      l.updatedAt = Date.now()
+    })
+  },
+  remove(id: string) {
+    const u = me()
+    commit((d) => {
+      const l = d.listings.find((x) => x.id === id)
+      if (!l || l.sellerId !== u.id || l.status !== 'draft') throw new AppError('forbidden')
+      d.listings = d.listings.filter((x) => x.id !== id)
+    })
+  },
+  view(id: string) {
+    try {
+      commit((d) => {
+        const l = d.listings.find((x) => x.id === id)
+        if (l) l.views++
+      })
+    } catch {
+      /* ignore */
+    }
+  },
+  toggleFavorite(listingId: string) {
+    const u = me()
+    commit((d) => {
+      const i = d.favorites.findIndex((f) => f.userId === u.id && f.listingId === listingId)
+      if (i >= 0) d.favorites.splice(i, 1)
+      else d.favorites.push({ userId: u.id, listingId })
+    })
+  },
+  report(listingId: string, reason: string) {
+    const u = me()
+    commit((d) => {
+      d.reports.push({ id: uid('r-'), kind: 'listing', targetId: listingId, reporterId: u.id, reason, status: 'open', createdAt: Date.now() })
+    })
+  },
+}
+
+// ---------- chat ----------
+export const chat = {
+  open(listingId: string) {
+    const u = me()
+    const l = db.listings.find((x) => x.id === listingId)
+    if (!l) throw new AppError('not_found')
+    if (l.sellerId === u.id) throw new AppError('own_listing')
+    let id = ''
+    commit((d) => {
+      id = ensureThread(d, listingId, u.id).id
+    })
+    return id
+  },
+  send(threadId: string, text: string, file?: FileAsset) {
+    const u = me()
+    commit((d) => {
+      const t = d.threads.find((x) => x.id === threadId)
+      if (!t || (t.buyerId !== u.id && t.sellerId !== u.id)) throw new AppError('forbidden')
+      const at = Date.now()
+      d.messages.push({ id: uid('m-'), threadId, senderId: u.id, text, file, createdAt: at })
+      t.lastMessageAt = at
+      t.lastRead[u.id] = at
+    })
+  },
+  markRead(threadId: string) {
+    const s = session
+    if (!s) return
+    const t = db.threads.find((x) => x.id === threadId)
+    if (!t || (t.lastRead[s.userId] ?? 0) >= t.lastMessageAt) return
+    commit((d) => {
+      d.threads.find((x) => x.id === threadId)!.lastRead[s.userId] = Date.now()
+    })
+  },
+  report(threadId: string, reason: string) {
+    const u = me()
+    commit((d) => {
+      d.reports.push({ id: uid('r-'), kind: 'thread', targetId: threadId, reporterId: u.id, reason, status: 'open', createdAt: Date.now() })
+    })
+  },
+}
+
+export function unreadCount(d: DB, userId: string) {
+  return d.threads.filter(
+    (t) => (t.buyerId === userId || t.sellerId === userId) && t.lastMessageAt > (t.lastRead[userId] ?? 0) &&
+      d.messages.some((m) => m.threadId === t.id && m.senderId !== userId && m.createdAt > (t.lastRead[userId] ?? 0)),
+  ).length
+}
+
+// ---------- NDA ----------
+export const ndas = {
+  request(listingId: string, signatureName: string) {
+    const u = me()
+    const l = db.listings.find((x) => x.id === listingId)
+    if (!l) throw new AppError('not_found')
+    if (l.sellerId === u.id) throw new AppError('own_listing')
+    const existing = db.ndas.find((n) => n.listingId === listingId && n.buyerId === u.id && n.status !== 'rejected')
+    if (existing) throw new AppError('nda_exists')
+    const lim = planOf(db, u, 'buyer').ndaLimitPerMonth
+    if (lim != null && ndaUsedThisMonth(db, u.id) >= lim) throw new AppError('nda_limit')
+    let id = ''
+    commit((d) => {
+      const n: Nda = { id: uid('n-'), listingId, buyerId: u.id, sellerId: l.sellerId, status: 'pending', buyerSignature: { name: signatureName, at: Date.now() }, createdAt: Date.now() }
+      id = n.id
+      d.ndas.push(n)
+      const t = ensureThread(d, listingId, u.id)
+      sysMsg(d, t.id, 'nda_signed', `/contract/nda/${n.id}`)
+      notify(d, l.sellerId, { th: `${u.name} เซ็น NDA สำหรับ "${l.displayName}" รอคุณอนุมัติ`, en: `${u.name} signed an NDA for "${l.displayName}" — awaiting your approval` }, '/dashboard?tab=ndas')
+    })
+    return id
+  },
+  decide(ndaId: string, approve: boolean, signatureName?: string) {
+    const u = me()
+    commit((d) => {
+      const n = d.ndas.find((x) => x.id === ndaId)
+      if (!n || n.sellerId !== u.id || n.status !== 'pending') throw new AppError('forbidden')
+      n.status = approve ? 'approved' : 'rejected'
+      n.decidedAt = Date.now()
+      if (approve) n.sellerSignature = { name: signatureName || u.name, at: Date.now() }
+      const l = d.listings.find((x) => x.id === n.listingId)!
+      const t = ensureThread(d, n.listingId, n.buyerId)
+      sysMsg(d, t.id, approve ? 'nda_approved' : 'nda_rejected', `/contract/nda/${n.id}`)
+      notify(d, n.buyerId, approve
+        ? { th: `NDA ได้รับอนุมัติ — ดูข้อมูลเต็มของ "${l.displayName}" ได้แล้ว`, en: `NDA approved — full details of "${l.displayName}" unlocked` }
+        : { th: `NDA สำหรับ "${l.displayName}" ถูกปฏิเสธ`, en: `NDA for "${l.displayName}" was declined` }, `/listing/${l.id}`)
+    })
+  },
+}
+
+// ---------- LOI / offers ----------
+export type RoundInput = Omit<LoiRound, 'by' | 'signature'> & { signatureName: string }
+
+export const lois = {
+  create(listingId: string, r: RoundInput) {
+    const u = me()
+    const l = db.listings.find((x) => x.id === listingId)
+    if (!l || l.status !== 'published') throw new AppError('not_available')
+    if (l.sellerId === u.id) throw new AppError('own_listing')
+    if (!canViewFull(db, u.id, l)) throw new AppError('nda_required')
+    if (db.lois.some((x) => x.listingId === listingId && x.buyerId === u.id && x.status === 'open')) throw new AppError('loi_exists')
+    let id = ''
+    commit((d) => {
+      const { signatureName, ...rest } = r
+      const loi: Loi = {
+        id: uid('o-'), listingId, buyerId: u.id, sellerId: l.sellerId, status: 'open',
+        rounds: [{ ...rest, by: 'buyer', signature: { name: signatureName, at: Date.now() } }],
+        createdAt: Date.now(), updatedAt: Date.now(),
+      }
+      id = loi.id
+      d.lois.push(loi)
+      const t = ensureThread(d, listingId, u.id)
+      sysMsg(d, t.id, 'loi_sent', `/contract/loi/${loi.id}`)
+      notify(d, l.sellerId, { th: `ได้รับข้อเสนอซื้อ (LOI) สำหรับ "${l.displayName}"`, en: `New offer (LOI) for "${l.displayName}"` }, `/contract/loi/${loi.id}`)
+    })
+    return id
+  },
+  respond(loiId: string, action: 'accept' | 'reject' | 'counter' | 'withdraw', payload?: { signatureName: string; round?: RoundInput }) {
+    const u = me()
+    commit((d) => {
+      const loi = d.lois.find((x) => x.id === loiId)
+      if (!loi || loi.status !== 'open') throw new AppError('forbidden')
+      const myRole: Role | null = loi.buyerId === u.id ? 'buyer' : loi.sellerId === u.id ? 'seller' : null
+      if (!myRole) throw new AppError('forbidden')
+      const last = loi.rounds[loi.rounds.length - 1]
+      const other = myRole === 'buyer' ? loi.sellerId : loi.buyerId
+      const l = d.listings.find((x) => x.id === loi.listingId)!
+      const t = ensureThread(d, loi.listingId, loi.buyerId)
+      loi.updatedAt = Date.now()
+      if (action === 'withdraw') {
+        if (myRole !== 'buyer') throw new AppError('forbidden')
+        loi.status = 'withdrawn'
+        sysMsg(d, t.id, 'loi_withdrawn', `/contract/loi/${loi.id}`)
+        return
+      }
+      if (last.by === myRole) throw new AppError('not_your_turn')
+      if (action === 'accept' && last.expiresAt < Date.now()) throw new AppError('loi_expired')
+      if (action === 'accept') {
+        if (l.status !== 'published') throw new AppError('not_available')
+        loi.status = 'accepted'
+        loi.acceptedSignature = { name: payload?.signatureName || u.name, at: Date.now() }
+        l.status = 'under_offer'
+        const deal: Deal = {
+          id: uid('d-'), listingId: l.id, loiId: loi.id, buyerId: loi.buyerId, sellerId: loi.sellerId,
+          agreedPrice: last.price, currency: last.currency, status: 'in_progress', createdAt: Date.now(),
+        }
+        d.deals.push(deal)
+        // other open offers on this listing are closed
+        d.lois.forEach((o) => {
+          if (o.listingId === l.id && o.id !== loi.id && o.status === 'open') o.status = 'rejected'
+        })
+        sysMsg(d, t.id, 'loi_accepted', `/contract/loi/${loi.id}`)
+        notify(d, other, { th: `ข้อเสนอสำหรับ "${l.displayName}" ได้รับการยอมรับแล้ว`, en: `Offer for "${l.displayName}" accepted` }, '/dashboard?tab=deals')
+      } else if (action === 'reject') {
+        loi.status = 'rejected'
+        sysMsg(d, t.id, 'loi_rejected', `/contract/loi/${loi.id}`)
+        notify(d, other, { th: `ข้อเสนอสำหรับ "${l.displayName}" ถูกปฏิเสธ`, en: `Offer for "${l.displayName}" rejected` }, `/contract/loi/${loi.id}`)
+      } else {
+        const r = payload?.round
+        if (!r) throw new AppError('invalid')
+        const { signatureName, ...rest } = r
+        loi.rounds.push({ ...rest, by: myRole, signature: { name: signatureName, at: Date.now() } })
+        sysMsg(d, t.id, 'loi_countered', `/contract/loi/${loi.id}`)
+        notify(d, other, { th: `มีข้อเสนอโต้กลับสำหรับ "${l.displayName}"`, en: `Counter-offer on "${l.displayName}"` }, `/contract/loi/${loi.id}`)
+      }
+    })
+  },
+}
+
+// ---------- deals ----------
+function closeDeal(d: DB, deal: Deal, price: number, by: 'parties' | 'admin') {
+  deal.status = 'closed'
+  deal.closedAt = Date.now()
+  deal.closedBy = by
+  deal.agreedPrice = price
+  const l = d.listings.find((x) => x.id === deal.listingId)!
+  l.status = 'sold'
+  const seller = d.users.find((x) => x.id === deal.sellerId)!
+  const plan = planOf(d, seller, 'seller')
+  const inv: Invoice = {
+    id: uid('inv-'), userId: seller.id, kind: 'fee',
+    description: { th: `ค่าธรรมเนียมความสำเร็จ ${plan.feePercent}% — ${l.displayName}`, en: `Success fee ${plan.feePercent}% — ${l.displayName}` },
+    amount: Math.round(price * plan.feePercent) / 100, currency: deal.currency, status: 'unpaid', refId: deal.id, createdAt: Date.now(),
+  }
+  d.invoices.push(inv)
+  deal.invoiceId = inv.id
+  const t = ensureThread(d, deal.listingId, deal.buyerId)
+  sysMsg(d, t.id, 'deal_closed')
+  notify(d, seller.id, { th: `ดีลปิดแล้ว! ชำระค่าธรรมเนียม ${plan.feePercent}% ได้ที่หน้าใบแจ้งหนี้`, en: `Deal closed! Please pay the ${plan.feePercent}% success fee` }, `/checkout/${inv.id}`)
+  notify(d, deal.buyerId, { th: `ดีล "${l.displayName}" ปิดเรียบร้อย ยินดีด้วย!`, en: `Deal "${l.displayName}" closed — congratulations!` }, '/dashboard?tab=deals')
+}
+
+export const deals = {
+  confirm(dealId: string, price: number) {
+    const u = me()
+    let result: 'waiting' | 'closed' | 'mismatch' = 'waiting'
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress') throw new AppError('forbidden')
+      const c = { price, at: Date.now() }
+      if (deal.buyerId === u.id) deal.buyerConfirm = c
+      else if (deal.sellerId === u.id) deal.sellerConfirm = c
+      else throw new AppError('forbidden')
+      if (deal.buyerConfirm && deal.sellerConfirm) {
+        if (deal.buyerConfirm.price === deal.sellerConfirm.price) {
+          closeDeal(d, deal, price, 'parties')
+          result = 'closed'
+        } else result = 'mismatch'
+      }
+    })
+    return result
+  },
+  cancel(dealId: string) {
+    const u = me()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress' || (deal.buyerId !== u.id && deal.sellerId !== u.id)) throw new AppError('forbidden')
+      deal.status = 'cancelled'
+      const l = d.listings.find((x) => x.id === deal.listingId)!
+      l.status = 'published'
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'deal_cancelled')
+      notify(d, u.id === deal.buyerId ? deal.sellerId : deal.buyerId, { th: `ดีล "${l.displayName}" ถูกยกเลิก`, en: `Deal "${l.displayName}" was cancelled` }, '/dashboard?tab=deals')
+    })
+  },
+}
+
+// ---------- billing ----------
+export const billing = {
+  subscribe(planId: string, currency: Currency) {
+    const u = me()
+    const plan = db.plans.find((p) => p.id === planId)
+    if (!plan || !plan.active) throw new AppError('not_found')
+    if (plan.priceTHB === 0) {
+      commit((d) => {
+        const x = d.users.find((y) => y.id === u.id)!
+        if (plan.audience === 'seller') { x.sellerPlanId = plan.id; x.sellerPlanUntil = undefined }
+        else { x.buyerPlanId = plan.id; x.buyerPlanUntil = undefined }
+      })
+      return null
+    }
+    const inv: Invoice = {
+      id: uid('inv-'), userId: u.id, kind: 'subscription',
+      description: { th: `แพ็กเกจ ${plan.name.th} (${plan.audience === 'seller' ? 'ผู้ขาย' : 'ผู้ซื้อ'}) — 30 วัน`, en: `${plan.name.en} plan (${plan.audience}) — 30 days` },
+      amount: currency === 'THB' ? plan.priceTHB : plan.priceUSD, currency, status: 'unpaid', refId: plan.id, createdAt: Date.now(),
+    }
+    commit((d) => {
+      d.invoices.push(inv)
+    })
+    return inv.id
+  },
+  recordPayment(invoiceId: string, ok: boolean, method: 'card' | 'promptpay', detail: string) {
+    const u = me()
+    commit((d) => {
+      const inv = d.invoices.find((x) => x.id === invoiceId)
+      if (!inv || inv.userId !== u.id || inv.status === 'paid') throw new AppError('forbidden')
+      const pay = { id: uid('pay-'), invoiceId, method, status: ok ? 'succeeded' : 'failed', detail, createdAt: Date.now() } as const
+      d.payments.push({ ...pay })
+      if (!ok) return
+      inv.status = 'paid'
+      inv.paidAt = Date.now()
+      inv.paymentId = pay.id
+      if (inv.kind === 'subscription') {
+        const plan = d.plans.find((p) => p.id === inv.refId)!
+        const x = d.users.find((y) => y.id === u.id)!
+        if (plan.audience === 'seller') { x.sellerPlanId = plan.id; x.sellerPlanUntil = Date.now() + 30 * DAY }
+        else { x.buyerPlanId = plan.id; x.buyerPlanUntil = Date.now() + 30 * DAY }
+      }
+    })
+  },
+}
+
+// ---------- saved searches / notifications ----------
+export const alerts = {
+  save(params: SearchParams) {
+    const u = me()
+    if (!planOf(db, u, 'buyer').alerts) throw new AppError('pro_required')
+    commit((d) => {
+      d.savedSearches.push({ id: uid('s-'), userId: u.id, params, createdAt: Date.now() })
+    })
+  },
+  remove(id: string) {
+    const u = me()
+    commit((d) => {
+      d.savedSearches = d.savedSearches.filter((s) => !(s.id === id && s.userId === u.id))
+    })
+  },
+  markAllRead() {
+    const u = me()
+    commit((d) => {
+      d.notifications.forEach((n) => {
+        if (n.userId === u.id) n.read = true
+      })
+    })
+  },
+}
+
+// ---------- admin ----------
+const adminOnly = () => {
+  const u = me()
+  if (!u.isAdmin) throw new AppError('forbidden')
+  return u
+}
+
+export const admin = {
+  review(listingId: string, approve: boolean, reason?: string) {
+    adminOnly()
+    commit((d) => {
+      const l = d.listings.find((x) => x.id === listingId)
+      if (!l) throw new AppError('not_found')
+      if (approve) {
+        l.status = 'published'
+        l.publishedAt = Date.now()
+        l.rejectReason = undefined
+        notify(d, l.sellerId, { th: `ประกาศ "${l.displayName}" เผยแพร่แล้ว`, en: `Listing "${l.displayName}" is now live` }, `/listing/${l.id}`)
+        onPublished(d, l)
+      } else {
+        l.status = 'rejected'
+        l.rejectReason = reason
+        notify(d, l.sellerId, { th: `ประกาศ "${l.displayName}" ถูกตีกลับ: ${reason}`, en: `Listing "${l.displayName}" was rejected: ${reason}` }, `/listing/${l.id}/edit`)
+      }
+    })
+  },
+  takeDown(listingId: string) {
+    adminOnly()
+    commit((d) => {
+      const l = d.listings.find((x) => x.id === listingId)
+      if (l) {
+        l.status = 'rejected'
+        l.rejectReason = 'Removed by admin'
+      }
+    })
+  },
+  setVerified(userId: string, v: boolean) {
+    adminOnly()
+    commit((d) => {
+      d.users.find((x) => x.id === userId)!.sellerVerified = v
+    })
+  },
+  setSuspended(userId: string, v: boolean) {
+    const a = adminOnly()
+    if (a.id === userId) throw new AppError('forbidden')
+    commit((d) => {
+      d.users.find((x) => x.id === userId)!.suspended = v
+      if (v) d.listings.forEach((l) => {
+        if (l.sellerId === userId && ['published', 'pending'].includes(l.status)) l.status = 'hidden'
+      })
+    })
+  },
+  updatePlan(plan: Plan) {
+    adminOnly()
+    commit((d) => {
+      const i = d.plans.findIndex((p) => p.id === plan.id)
+      d.plans[i] = plan
+    })
+  },
+  resolveReport(id: string) {
+    adminOnly()
+    commit((d) => {
+      d.reports.find((r) => r.id === id)!.status = 'resolved'
+    })
+  },
+  closeDeal(dealId: string, price: number) {
+    adminOnly()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress') throw new AppError('forbidden')
+      closeDeal(d, deal, price, 'admin')
+    })
+  },
+  setFx(rate: number) {
+    commit((d) => {
+      d.fx = { usdThb: rate, updatedAt: Date.now() }
+    })
+  },
+  resetDemo() {
+    localStorage.removeItem(KEY)
+    db = load()
+    setSession(null)
+  },
+}
+
+/** Refresh USD→THB once a day from a free public API; keeps the old rate on failure. */
+export async function refreshFx() {
+  if (Date.now() - db.fx.updatedAt < DAY) return
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD')
+    const j = await r.json()
+    const rate = Number(j?.rates?.THB)
+    if (rate > 0) admin.setFx(Math.round(rate * 100) / 100)
+  } catch {
+    /* offline: keep fallback rate */
+  }
+}
