@@ -2,7 +2,7 @@ import type { DB, Listing, Plan, User } from './types'
 import { coverSvg } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 3
+export const DB_VERSION = 4
 
 export const DEMO_ACCOUNTS = [
   { email: 'buyer@demo.com', password: 'demo1234', role: 'buyer' },
@@ -11,11 +11,11 @@ export const DEMO_ACCOUNTS = [
 ] as const
 
 const plans: Plan[] = [
-  { id: 'seller-free', audience: 'seller', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: 1, feePercent: 3, ndaLimitPerMonth: null, featured: false, alerts: false, active: true },
-  { id: 'seller-pro', audience: 'seller', name: { th: 'Pro', en: 'Pro' }, priceTHB: 990, priceUSD: 29, listingLimit: 5, feePercent: 2, ndaLimitPerMonth: null, featured: true, alerts: false, active: true },
-  { id: 'seller-business', audience: 'seller', name: { th: 'Business', en: 'Business' }, priceTHB: 2990, priceUSD: 89, listingLimit: null, feePercent: 1, ndaLimitPerMonth: null, featured: true, alerts: false, active: true },
+  { id: 'seller-free', audience: 'seller', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: null, feePercent: 3, ndaLimitPerMonth: null, featured: false, alerts: false, active: true },
+  { id: 'seller-pro', audience: 'seller', name: { th: 'Pro', en: 'Pro' }, priceTHB: 990, priceUSD: 29, listingLimit: 5, feePercent: 2, ndaLimitPerMonth: null, featured: true, alerts: false, active: false },
+  { id: 'seller-business', audience: 'seller', name: { th: 'Business', en: 'Business' }, priceTHB: 2990, priceUSD: 89, listingLimit: null, feePercent: 1, ndaLimitPerMonth: null, featured: true, alerts: false, active: false },
   { id: 'buyer-free', audience: 'buyer', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: null, feePercent: 0, ndaLimitPerMonth: 3, featured: false, alerts: false, active: true },
-  { id: 'buyer-pro', audience: 'buyer', name: { th: 'Pro', en: 'Pro' }, priceTHB: 490, priceUSD: 15, listingLimit: null, feePercent: 0, ndaLimitPerMonth: null, featured: false, alerts: true, active: true },
+  { id: 'buyer-pro', audience: 'buyer', name: { th: 'Premium', en: 'Premium' }, priceTHB: 999, priceUSD: 29, listingLimit: null, feePercent: 0, ndaLimitPerMonth: null, featured: false, alerts: true, active: true },
 ]
 
 function user(p: Partial<User> & Pick<User, 'id' | 'email' | 'name'>, password: string): User {
@@ -107,7 +107,7 @@ function listing(r: Raw, i: number): Listing {
 export function makeSeed(): DB {
   const users: User[] = [
     user({ id: 'u-buyer', email: 'buyer@demo.com', name: 'สมชาย ผู้ลงทุน', primaryRole: 'buyer' }, 'demo1234'),
-    user({ id: 'u-seller', email: 'seller@demo.com', name: 'วิภา เจ้าของกิจการ', primaryRole: 'seller', sellerVerified: true, sellerPlanId: 'seller-business', sellerPlanUntil: Date.now() + 30 * DAY }, 'demo1234'),
+    user({ id: 'u-seller', email: 'seller@demo.com', name: 'วิภา เจ้าของกิจการ', primaryRole: 'seller', sellerVerified: true }, 'demo1234'),
     user({ id: 'u-seller2', email: 'seller2@demo.com', name: 'ประเสริฐ ศรีสุข', primaryRole: 'seller', sellerVerified: true }, 'demo1234'),
     user({ id: 'u-seller3', email: 'seller3@demo.com', name: 'Daniel Carter', primaryRole: 'seller' }, 'demo1234'),
     user({ id: 'u-admin', email: 'admin@demo.com', name: 'Admin', isAdmin: true }, 'admin1234'),

@@ -55,7 +55,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap gap-8 text-sm text-gray-300">
             <span><b className="text-2xl text-white">{pub.length}</b> {t('home.statListings')}</span>
             <span><b className="text-2xl text-white">{CATEGORIES.length}</b> {t('home.statCategories')}</span>
-            <span><b className="text-2xl text-white">1–3%</b> {t('home.statFee')}</span>
+            <span><b className="text-2xl text-white">3%</b> {t('home.statFee')}</span>
           </div>
         </div>
       </section>
