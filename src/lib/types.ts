@@ -3,6 +3,16 @@ export type Currency = 'THB' | 'USD'
 export type Role = 'buyer' | 'seller'
 export type Bi = { th: string; en: string }
 
+export interface Kyc {
+  status: 'pending' | 'verified' | 'rejected'
+  fullName: string
+  idNumber: string // stored masked, e.g. 1-xxxx-xxxxx-12-3
+  idImage: string // data URL (demo only)
+  submittedAt: number
+  reviewedAt?: number
+  note?: string
+}
+
 export interface User {
   id: string
   email: string
@@ -20,6 +30,8 @@ export interface User {
   buyerPlanUntil?: number
   provider: 'password' | 'google'
   createdAt: number
+  /** Identity verification (KYC) — required before pitching, NDA or offers. */
+  kyc?: Kyc
 }
 
 export interface Plan {
@@ -77,6 +89,10 @@ export interface Listing {
     documents: FileAsset[]
   }
   views: number
+  /** Admin checked the business documents / financials. */
+  docsVerified?: boolean
+  /** Paid promotion (advertising revenue) — shown as Sponsored until this time. */
+  sponsoredUntil?: number
   createdAt: number
   updatedAt: number
   publishedAt?: number
@@ -136,18 +152,20 @@ export interface Deal {
   closedBy?: 'parties' | 'admin'
   closedAt?: number
   invoiceId?: string
+  /** Simulated transaction status (no real money moves through the prototype). */
+  transaction?: { buyerPaidAt?: number; sellerReceivedAt?: number }
   createdAt: number
 }
 
 export interface Invoice {
   id: string
   userId: string
-  kind: 'subscription' | 'fee'
+  kind: 'subscription' | 'fee' | 'ad'
   description: Bi
   amount: number
   currency: Currency
   status: 'unpaid' | 'paid'
-  refId: string // planId or dealId
+  refId: string // planId, dealId or listingId (ad)
   createdAt: number
   paidAt?: number
   paymentId?: string
@@ -223,6 +241,8 @@ export interface BuyerRequest {
   maxBudget: number // THB
   minProfit: number // THB per year, 0 = no minimum
   description: string
+  /** What the buyer wants to do with the business (SCAMPER: put to another use). */
+  purpose?: 'buy' | 'invest' | 'partner'
   status: 'open' | 'closed'
   createdAt: number
 }
@@ -234,6 +254,9 @@ export interface Pitch {
   sellerId: string
   buyerId: string
   message: string
+  /** Make Offer: the seller's price for this buyer (listing currency). */
+  offerPrice?: number
+  offerTerms?: string
   status: 'pending' | 'shortlisted' | 'declined'
   createdAt: number
   decidedAt?: number
@@ -263,6 +286,19 @@ export interface DB {
   savedSearches: SavedSearch[]
   buyerRequests: BuyerRequest[]
   pitches: Pitch[]
+  disputes: Dispute[]
+  settings: { adPriceTHB: number; adPriceUSD: number; adDays: number }
   favorites: { userId: string; listingId: string }[]
   fx: { usdThb: number; updatedAt: number }
+}
+
+export interface Dispute {
+  id: string
+  dealId: string
+  openedBy: string
+  reason: string
+  status: 'open' | 'resolved'
+  resolution?: string
+  createdAt: number
+  resolvedAt?: number
 }

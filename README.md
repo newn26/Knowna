@@ -18,8 +18,15 @@ The login page has one-click buttons for each account. **To demo realtime chat**
 
 ## Features
 
+- **Reverse marketplace (buyer requests):** a buyer posts what they want (purpose: buy, invest or partner; category; location; budget; minimum profit). Owners of matching businesses **Pitch** a listing and **Make Offer** with their own price and terms. The buyer compares offers, shortlists one, and a chat opens.
+- **Matching:** rule-based matching on category, location, budget and profit. Sellers are notified when a new request fits one of their live listings.
+- **Deal Room:** one page per listing and buyer that tracks Match → NDA → Deal Room → Negotiation → Transaction, with every shared document and contract in one place.
+- **Trust and safety:**
+  - **Identity verification (KYC, simulated):** buyers and sellers upload an ID photo, and an admin approves it. KYC is required before pitching, signing an NDA or making an offer.
+  - Admins can mark a listing's documents and financials as **checked**.
+  - Either party can **open a dispute** on a deal. Admins mediate and record a resolution.
 - **Accounts:** sign up with a simulated email verification step, or use a simulated "Continue with Google". One account can switch between the **Buyer** and **Seller** roles.
-- **Search:** filter by business name or keyword, category, location, price range and revenue range, then sort by newest, price or revenue.
+- **Search:** filter by business name or keyword, category, location, price, revenue and profit, then sort. A **valuation tool** estimates a value range from profit.
 - **Listings and confidentiality:**
   - The public *teaser* shows the display name (it can be anonymous), category, location, price and summary financials.
   - *Full details* (legal name, address, extra photos, documents) unlock only after the buyer signs the in-app NDA **and** the seller approves it.
@@ -28,15 +35,22 @@ The login page has one-click buttons for each account. **To demo realtime chat**
 - **Contracts:**
   - A standard platform NDA, in Thai and English.
   - An LOI (Letter of Intent) with offer price, deposit, due-diligence period, expiry and conditions. The other party can accept, reject or counter, over multiple rounds.
-  - Typed-name e-signatures with timestamps.
-  - Print or save any contract as a PDF.
-- **Deals and revenue:**
+  - Typed-name e-signatures with timestamps. Print or save any contract as a PDF.
+- **Deals and transaction:**
   - When an LOI is accepted, a deal is created.
-  - Both parties confirm the final price. The deal then closes and the seller is invoiced a **1–3% success fee**, depending on their plan.
-  - A seller with an unpaid fee cannot submit new listings.
-- **Subscriptions:** Seller plans are Free, Pro and Business; buyer plans are Free and Pro. Plans set listing limits, fee %, featured placement, monthly NDA quota and saved-search alerts. **Admins can edit every plan.**
+  - The transaction is **simulated as status only**: the buyer reports payment, then the seller confirms receipt. No money moves.
+  - Both parties confirm the final price. The deal then closes and the seller is invoiced the **3% success fee**. A seller with an unpaid fee cannot submit new listings.
+- **Revenue (as in the business plan):**
+  - Free membership.
+  - **Premium at 999 THB/month** for buyers who want deeper data.
+  - **3% transaction fee** charged to the seller.
+  - **Advertising:** sellers pay to show a listing as *Sponsored* on the home page and at the top of search. The default is 499 THB for 7 days, and admins can change it.
 - **Demo payments:** checkout supports a card or a PromptPay QR, and can simulate a failed payment. Payments go through a `PaymentProvider` interface (`src/lib/payment.ts`) so Stripe or Omise can be plugged in later.
-- **Admin console:** listing review queue (approve, or reject with a reason), takedowns, seller verification badges, user suspension, contract list, deal close-out, reports, invoices and plan editing.
+- **Admin console:**
+  - **Key metrics** from the Lean Canvas: users, buyer requests, pitches, closed deals and revenue.
+  - Queues for listing review, KYC, disputes and reports.
+  - Document checks, takedowns, user suspension and deal close-out.
+  - Editing of plans and the ad price.
 - **Language and currency:** the UI is in Thai and English. Prices show in THB or USD, converted with a daily USD→THB rate from a free API, with a built-in fallback rate.
 
 ## Tech

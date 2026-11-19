@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { BellPlus, SlidersHorizontal } from 'lucide-react'
 import { CATEGORIES, PROVINCES } from '../lib/constants'
 import { usePrefs } from '../lib/prefs'
-import { alerts, featuredIds, useDB, useMe } from '../lib/store'
+import { alerts, featuredIds, sponsoredIds, useDB, useMe } from '../lib/store'
 import { matches, paramsFromQuery, queryFromParams, sortListings } from '../lib/search'
 import type { SearchParams } from '../lib/types'
 import { ListingCard } from '../components/ListingCard'
@@ -33,7 +33,11 @@ export default function Search() {
 
   const feat = featuredIds(d)
   const results = useMemo(
-    () => sortListings(d.listings.filter((l) => matches(l, p, d.fx.usdThb)), p.sort, d.fx.usdThb, feat),
+    () => {
+      const spons = sponsoredIds(d)
+      // sponsored (paid) listings that match the filters are shown first
+      return sortListings(d.listings.filter((l) => matches(l, p, d.fx.usdThb)), p.sort, d.fx.usdThb, feat).sort((a, b) => Number(spons.has(b.id)) - Number(spons.has(a.id)))
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [d, sp.toString()],
   )

@@ -1,5 +1,5 @@
 import { Link, Navigate, useLocation } from 'react-router-dom'
-import { BadgeCheck, Heart, MapPin, Star, TrendingUp } from 'lucide-react'
+import { BadgeCheck, FileCheck2, Heart, MapPin, Megaphone, Star, TrendingUp } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { Listing } from '../lib/types'
 import { catName, provName } from '../lib/constants'
@@ -19,6 +19,7 @@ export function ListingCard({ l, featured }: { l: Listing; featured?: boolean })
       <div className="relative aspect-[4/3] overflow-hidden">
         <Img src={l.coverImages[0]} alt={l.displayName} className="h-full w-full transition group-hover:scale-105" />
         <div className="absolute left-3 top-3 flex gap-1">
+          {(l.sponsoredUntil ?? 0) > Date.now() && <Badge t="amber"><Megaphone size={12} /> {t('card.sponsored')}</Badge>}
           {featured && <Badge t="dark"><Star size={12} /> {t('card.featured')}</Badge>}
           {l.status === 'under_offer' && <Badge t="blue">{t('status.under_offer')}</Badge>}
         </div>
@@ -38,6 +39,7 @@ export function ListingCard({ l, featured }: { l: Listing; featured?: boolean })
         <p className="mt-1 flex items-center gap-1 text-xs text-muted">
           <MapPin size={12} /> {provName(l.province, lang)}
           {seller?.sellerVerified && <span className="ml-2 inline-flex items-center gap-0.5 text-green-600"><BadgeCheck size={12} /> {t('card.verified')}</span>}
+          {l.docsVerified && <span className="ml-2 inline-flex items-center gap-0.5 text-brand-600"><FileCheck2 size={12} /> {t('card.docsVerified')}</span>}
         </p>
         <div className="mt-auto flex items-end justify-between pt-4">
           <div>

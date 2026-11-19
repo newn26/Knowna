@@ -115,6 +115,7 @@ function Thread({ id }: { id: string }) {
           <Link to={`/listing/${l.id}`} className="block truncate text-sm font-semibold hover:text-brand-500">{l.displayName}</Link>
           <p className="truncate text-xs text-muted">{isBuyer ? (full ? other?.name : t('detail.sellerHidden')) : other?.name}</p>
         </div>
+        <Link to={`/room/${th.id}`} className="rounded-full border border-brand-500 px-3 py-1 text-xs font-semibold text-brand-600 hover:bg-brand-50">Deal Room</Link>
         <button onClick={() => setReportOpen(true)} className="rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-red-500" title={t('chat.report')}><Flag size={16} /></button>
       </header>
 

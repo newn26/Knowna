@@ -2,7 +2,7 @@ import type { DB, Listing, Plan, User } from './types'
 import { coverSvg } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 
 export const DEMO_ACCOUNTS = [
   { email: 'buyer@demo.com', password: 'demo1234', role: 'buyer' },
@@ -18,6 +18,9 @@ const plans: Plan[] = [
   { id: 'buyer-pro', audience: 'buyer', name: { th: 'Premium', en: 'Premium' }, priceTHB: 999, priceUSD: 29, listingLimit: null, feePercent: 0, ndaLimitPerMonth: null, featured: false, alerts: true, active: true },
 ]
 
+/** Placeholder ID-card image for the pending KYC demo. */
+const DEMO_ID_IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 214"><rect width="340" height="214" rx="14" fill="#dbeafe"/><rect x="20" y="60" width="90" height="110" rx="8" fill="#93c5fd"/><rect x="130" y="70" width="170" height="12" rx="6" fill="#60a5fa"/><rect x="130" y="98" width="130" height="12" rx="6" fill="#93c5fd"/><rect x="130" y="126" width="150" height="12" rx="6" fill="#93c5fd"/><text x="20" y="38" font-family="Arial" font-size="18" font-weight="bold" fill="#1e3a8a">ID CARD (DEMO)</text></svg>')
+
 function user(p: Partial<User> & Pick<User, 'id' | 'email' | 'name'>, password: string): User {
   return {
     passwordHash: demoHash(password),
@@ -29,6 +32,7 @@ function user(p: Partial<User> & Pick<User, 'id' | 'email' | 'name'>, password: 
     sellerPlanId: 'seller-free',
     buyerPlanId: 'buyer-free',
     provider: 'password',
+    kyc: { status: 'verified', fullName: p.name, idNumber: '1-xxxx-xxxxx-00-0', idImage: '', submittedAt: Date.now() - 50 * DAY, reviewedAt: Date.now() - 49 * DAY },
     createdAt: Date.now() - 60 * DAY,
     ...p,
   }
@@ -109,10 +113,13 @@ export function makeSeed(): DB {
     user({ id: 'u-buyer', email: 'buyer@demo.com', name: 'สมชาย ผู้ลงทุน', primaryRole: 'buyer' }, 'demo1234'),
     user({ id: 'u-seller', email: 'seller@demo.com', name: 'วิภา เจ้าของกิจการ', primaryRole: 'seller', sellerVerified: true }, 'demo1234'),
     user({ id: 'u-seller2', email: 'seller2@demo.com', name: 'ประเสริฐ ศรีสุข', primaryRole: 'seller', sellerVerified: true }, 'demo1234'),
-    user({ id: 'u-seller3', email: 'seller3@demo.com', name: 'Daniel Carter', primaryRole: 'seller' }, 'demo1234'),
+    user({ id: 'u-seller3', email: 'seller3@demo.com', name: 'Daniel Carter', primaryRole: 'seller', kyc: { status: 'pending', fullName: 'Daniel Carter', idNumber: 'P-xxxx-4821', idImage: DEMO_ID_IMAGE, submittedAt: Date.now() - 3600_000 } }, 'demo1234'),
     user({ id: 'u-admin', email: 'admin@demo.com', name: 'Admin', isAdmin: true }, 'admin1234'),
   ]
   const listings = raw.map(listing)
+  // a few listings whose documents the admin has checked, and one paid promotion
+  ;['l-1', 'l-2', 'l-3', 'l-7', 'l-9'].forEach((id) => (listings.find((l) => l.id === id)!.docsVerified = true))
+  listings.find((l) => l.id === 'l-6')!.sponsoredUntil = Date.now() + 5 * DAY
   // one listing awaiting review so the admin queue is not empty
   listings.push({
     ...listing(['ร้านก๋วยเตี๋ยวเรือเจ้าดัง', 'food', 'ayutthaya', 'THB', 1_100_000, 2_600_000, 540_000, 2011, 5, 'เจ้าของเกษียณ', 'ร้านก๋วยเตี๋ยวเรือริมน้ำ ลูกค้านักท่องเที่ยวแน่นทุกเสาร์อาทิตย์', 'u-seller'], 20),
@@ -146,14 +153,16 @@ export function makeSeed(): DB {
     notifications: [],
     savedSearches: [],
     buyerRequests: [
-      { id: 'r-1', buyerId: 'u-buyer', title: 'หาซื้อร้านอาหารหรือคาเฟ่ที่มีกำไรแล้ว', category: 'food', province: '', maxBudget: 3_000_000, minProfit: 400_000, description: 'อยากได้ร้านที่มีลูกค้าประจำและสูตรของตัวเอง พร้อมรับช่วงต่อทันที ไม่จำเป็นต้องอยู่กรุงเทพ', status: 'open', createdAt: t0 },
-      { id: 'r-2', buyerId: 'u-seller2', title: 'มองหาธุรกิจออนไลน์ งบไม่เกิน 10 ล้าน', category: 'ecommerce', province: '', maxBudget: 10_000_000, minProfit: 500_000, description: 'สนใจแบรนด์ที่ขายบน Shopee/Lazada หรือเว็บของตัวเอง มีระบบหลังบ้านและทีมงานพร้อม', status: 'open', createdAt: t0 + 3600_000 },
-      { id: 'r-3', buyerId: 'u-seller3', title: 'ต้องการธุรกิจการศึกษาในกรุงเทพ', category: 'education', province: 'bangkok', maxBudget: 5_000_000, minProfit: 0, description: 'โรงเรียนกวดวิชาหรือสถาบันสอนภาษา ยินดีให้เจ้าของเดิมสอนต่อช่วงแรก', status: 'open', createdAt: t0 + 7200_000 },
+      { id: 'r-1', buyerId: 'u-buyer', title: 'หาซื้อร้านอาหารหรือคาเฟ่ที่มีกำไรแล้ว', category: 'food', province: '', maxBudget: 3_000_000, minProfit: 400_000, description: 'อยากได้ร้านที่มีลูกค้าประจำและสูตรของตัวเอง พร้อมรับช่วงต่อทันที ไม่จำเป็นต้องอยู่กรุงเทพ', purpose: 'buy', status: 'open', createdAt: t0 },
+      { id: 'r-2', buyerId: 'u-seller2', title: 'มองหาธุรกิจออนไลน์ งบไม่เกิน 10 ล้าน', category: 'ecommerce', province: '', maxBudget: 10_000_000, minProfit: 500_000, description: 'สนใจแบรนด์ที่ขายบน Shopee/Lazada หรือเว็บของตัวเอง มีระบบหลังบ้านและทีมงานพร้อม', purpose: 'invest', status: 'open', createdAt: t0 + 3600_000 },
+      { id: 'r-3', buyerId: 'u-seller3', title: 'ต้องการธุรกิจการศึกษาในกรุงเทพ', category: 'education', province: 'bangkok', maxBudget: 5_000_000, minProfit: 0, description: 'โรงเรียนกวดวิชาหรือสถาบันสอนภาษา ยินดีให้เจ้าของเดิมสอนต่อช่วงแรก', purpose: 'partner', status: 'open', createdAt: t0 + 7200_000 },
     ],
     pitches: [
-      { id: 'p-1', requestId: 'r-1', listingId: 'l-12', sellerId: 'u-seller3', buyerId: 'u-buyer', message: 'ร้านเบเกอรี่เปิดมา 9 ปี ลูกค้าประจำเยอะ ส่งต่อสูตรและอุปกรณ์ครบ ราคาต่ำกว่างบของคุณมาก', status: 'pending', createdAt: t0 + 5400_000 },
+      { id: 'p-1', requestId: 'r-1', listingId: 'l-12', sellerId: 'u-seller3', buyerId: 'u-buyer', message: 'ร้านเบเกอรี่เปิดมา 9 ปี ลูกค้าประจำเยอะ ส่งต่อสูตรและอุปกรณ์ครบ ราคาต่ำกว่างบของคุณมาก', offerPrice: 800_000, offerTerms: 'รวมอุปกรณ์ทั้งหมด และสอนสูตรให้ 1 เดือน', status: 'pending', createdAt: t0 + 5400_000 },
     ],
     favorites: [],
+    disputes: [],
+    settings: { adPriceTHB: 499, adPriceUSD: 15, adDays: 7 },
     fx: { usdThb: 36, updatedAt: 0 },
   }
 }

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle2, MapPin, MessageSquare, Plus, Tag, TrendingUp, Wallet } from 'lucide-react'
+import { CheckCircle2, Handshake, MapPin, MessageSquare, Plus, ShieldAlert, Tag, TrendingUp, Wallet } from 'lucide-react'
 import { CATEGORIES, PROVINCES, catName, provName } from '../lib/constants'
 import { usePrefs } from '../lib/prefs'
-import { auth, pitches, requestMatches, requests, useDB, useMe, useSession } from '../lib/store'
+import { auth, kycVerified, pitches, requestMatches, requests, useDB, useMe, useSession } from '../lib/store'
 import type { BuyerRequest } from '../lib/types'
 import { fmtDate } from '../lib/utils'
 import { Page } from '../components/Layout'
@@ -16,6 +16,7 @@ function Criteria({ r }: { r: BuyerRequest }) {
   const { t, lang, money } = usePrefs()
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-gray-600">
+      {r.purpose && <span className="inline-flex items-center gap-1 font-semibold text-brand-600"><Handshake size={14} /> {t('req.purpose.' + r.purpose)}</span>}
       <span className="inline-flex items-center gap-1"><Tag size={14} /> {r.category ? catName(r.category, lang) : t('req.any')}</span>
       <span className="inline-flex items-center gap-1"><MapPin size={14} /> {r.province ? provName(r.province, lang) : t('req.any')}</span>
       <span className="inline-flex items-center gap-1"><Wallet size={14} /> {t('req.budget')} <b>{money(r.maxBudget, 'THB')}</b></span>
@@ -71,7 +72,7 @@ export function RequestForm() {
   const session = useSession()
   const nav = useNavigate()
   const err = useErrorText()
-  const [f, setF] = useState({ title: '', category: '', province: '', maxBudget: '', minProfit: '0', description: '' })
+  const [f, setF] = useState({ title: '', category: '', province: '', maxBudget: '', minProfit: '0', description: '', purpose: 'buy' as 'buy' | 'invest' | 'partner' })
   const [error, setError] = useState('')
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value })
   const submit = (e: React.FormEvent) => {
@@ -90,6 +91,15 @@ export function RequestForm() {
       <p className="mt-1 text-sm text-gray-500">{t('req.formSubtitle')}</p>
       <Card className="mt-6 p-6">
         <form onSubmit={submit} className="space-y-4">
+          <Field label={t('req.fPurpose')}>
+            <div className="grid grid-cols-3 gap-2">
+              {(['buy', 'invest', 'partner'] as const).map((x) => (
+                <button type="button" key={x} onClick={() => setF({ ...f, purpose: x })} className={'rounded-lg border-2 px-3 py-2 text-sm font-semibold ' + (f.purpose === x ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-200 text-gray-600')}>
+                  {t('req.purpose.' + x)}
+                </button>
+              ))}
+            </div>
+          </Field>
           <Field label={t('req.fTitle') + ' *'}><Input value={f.title} onChange={set('title')} placeholder={t('req.fTitlePh')} required maxLength={120} /></Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t('form.category')}>
@@ -157,11 +167,25 @@ function OwnerPitches({ r }: { r: BuyerRequest }) {
   const { t, lang, money } = usePrefs()
   const err = useErrorText()
   const [error, setError] = useState('')
-  const items = d.pitches.filter((p) => p.requestId === r.id).sort((a, b) => b.createdAt - a.createdAt)
+  const [sort, setSort] = useState<'newest' | 'price'>('newest')
+  const offerOf = (p: (typeof d.pitches)[number]) => {
+    const l = d.listings.find((x) => x.id === p.listingId)
+    const v = p.offerPrice ?? l?.askingPrice ?? 0
+    return l?.currency === 'USD' ? v * d.fx.usdThb : v
+  }
+  const items = d.pitches.filter((p) => p.requestId === r.id).sort((a, b) => (sort === 'price' ? offerOf(a) - offerOf(b) : b.createdAt - a.createdAt))
   const act = (fn: () => void) => { try { setError(''); fn() } catch (x) { setError(err(x)) } }
   return (
     <>
-      <h2 className="mb-3 text-lg font-semibold">{t('req.pitches')}</h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t('req.pitches')}</h2>
+        {items.length > 1 && (
+          <Select value={sort} onChange={(e) => setSort(e.target.value as 'newest' | 'price')} className="w-auto">
+            <option value="newest">{t('sort.newest')}</option>
+            <option value="price">{t('req.sortOffer')}</option>
+          </Select>
+        )}
+      </div>
       {error && <div className="mb-3"><Alert t="red">{error}</Alert></div>}
       {!items.length ? <Empty icon="Inbox" title={t('req.noPitches')} /> : (
         <div className="space-y-3">
@@ -179,6 +203,13 @@ function OwnerPitches({ r }: { r: BuyerRequest }) {
                     <Badge t={requestMatches(l, r, d.fx.usdThb) ? 'green' : 'amber'}>{requestMatches(l, r, d.fx.usdThb) ? t('req.match') : t('req.notMatch')}</Badge>
                   </div>
                   <p className="mt-1 text-xs text-muted">{catName(l.category, lang)} · {provName(l.province, lang)} · {t('card.asking')} {money(l.askingPrice, l.currency)} · {t('form.profit')} {money(l.netProfit, l.currency)}</p>
+                  {p.offerPrice != null && (
+                    <p className="mt-2 text-sm">
+                      <span className="font-semibold text-brand-600">{t('req.offerPrice')}: {money(p.offerPrice, l.currency)}</span>
+                      {p.offerPrice < l.askingPrice && <span className="ml-2 text-xs text-green-600">({t('req.belowAsking', { pct: Math.round((1 - p.offerPrice / l.askingPrice) * 100) })})</span>}
+                    </p>
+                  )}
+                  {p.offerTerms && <p className="mt-1 text-xs text-gray-600">{t('req.offerTerms')}: {p.offerTerms}</p>}
                   {p.message && <p className="mt-2 rounded-lg bg-surface px-3 py-2 text-sm text-gray-700">“{p.message}”</p>}
                   <div className="mt-3 flex flex-wrap gap-2">
                     {p.status === 'pending' && <>
@@ -207,6 +238,8 @@ function PitchBox({ r }: { r: BuyerRequest }) {
   const err = useErrorText()
   const [listingId, setListingId] = useState('')
   const [msg, setMsg] = useState('')
+  const [offer, setOffer] = useState('')
+  const [terms, setTerms] = useState('')
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
   if (!me) return <Card className="p-6 text-center"><Link to={`/login?next=${encodeURIComponent('/requests/' + r.id)}`} className="font-semibold text-brand-500">{t('req.loginToPitch')}</Link></Card>
@@ -219,8 +252,10 @@ function PitchBox({ r }: { r: BuyerRequest }) {
     try {
       setError('')
       if (session?.role !== 'seller') auth.setRole('seller')
-      pitches.send(r.id, chosen, msg)
+      pitches.send(r.id, chosen, msg, { price: offer ? Number(offer) : undefined, terms })
       setMsg('')
+      setOffer('')
+      setTerms('')
       setListingId('')
       setSent(true)
     } catch (x) {
@@ -245,17 +280,27 @@ function PitchBox({ r }: { r: BuyerRequest }) {
           </div>
         </Card>
       )}
-      {r.status === 'open' && (options.length > 0 || !mine.length) && (
+      {r.status === 'open' && (!kycVerified(me) || options.length > 0 || !mine.length) && (
         <Card className="p-5">
           <h2 className="mb-3 font-semibold">{t('req.pitchTitle')}</h2>
           {sent && <div className="mb-3"><Alert t="green">{t('req.pitchSent')}</Alert></div>}
-          {!options.length ? <p className="text-sm text-gray-500">{t('req.noMatch')}</p> : (
+          {!kycVerified(me) ? (
+            <Alert><span className="flex flex-wrap items-center gap-2"><ShieldAlert size={16} /> {t('kyc.neededToPitch')} <Link to="/verify" className="font-semibold underline">{t('kyc.goVerify')}</Link></span></Alert>
+          ) : !options.length ? <p className="text-sm text-gray-500">{t('req.noMatch')}</p> : (
             <form onSubmit={send} className="space-y-3">
               <Field label={t('req.pitchSelect')}>
                 <Select value={chosen} onChange={(e) => setListingId(e.target.value)}>
                   {options.map((l) => <option key={l.id} value={l.id}>{l.displayName} — {money(l.askingPrice, l.currency)}</option>)}
                 </Select>
               </Field>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label={t('req.offerPrice')} hint={t('req.offerHint')}>
+                  <Input type="number" min={1} value={offer} onChange={(e) => setOffer(e.target.value)} onWheel={noWheel} placeholder={String(d.listings.find((l) => l.id === chosen)?.askingPrice ?? '')} />
+                </Field>
+                <Field label={t('req.offerTerms')}>
+                  <Input value={terms} onChange={(e) => setTerms(e.target.value)} placeholder={t('req.offerTermsPh')} maxLength={200} />
+                </Field>
+              </div>
               <Field label={t('req.pitchMsg')}><Textarea value={msg} onChange={(e) => setMsg(e.target.value)} placeholder={t('req.pitchMsgPh')} maxLength={600} /></Field>
               {error && <Alert t="red">{error}</Alert>}
               <div className="flex justify-end"><Button type="submit">{t('req.pitchSend')}</Button></div>

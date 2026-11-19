@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, FileSignature, Lock, MessageSquare, Search, ShieldCheck } from 'lucide-react'
 import { CATEGORIES, PROVINCES } from '../lib/constants'
 import { usePrefs } from '../lib/prefs'
-import { featuredIds, useDB } from '../lib/store'
+import { featuredIds, sponsoredIds, useDB } from '../lib/store'
 import { PUBLIC_STATUSES } from '../lib/search'
 import { ListingCard } from '../components/ListingCard'
 import { Icon } from '../components/ui'
@@ -17,7 +17,9 @@ export default function Home() {
   const [prov, setProv] = useState('')
   const pub = d.listings.filter((l) => (PUBLIC_STATUSES as readonly string[]).includes(l.status))
   const feat = featuredIds(d)
-  const featured = pub.filter((l) => feat.has(l.id)).sort((a, b) => b.views - a.views).slice(0, 4)
+  const spons = sponsoredIds(d)
+  // paid promotions (advertising) first, then plan-featured listings
+  const featured = pub.filter((l) => spons.has(l.id) || feat.has(l.id)).sort((a, b) => Number(spons.has(b.id)) - Number(spons.has(a.id)) || b.views - a.views).slice(0, 4)
   const latest = [...pub].sort((a, b) => (b.publishedAt ?? 0) - (a.publishedAt ?? 0)).slice(0, 8)
 
   const go = () => {

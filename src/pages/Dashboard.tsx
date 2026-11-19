@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Archive, Eye, EyeOff, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Archive, Eye, EyeOff, Megaphone, Pencil, Plus, Trash2 } from 'lucide-react'
 import { usePrefs } from '../lib/prefs'
-import { alerts, auth, deals, listings, ndaUsedThisMonth, planOf, useDB, useMe, useSession } from '../lib/store'
+import { alerts, auth, billing, deals, listings, ndaUsedThisMonth, planOf, useDB, useMe, useSession } from '../lib/store'
 import type { Deal, Role } from '../lib/types'
 import { catName, provName } from '../lib/constants'
 import { cls, fmtDate } from '../lib/utils'
@@ -79,8 +79,10 @@ export default function Dashboard() {
 function MyListings() {
   const d = useDB()
   const me = useMe()!
-  const { t, lang, money } = usePrefs()
+  const { t, lang, money, currency } = usePrefs()
+  const nav = useNavigate()
   const mine = d.listings.filter((l) => l.sellerId === me.id && l.status !== 'archived').sort((a, b) => b.updatedAt - a.updatedAt)
+  const promote = (id: string) => nav(`/checkout/${billing.promote(id, currency)}`)
   if (!mine.length) return <Empty icon="Store" title={t('dash.noListings')}><Link to="/sell" className="font-semibold text-brand-500">{t('dash.newListing')}</Link></Empty>
   return (
     <div className="divide-y">
@@ -91,7 +93,13 @@ function MyListings() {
             <Link to={`/listing/${l.id}`} className="font-semibold hover:text-brand-500">{l.displayName}</Link>
             <p className="text-xs text-muted">{catName(l.category, lang)} · {provName(l.province, lang)} · {money(l.askingPrice, l.currency)} · {l.views} {t('dash.views')}</p>
             {l.rejectReason && <p className="text-xs text-red-600">{t('detail.rejectReason')}: {l.rejectReason}</p>}
+            {(l.sponsoredUntil ?? 0) > Date.now() && <p className="text-xs font-semibold text-amber-600">{t('ad.activeUntil', { d: fmtDate(l.sponsoredUntil!, lang) })}</p>}
           </div>
+          {l.status === 'published' && (
+            <Button size="sm" variant="outline" onClick={() => promote(l.id)} title={t('ad.hint', { days: d.settings.adDays })}>
+              <Megaphone size={14} /> {t('ad.promote', { price: money(currency === 'THB' ? d.settings.adPriceTHB : d.settings.adPriceUSD, currency, { exact: true }) })}
+            </Button>
+          )}
           <StatusBadge status={l.status} />
           <div className="flex gap-1">
             {!['sold', 'under_offer'].includes(l.status) && <Link to={`/listing/${l.id}/edit`} title={t('common.edit')} className="rounded p-2 hover:bg-gray-100"><Pencil size={16} /></Link>}
@@ -259,7 +267,8 @@ function DealCard({ deal, role }: { deal: Deal; role: Role }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <Link to={`/listing/${l.id}`} className="font-semibold hover:text-brand-500">{l.displayName}</Link>
-          <p className="text-xs text-muted">{t('deal.agreed')}: {money(deal.agreedPrice, deal.currency, { exact: true })} · <Link to={`/contract/loi/${deal.loiId}`} className="text-brand-500">LOI</Link></p>
+          <p className="text-xs text-muted">{t('deal.agreed')}: {money(deal.agreedPrice, deal.currency, { exact: true })} · <Link to={`/contract/loi/${deal.loiId}`} className="text-brand-500">LOI</Link>{(() => { const th = d.threads.find((x) => x.listingId === deal.listingId && x.buyerId === deal.buyerId); return th ? <> · <Link to={`/room/${th.id}`} className="font-semibold text-brand-500">Deal Room</Link></> : null })()}</p>
+          {deal.status === 'in_progress' && <p className="mt-1 text-xs text-gray-500">{t('room.txnPaid')}: {deal.transaction?.buyerPaidAt ? '✓' : '—'} · {t('room.txnReceived')}: {deal.transaction?.sellerReceivedAt ? '✓' : '—'}</p>}
         </div>
         <StatusBadge status={deal.status} />
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Bell, Building2, ChevronDown, LogOut, Menu, MessageSquare, Search, Shield, User as UserIcon, X } from 'lucide-react'
+import { BadgeCheck, Bell, Building2, ChevronDown, LogOut, Menu, MessageSquare, Search, Shield, User as UserIcon, X } from 'lucide-react'
 import { alerts, auth, refreshFx, unreadCount, useDB, useMe, useSession } from '../lib/store'
 import { usePrefs } from '../lib/prefs'
 import { cls, fmtDate } from '../lib/utils'
@@ -120,6 +120,7 @@ function UserMenu() {
             </div>
           </div>
           <Link to="/dashboard" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-50"><UserIcon size={16} /> {t('nav.dashboard')}</Link>
+          <Link to="/verify" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-50"><BadgeCheck size={16} /> {t('nav.verify')} {!me.isAdmin && <span className={'ml-auto text-[11px] font-semibold ' + (me.kyc?.status === 'verified' ? 'text-green-600' : 'text-amber-600')}>{t('kyc.status.' + (me.kyc?.status ?? 'none'))}</span>}</Link>
           <Link to="/pricing" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-50"><Building2 size={16} /> {t('nav.pricing')}</Link>
           {me.isAdmin && <Link to="/admin" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-gray-50"><Shield size={16} /> {t('nav.admin')}</Link>}
           <button onClick={() => { auth.logout(); nav('/') }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50"><LogOut size={16} /> {t('nav.logout')}</button>
