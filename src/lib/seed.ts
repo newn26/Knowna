@@ -2,7 +2,7 @@ import type { DB, Listing, Plan, User } from './types'
 import { coverSvg } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 2
+export const DB_VERSION = 3
 
 export const DEMO_ACCOUNTS = [
   { email: 'buyer@demo.com', password: 'demo1234', role: 'buyer' },
@@ -145,6 +145,14 @@ export function makeSeed(): DB {
     reports: [],
     notifications: [],
     savedSearches: [],
+    buyerRequests: [
+      { id: 'r-1', buyerId: 'u-buyer', title: 'หาซื้อร้านอาหารหรือคาเฟ่ที่มีกำไรแล้ว', category: 'food', province: '', maxBudget: 3_000_000, minProfit: 400_000, description: 'อยากได้ร้านที่มีลูกค้าประจำและสูตรของตัวเอง พร้อมรับช่วงต่อทันที ไม่จำเป็นต้องอยู่กรุงเทพ', status: 'open', createdAt: t0 },
+      { id: 'r-2', buyerId: 'u-seller2', title: 'มองหาธุรกิจออนไลน์ งบไม่เกิน 10 ล้าน', category: 'ecommerce', province: '', maxBudget: 10_000_000, minProfit: 500_000, description: 'สนใจแบรนด์ที่ขายบน Shopee/Lazada หรือเว็บของตัวเอง มีระบบหลังบ้านและทีมงานพร้อม', status: 'open', createdAt: t0 + 3600_000 },
+      { id: 'r-3', buyerId: 'u-seller3', title: 'ต้องการธุรกิจการศึกษาในกรุงเทพ', category: 'education', province: 'bangkok', maxBudget: 5_000_000, minProfit: 0, description: 'โรงเรียนกวดวิชาหรือสถาบันสอนภาษา ยินดีให้เจ้าของเดิมสอนต่อช่วงแรก', status: 'open', createdAt: t0 + 7200_000 },
+    ],
+    pitches: [
+      { id: 'p-1', requestId: 'r-1', listingId: 'l-12', sellerId: 'u-seller3', buyerId: 'u-buyer', message: 'ร้านเบเกอรี่เปิดมา 9 ปี ลูกค้าประจำเยอะ ส่งต่อสูตรและอุปกรณ์ครบ ราคาต่ำกว่างบของคุณมาก', status: 'pending', createdAt: t0 + 5400_000 },
+    ],
     favorites: [],
     fx: { usdThb: 36, updatedAt: 0 },
   }

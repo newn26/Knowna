@@ -140,6 +140,7 @@ function Header() {
   const unread = me ? unreadCount(d, me.id) : 0
   const links = [
     { to: '/search', label: t('nav.browse') },
+    { to: '/requests', label: t('nav.requests') },
     { to: '/sell', label: t('nav.sell') },
     { to: '/pricing', label: t('nav.pricing') },
   ]
@@ -159,13 +160,13 @@ function Header() {
           ))}
         </nav>
         <form
-          className="ml-auto hidden max-w-sm flex-1 items-center rounded-full border border-gray-200 bg-surface px-4 lg:flex"
+          className="ml-auto hidden max-w-sm flex-1 items-center rounded-full border border-gray-200 bg-surface px-4 xl:flex"
           onSubmit={(e) => { e.preventDefault(); nav('/search?q=' + encodeURIComponent(q)) }}
         >
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('nav.searchPlaceholder')} className="w-full bg-transparent py-2 text-sm outline-none" />
           <Search size={18} className="text-gray-500" />
         </form>
-        <div className="ml-auto flex items-center gap-1 lg:ml-2">
+        <div className="ml-auto flex items-center gap-1 xl:ml-2">
           {me && session ? (
             <>
               {me.isAdmin && <Badge t="dark" className="mr-1 hidden sm:inline-flex">Admin</Badge>}
@@ -211,6 +212,7 @@ function Footer() {
         <div className="text-sm">
           <p className="mb-3 font-semibold text-white">{t('footer.links')}</p>
           <Link to="/search" className="block py-1 hover:text-white">{t('nav.browse')}</Link>
+          <Link to="/requests" className="block py-1 hover:text-white">{t('nav.requests')}</Link>
           <Link to="/sell" className="block py-1 hover:text-white">{t('nav.sell')}</Link>
           <Link to="/pricing" className="block py-1 hover:text-white">{t('nav.pricing')}</Link>
         </div>

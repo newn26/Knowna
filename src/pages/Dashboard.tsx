@@ -10,7 +10,7 @@ import { Page } from '../components/Layout'
 import { ListingCard } from '../components/ListingCard'
 import { Alert, Badge, Button, Card, Empty, Img, Input, StatusBadge, Tabs, useErrorText, Field } from '../components/ui'
 
-type Tab = 'listings' | 'ndas' | 'offers' | 'deals' | 'favorites' | 'alerts' | 'billing' | 'profile'
+type Tab = 'listings' | 'pitches' | 'requests' | 'ndas' | 'offers' | 'deals' | 'favorites' | 'alerts' | 'billing' | 'profile'
 
 export default function Dashboard() {
   const me = useMe()!
@@ -19,8 +19,8 @@ export default function Dashboard() {
   const { t, L } = usePrefs()
   const [sp, setSp] = useSearchParams()
   const role = session.role
-  const sellerTabs: Tab[] = ['listings', 'ndas', 'offers', 'deals', 'billing', 'profile']
-  const buyerTabs: Tab[] = ['ndas', 'offers', 'deals', 'favorites', 'alerts', 'billing', 'profile']
+  const sellerTabs: Tab[] = ['listings', 'pitches', 'ndas', 'offers', 'deals', 'billing', 'profile']
+  const buyerTabs: Tab[] = ['requests', 'ndas', 'offers', 'deals', 'favorites', 'alerts', 'billing', 'profile']
   const tabs = role === 'seller' ? sellerTabs : buyerTabs
   const tab = (tabs.includes(sp.get('tab') as Tab) ? sp.get('tab') : tabs[0]) as Tab
   const setTab = (x: Tab) => setSp({ tab: x })
@@ -29,6 +29,7 @@ export default function Dashboard() {
   const pendingNdas = d.ndas.filter((n) => n.sellerId === me.id && n.status === 'pending').length
   const myTurnLois = d.lois.filter((o) => o.status === 'open' && (role === 'seller' ? o.sellerId === me.id : o.buyerId === me.id) && o.rounds[o.rounds.length - 1].by !== role).length
   const openDeals = d.deals.filter((x) => x.status === 'in_progress' && (role === 'seller' ? x.sellerId : x.buyerId) === me.id).length
+  const newPitches = d.pitches.filter((p) => p.buyerId === me.id && p.status === 'pending').length
   const unpaid = d.invoices.filter((i) => i.userId === me.id && i.status === 'unpaid').length
 
   return (
@@ -55,11 +56,13 @@ export default function Dashboard() {
           items={tabs.map((x) => ({
             id: x,
             label: t(`dash.tab.${x}${x === 'ndas' || x === 'offers' ? '.' + role : ''}`),
-            count: x === 'ndas' && role === 'seller' ? pendingNdas : x === 'offers' ? myTurnLois : x === 'deals' ? openDeals : x === 'billing' ? unpaid : 0,
+            count: x === 'requests' ? newPitches : x === 'ndas' && role === 'seller' ? pendingNdas : x === 'offers' ? myTurnLois : x === 'deals' ? openDeals : x === 'billing' ? unpaid : 0,
           }))}
         />
         <div className="p-5">
           {tab === 'listings' && <MyListings />}
+          {tab === 'requests' && <MyRequests />}
+          {tab === 'pitches' && <MyPitches />}
           {tab === 'ndas' && <NdaList role={role} />}
           {tab === 'offers' && <OfferList role={role} />}
           {tab === 'deals' && <DealList role={role} />}
@@ -100,6 +103,65 @@ function MyListings() {
         </div>
       ))}
     </div>
+  )
+}
+
+function MyRequests() {
+  const d = useDB()
+  const me = useMe()!
+  const { t, lang, money } = usePrefs()
+  const mine = d.buyerRequests.filter((r) => r.buyerId === me.id).sort((a, b) => b.createdAt - a.createdAt)
+  return (
+    <>
+      <div className="mb-4 flex justify-end"><Link to="/requests/new"><Button size="sm"><Plus size={14} /> {t('req.new')}</Button></Link></div>
+      {!mine.length ? <Empty icon="Search" title={t('dash.noRequests')} /> : (
+        <div className="divide-y">
+          {mine.map((r) => {
+            const ps = d.pitches.filter((p) => p.requestId === r.id)
+            const fresh = ps.filter((p) => p.status === 'pending').length
+            return (
+              <div key={r.id} className="flex flex-wrap items-center gap-4 py-4">
+                <div className="min-w-0 flex-1">
+                  <Link to={`/requests/${r.id}`} className="font-semibold hover:text-brand-500">{r.title}</Link>
+                  <p className="text-xs text-muted">{r.category ? catName(r.category, lang) : t('req.any')} · {t('req.budget')} {money(r.maxBudget, 'THB')} · {fmtDate(r.createdAt, lang)}</p>
+                </div>
+                <Badge t={r.status === 'open' ? 'green' : 'gray'}>{r.status === 'open' ? t('req.open') : t('req.closed')}</Badge>
+                <Badge t={fresh ? 'blue' : 'gray'}>{t('req.pitchCount', { n: ps.length })}</Badge>
+                <Link to={`/requests/${r.id}`}><Button size="sm" variant={fresh ? 'primary' : 'outline'}>{t('chat.view')}</Button></Link>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
+
+function MyPitches() {
+  const d = useDB()
+  const me = useMe()!
+  const { t, lang } = usePrefs()
+  const mine = d.pitches.filter((p) => p.sellerId === me.id).sort((a, b) => b.createdAt - a.createdAt)
+  if (!mine.length) return <Empty icon="Inbox" title={t('dash.noPitches')}><Link to="/requests" className="font-semibold text-brand-500">{t('req.title')}</Link></Empty>
+  return (
+    <table className="w-full text-sm">
+      <thead className="text-left text-xs text-muted"><tr><th className="py-2">{t('req.title')}</th><th>{t('dash.col.listing')}</th><th>{t('dash.col.status')}</th><th /></tr></thead>
+      <tbody className="divide-y">
+        {mine.map((p) => {
+          const r = d.buyerRequests.find((x) => x.id === p.requestId)
+          const l = d.listings.find((x) => x.id === p.listingId)
+          const thread = d.threads.find((x) => x.listingId === p.listingId && x.buyerId === p.buyerId)
+          return (
+            <tr key={p.id}>
+              <td className="py-3"><Link to={`/requests/${p.requestId}`} className="font-semibold hover:text-brand-500">{r?.title}</Link><p className="text-xs text-muted">{fmtDate(p.createdAt, lang)}</p></td>
+              <td>{l?.displayName}</td>
+              <td><StatusBadge status={p.status} /></td>
+              <td className="text-right">{p.status === 'shortlisted' && thread && <Link to={`/messages/${thread.id}`}><Button size="sm">{t('req.openChat')}</Button></Link>}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   )
 }
 
