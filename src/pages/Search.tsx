@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BellPlus, SlidersHorizontal } from 'lucide-react'
 import { CATEGORIES, PROVINCES } from '../lib/constants'
@@ -18,6 +18,7 @@ export default function Search() {
   const [sp, setSp] = useSearchParams()
   const p = paramsFromQuery(sp)
   const [showFilters, setShowFilters] = useState(false)
+  const [reset, setReset] = useState(0)
   const [msg, setMsg] = useState('')
   const err = useErrorText()
 
@@ -27,8 +28,8 @@ export default function Search() {
   const fromThb = (v?: number) => (v == null ? '' : String(Math.round(v / k)))
 
   const set = (patch: Partial<SearchParams>) => setSp(queryFromParams({ ...p, ...patch }))
-  const setNum = (key: keyof SearchParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    set({ [key]: e.target.value === '' ? undefined : toThb(Number(e.target.value)) } as Partial<SearchParams>)
+  const setNum = (key: keyof SearchParams) => (v: string) =>
+    set({ [key]: v === '' ? undefined : toThb(Number(v)) } as Partial<SearchParams>)
 
   const feat = featuredIds(d)
   const results = useMemo(
@@ -57,7 +58,7 @@ export default function Search() {
           <Button variant="outline" size="sm" className="md:hidden" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal size={14} /> {t('search.filters')}</Button>
           {me && <Button variant="outline" size="sm" onClick={saveSearch}><BellPlus size={14} /> {t('search.saveAlert')}</Button>}
           <Select value={p.sort ?? 'newest'} onChange={(e) => set({ sort: e.target.value as SearchParams['sort'] })} className="w-auto">
-            {(['newest', 'price_asc', 'price_desc', 'revenue_desc'] as const).map((s) => <option key={s} value={s}>{t('sort.' + s)}</option>)}
+            {(['newest', 'price_asc', 'price_desc', 'revenue_desc', 'profit_desc'] as const).map((s) => <option key={s} value={s}>{t('sort.' + s)}</option>)}
           </Select>
         </div>
       </div>
@@ -81,17 +82,20 @@ export default function Search() {
           </Field>
           <Field label={`${t('search.price')} (${currency})`}>
             <div className="flex gap-2">
-              <Input type="number" min={0} placeholder={t('search.min')} value={fromThb(p.minPrice)} onChange={setNum('minPrice')} />
-              <Input type="number" min={0} placeholder={t('search.max')} value={fromThb(p.maxPrice)} onChange={setNum('maxPrice')} />
+              <NumFilter key={currency + 'minPrice'} clear={reset} placeholder={t('search.min')} value={fromThb(p.minPrice)} onCommit={setNum('minPrice')} />
+              <NumFilter key={currency + 'maxPrice'} clear={reset} placeholder={t('search.max')} value={fromThb(p.maxPrice)} onCommit={setNum('maxPrice')} />
             </div>
           </Field>
           <Field label={`${t('search.revenue')} (${currency})`}>
             <div className="flex gap-2">
-              <Input type="number" min={0} placeholder={t('search.min')} value={fromThb(p.minRevenue)} onChange={setNum('minRevenue')} />
-              <Input type="number" min={0} placeholder={t('search.max')} value={fromThb(p.maxRevenue)} onChange={setNum('maxRevenue')} />
+              <NumFilter key={currency + 'minRevenue'} clear={reset} placeholder={t('search.min')} value={fromThb(p.minRevenue)} onCommit={setNum('minRevenue')} />
+              <NumFilter key={currency + 'maxRevenue'} clear={reset} placeholder={t('search.max')} value={fromThb(p.maxRevenue)} onCommit={setNum('maxRevenue')} />
             </div>
           </Field>
-          <Button variant="ghost" size="sm" className="w-full" onClick={() => setSp('')}>{t('search.clear')}</Button>
+          <Field label={`${t('search.minProfit')} (${currency})`}>
+            <NumFilter key={currency + 'minProfit'} clear={reset} placeholder={t('search.min')} value={fromThb(p.minProfit)} onCommit={setNum('minProfit')} />
+          </Field>
+          <Button variant="ghost" size="sm" className="w-full" onClick={() => { setSp(''); setReset((n) => n + 1) }}>{t('search.clear')}</Button>
         </aside>
         <div>
           {results.length === 0 ? (
@@ -104,5 +108,29 @@ export default function Search() {
         </div>
       </div>
     </Page>
+  )
+}
+
+/**
+ * Number filter that keeps what the user types locally. Driving the input straight from the URL
+ * dropped digits when typing fast (the URL update lags behind keystrokes).
+ * The parent remounts it (via `key`) when the currency changes, and bumps `clear` to empty it.
+ */
+function NumFilter({ value, onCommit, placeholder, clear }: { value: string; onCommit: (v: string) => void; placeholder: string; clear: number }) {
+  const [draft, setDraft] = useState(value)
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) first.current = false
+    else setDraft('')
+  }, [clear])
+  return (
+    <Input
+      type="number"
+      min={0}
+      placeholder={placeholder}
+      value={draft}
+      onChange={(e) => { setDraft(e.target.value); onCommit(e.target.value) }}
+      onWheel={(e) => e.currentTarget.blur()}
+    />
   )
 }

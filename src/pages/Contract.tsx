@@ -48,7 +48,7 @@ function DocShell({ title, status, listingId, children }: { title: string; statu
       <Card className="p-8 print:border-0 print:p-0">
         <div className="mb-6 flex items-start justify-between border-b pb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-500">BizMarket</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-500">RUB Job</p>
             <h1 className="text-2xl font-bold">{title}</h1>
             <p className="text-sm text-muted">{l?.displayName}</p>
           </div>

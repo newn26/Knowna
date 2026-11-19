@@ -16,6 +16,7 @@ export function matches(l: Listing, p: SearchParams, usdThb: number): boolean {
   if (p.maxPrice != null && l.askingPrice * k > p.maxPrice) return false
   if (p.minRevenue != null && l.annualRevenue * k < p.minRevenue) return false
   if (p.maxRevenue != null && l.annualRevenue * k > p.maxRevenue) return false
+  if (p.minProfit != null && l.netProfit * k < p.minProfit) return false
   return true
 }
 
@@ -26,6 +27,7 @@ export function sortListings(ls: Listing[], sort: SearchParams['sort'], usdThb: 
     price_asc: (a, b) => a.askingPrice * k(a) - b.askingPrice * k(b),
     price_desc: (a, b) => b.askingPrice * k(b) - a.askingPrice * k(a),
     revenue_desc: (a, b) => b.annualRevenue * k(b) - a.annualRevenue * k(a),
+    profit_desc: (a, b) => b.netProfit * k(b) - a.netProfit * k(a),
   }
   const cmp = by[sort ?? 'newest']
   // featured listings float to the top within the chosen order
@@ -42,6 +44,7 @@ export function paramsFromQuery(sp: URLSearchParams): SearchParams {
     maxPrice: num('maxPrice'),
     minRevenue: num('minRevenue'),
     maxRevenue: num('maxRevenue'),
+    minProfit: num('minProfit'),
     sort: (sp.get('sort') as SearchParams['sort']) || undefined,
   }
 }

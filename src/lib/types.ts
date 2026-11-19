@@ -209,7 +209,8 @@ export interface SearchParams {
   maxPrice?: number
   minRevenue?: number
   maxRevenue?: number
-  sort?: 'newest' | 'price_asc' | 'price_desc' | 'revenue_desc'
+  minProfit?: number
+  sort?: 'newest' | 'price_asc' | 'price_desc' | 'revenue_desc' | 'profit_desc'
 }
 
 /** Reverse marketplace: a buyer posts what they want, sellers pitch matching listings. */

@@ -1,4 +1,4 @@
-# BizMarket — Business-for-Sale Marketplace (Prototype)
+# RUB Job — Business-for-Sale Marketplace (Prototype)
 
 **Live demo:** https://newn26.github.io/biz-marketplace/
 

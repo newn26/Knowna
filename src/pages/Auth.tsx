@@ -12,8 +12,8 @@ function Shell({ title, subtitle, children }: { title: string; subtitle: string;
   return (
     <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 md:grid-cols-2">
       <div className="hidden flex-col justify-center rounded-2xl bg-gradient-to-br from-ink to-brand-700 p-10 text-white md:flex">
-        <span className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 text-xl font-bold">B</span>
-        <h2 className="text-3xl font-bold leading-tight">BizMarket</h2>
+        <span className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500 text-xl font-bold">R</span>
+        <h2 className="text-3xl font-bold leading-tight">RUB Job</h2>
         <p className="mt-3 text-gray-300">{subtitle}</p>
       </div>
       <div className="rounded-2xl border border-gray-200 bg-white p-8">
