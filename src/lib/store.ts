@@ -122,6 +122,18 @@ const me = () => {
   return u
 }
 
+/** Identity verified (KYC) — admins are trusted by default. */
+export const kycVerified = (u: User | null | undefined) => !!u && (u.isAdmin || u.kyc?.status === 'verified')
+const requireKyc = (u: User) => {
+  if (!kycVerified(u)) throw new AppError('kyc_required')
+}
+
+/** Listings with an active paid promotion (advertising revenue). */
+export function sponsoredIds(d: DB): Set<string> {
+  const now = Date.now()
+  return new Set(d.listings.filter((l) => (l.sponsoredUntil ?? 0) > now && ['published', 'under_offer'].includes(l.status)).map((l) => l.id))
+}
+
 export function planOf(d: DB, u: User, audience: Role): Plan {
   const id = audience === 'seller' ? u.sellerPlanId : u.buyerPlanId
   const until = audience === 'seller' ? u.sellerPlanUntil : u.buyerPlanUntil
@@ -389,6 +401,7 @@ export const ndas = {
     const l = db.listings.find((x) => x.id === listingId)
     if (!l) throw new AppError('not_found')
     if (l.sellerId === u.id) throw new AppError('own_listing')
+    requireKyc(u)
     const existing = db.ndas.find((n) => n.listingId === listingId && n.buyerId === u.id && n.status !== 'rejected')
     if (existing) throw new AppError('nda_exists')
     const lim = planOf(db, u, 'buyer').ndaLimitPerMonth
@@ -431,6 +444,7 @@ export const lois = {
     const l = db.listings.find((x) => x.id === listingId)
     if (!l || l.status !== 'published') throw new AppError('not_available')
     if (l.sellerId === u.id) throw new AppError('own_listing')
+    requireKyc(u)
     if (!canViewFull(db, u.id, l)) throw new AppError('nda_required')
     if (db.lois.some((x) => x.listingId === listingId && x.buyerId === u.id && x.status === 'open')) throw new AppError('loi_exists')
     let id = ''
@@ -544,6 +558,31 @@ export const deals = {
     })
     return result
   },
+  /** Simulated transaction: buyer reports payment, seller confirms receipt. No real money moves. */
+  markPaid(dealId: string) {
+    const u = me()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress' || deal.buyerId !== u.id) throw new AppError('forbidden')
+      deal.transaction = { ...deal.transaction, buyerPaidAt: Date.now() }
+      const l = d.listings.find((x) => x.id === deal.listingId)!
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'txn_paid')
+      notify(d, deal.sellerId, { th: `ผู้ซื้อแจ้งชำระเงินสำหรับ "${l.displayName}" แล้ว กรุณายืนยันการรับเงิน`, en: `The buyer reported payment for "${l.displayName}" — please confirm receipt` }, `/room/${t.id}`)
+    })
+  },
+  markReceived(dealId: string) {
+    const u = me()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress' || deal.sellerId !== u.id || !deal.transaction?.buyerPaidAt) throw new AppError('forbidden')
+      deal.transaction = { ...deal.transaction, sellerReceivedAt: Date.now() }
+      const l = d.listings.find((x) => x.id === deal.listingId)!
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'txn_received')
+      notify(d, deal.buyerId, { th: `ผู้ขายยืนยันรับเงินสำหรับ "${l.displayName}" แล้ว`, en: `The seller confirmed receiving payment for "${l.displayName}"` }, `/room/${t.id}`)
+    })
+  },
   cancel(dealId: string) {
     const u = me()
     commit((d) => {
@@ -555,6 +594,44 @@ export const deals = {
       const t = ensureThread(d, deal.listingId, deal.buyerId)
       sysMsg(d, t.id, 'deal_cancelled')
       notify(d, u.id === deal.buyerId ? deal.sellerId : deal.buyerId, { th: `ดีล "${l.displayName}" ถูกยกเลิก`, en: `Deal "${l.displayName}" was cancelled` }, '/dashboard?tab=deals')
+    })
+  },
+}
+
+// ---------- disputes ----------
+export const disputes = {
+  open(dealId: string, reason: string) {
+    const u = me()
+    if (!reason.trim()) throw new AppError('invalid')
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || (deal.buyerId !== u.id && deal.sellerId !== u.id)) throw new AppError('forbidden')
+      if (d.disputes.some((x) => x.dealId === dealId && x.status === 'open')) throw new AppError('dispute_exists')
+      d.disputes.push({ id: uid('dp-'), dealId, openedBy: u.id, reason: reason.trim(), status: 'open', createdAt: Date.now() })
+      const l = d.listings.find((x) => x.id === deal.listingId)!
+      sysMsg(d, ensureThread(d, deal.listingId, deal.buyerId).id, 'dispute_opened')
+      d.users.filter((x) => x.isAdmin).forEach((a) =>
+        notify(d, a.id, { th: `มีการแจ้งข้อพิพาท: ${l.displayName}`, en: `Dispute opened: ${l.displayName}` }, '/admin?tab=disputes'),
+      )
+      notify(d, u.id === deal.buyerId ? deal.sellerId : deal.buyerId, { th: `อีกฝ่ายแจ้งข้อพิพาทในดีล "${l.displayName}" ทีมงานจะติดต่อประสานงาน`, en: `The other party opened a dispute on "${l.displayName}" — our team will mediate` }, '/dashboard?tab=deals')
+    })
+  },
+}
+
+// ---------- KYC ----------
+export const kyc = {
+  submit(p: { fullName: string; idNumber: string; idImage: string }) {
+    const u = me()
+    const digits = p.idNumber.replace(/\W/g, '')
+    if (!p.fullName.trim() || digits.length < 6 || !p.idImage) throw new AppError('invalid')
+    // keep only the last 3 characters of the ID number — the prototype never stores the full number
+    const masked = 'x'.repeat(Math.max(0, digits.length - 3)) + digits.slice(-3)
+    commit((d) => {
+      const x = d.users.find((y) => y.id === u.id)!
+      x.kyc = { status: 'pending', fullName: p.fullName.trim(), idNumber: masked, idImage: p.idImage, submittedAt: Date.now() }
+      d.users.filter((a) => a.isAdmin).forEach((a) =>
+        notify(d, a.id, { th: `คำขอยืนยันตัวตนใหม่: ${x.name}`, en: `New identity verification: ${x.name}` }, '/admin?tab=kyc'),
+      )
     })
   },
 }
@@ -583,6 +660,22 @@ export const billing = {
     })
     return inv.id
   },
+  /** Advertising: pay to show a listing as Sponsored for a few days. */
+  promote(listingId: string, currency: Currency) {
+    const u = me()
+    const l = db.listings.find((x) => x.id === listingId)
+    if (!l || l.sellerId !== u.id || l.status !== 'published') throw new AppError('forbidden')
+    const s = db.settings
+    const inv: Invoice = {
+      id: uid('inv-'), userId: u.id, kind: 'ad',
+      description: { th: `โปรโมตประกาศ (Sponsored) ${s.adDays} วัน — ${l.displayName}`, en: `Sponsored listing, ${s.adDays} days — ${l.displayName}` },
+      amount: currency === 'THB' ? s.adPriceTHB : s.adPriceUSD, currency, status: 'unpaid', refId: l.id, createdAt: Date.now(),
+    }
+    commit((d) => {
+      d.invoices.push(inv)
+    })
+    return inv.id
+  },
   recordPayment(invoiceId: string, ok: boolean, method: 'card' | 'promptpay', detail: string) {
     const u = me()
     commit((d) => {
@@ -599,6 +692,10 @@ export const billing = {
         const x = d.users.find((y) => y.id === u.id)!
         if (plan.audience === 'seller') { x.sellerPlanId = plan.id; x.sellerPlanUntil = Date.now() + 30 * DAY }
         else { x.buyerPlanId = plan.id; x.buyerPlanUntil = Date.now() + 30 * DAY }
+      }
+      if (inv.kind === 'ad') {
+        const l = d.listings.find((x) => x.id === inv.refId)
+        if (l) l.sponsoredUntil = Math.max(Date.now(), l.sponsoredUntil ?? 0) + d.settings.adDays * DAY
       }
     })
   },
@@ -630,7 +727,7 @@ export const alerts = {
 }
 
 // ---------- buyer requests & pitches (reverse marketplace) ----------
-export type RequestInput = Pick<BuyerRequest, 'title' | 'category' | 'province' | 'maxBudget' | 'minProfit' | 'description'>
+export type RequestInput = Pick<BuyerRequest, 'title' | 'category' | 'province' | 'maxBudget' | 'minProfit' | 'description' | 'purpose'>
 
 /** Does a listing satisfy a buyer request? Money is compared in THB. */
 export function requestMatches(l: Listing, r: BuyerRequest, usdThb: number) {
@@ -666,8 +763,9 @@ export const requests = {
 }
 
 export const pitches = {
-  send(requestId: string, listingId: string, message: string) {
+  send(requestId: string, listingId: string, message: string, offer?: { price?: number; terms?: string }) {
     const u = me()
+    requireKyc(u)
     const r = db.buyerRequests.find((x) => x.id === requestId)
     const l = db.listings.find((x) => x.id === listingId)
     if (!r || !l) throw new AppError('not_found')
@@ -676,7 +774,7 @@ export const pitches = {
     if (l.sellerId !== u.id || l.status !== 'published') throw new AppError('forbidden')
     if (db.pitches.some((p) => p.requestId === requestId && p.listingId === listingId)) throw new AppError('pitch_exists')
     commit((d) => {
-      d.pitches.push({ id: uid('p-'), requestId, listingId, sellerId: u.id, buyerId: r.buyerId, message: message.trim(), status: 'pending', createdAt: Date.now() })
+      d.pitches.push({ id: uid('p-'), requestId, listingId, sellerId: u.id, buyerId: r.buyerId, message: message.trim(), offerPrice: offer?.price && offer.price > 0 ? offer.price : undefined, offerTerms: offer?.terms?.trim() || undefined, status: 'pending', createdAt: Date.now() })
       notify(d, r.buyerId, { th: `มีธุรกิจเสนอตัวเข้ามา: "${l.displayName}" สำหรับ "${r.title}"`, en: `New pitch: "${l.displayName}" for "${r.title}"` }, `/requests/${requestId}`)
     })
   },
@@ -734,6 +832,50 @@ export const admin = {
         l.status = 'rejected'
         l.rejectReason = 'Removed by admin'
       }
+    })
+  },
+  reviewKyc(userId: string, approve: boolean, note?: string) {
+    adminOnly()
+    commit((d) => {
+      const u = d.users.find((x) => x.id === userId)
+      if (!u?.kyc) throw new AppError('not_found')
+      u.kyc.status = approve ? 'verified' : 'rejected'
+      u.kyc.reviewedAt = Date.now()
+      u.kyc.note = note
+      if (approve) u.sellerVerified = true
+      notify(d, u.id, approve
+        ? { th: 'ยืนยันตัวตนสำเร็จ — เริ่มเจรจาซื้อขายได้แล้ว', en: 'Identity verified — you can now start deals' }
+        : { th: `การยืนยันตัวตนไม่ผ่าน: ${note ?? ''}`, en: `Identity verification rejected: ${note ?? ''}` }, '/verify')
+    })
+  },
+  setDocsVerified(listingId: string, v: boolean) {
+    adminOnly()
+    commit((d) => {
+      const l = d.listings.find((x) => x.id === listingId)
+      if (!l) throw new AppError('not_found')
+      l.docsVerified = v
+      if (v) notify(d, l.sellerId, { th: `เอกสารของ "${l.displayName}" ผ่านการตรวจสอบแล้ว`, en: `Documents for "${l.displayName}" were verified` }, `/listing/${l.id}`)
+    })
+  },
+  resolveDispute(id: string, resolution: string) {
+    adminOnly()
+    commit((d) => {
+      const x = d.disputes.find((y) => y.id === id)
+      if (!x || x.status !== 'open') throw new AppError('forbidden')
+      x.status = 'resolved'
+      x.resolution = resolution.trim()
+      x.resolvedAt = Date.now()
+      const deal = d.deals.find((y) => y.id === x.dealId)!
+      const l = d.listings.find((y) => y.id === deal.listingId)!
+      for (const party of [deal.buyerId, deal.sellerId]) {
+        notify(d, party, { th: `ทีมงานปิดข้อพิพาท "${l.displayName}": ${x.resolution}`, en: `Dispute on "${l.displayName}" resolved: ${x.resolution}` }, '/dashboard?tab=deals')
+      }
+    })
+  },
+  updateSettings(s: DB['settings']) {
+    adminOnly()
+    commit((d) => {
+      d.settings = s
     })
   },
   setVerified(userId: string, v: boolean) {

@@ -17,6 +17,8 @@ import Checkout from './pages/Checkout'
 import Admin from './pages/Admin'
 import { RequestDetail, RequestForm, RequestList } from './pages/Requests'
 import Valuation from './pages/Valuation'
+import DealRoom from './pages/DealRoom'
+import Verify from './pages/Verify'
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -51,6 +53,8 @@ export default function App() {
             <Route path="/requests/new" element={<RequireAuth><RequestForm /></RequireAuth>} />
             <Route path="/requests/:id" element={<RequestDetail />} />
             <Route path="/valuation" element={<Valuation />} />
+            <Route path="/room/:threadId" element={<RequireAuth><DealRoom /></RequireAuth>} />
+            <Route path="/verify" element={<RequireAuth><Verify /></RequireAuth>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/pricing" element={<Pricing />} />

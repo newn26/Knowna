@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { BadgeCheck, Ban, Check, Eye, RotateCcw, X } from 'lucide-react'
+import { BadgeCheck, Ban, Check, Eye, FileCheck2, RotateCcw, X } from 'lucide-react'
 import { usePrefs } from '../lib/prefs'
 import { admin, useDB, useMe } from '../lib/store'
 import type { Plan } from '../lib/types'
@@ -9,7 +9,7 @@ import { fmtDate } from '../lib/utils'
 import { Page } from '../components/Layout'
 import { Alert, Badge, Button, Card, Empty, Field, Img, Input, Modal, StatusBadge, Tabs, Textarea, useErrorText } from '../components/ui'
 
-type Tab = 'review' | 'listings' | 'users' | 'contracts' | 'deals' | 'reports' | 'invoices' | 'plans'
+type Tab = 'review' | 'kyc' | 'listings' | 'users' | 'contracts' | 'deals' | 'disputes' | 'reports' | 'invoices' | 'plans'
 
 export default function Admin() {
   const d = useDB()
@@ -21,8 +21,13 @@ export default function Admin() {
   const unpaid = d.invoices.filter((i) => i.status === 'unpaid' && i.kind === 'fee')
   const paidTotal = d.invoices.filter((i) => i.status === 'paid').reduce((s, i) => s + (i.currency === 'USD' ? i.amount * d.fx.usdThb : i.amount), 0)
 
+  const pendingKyc = d.users.filter((u) => u.kyc?.status === 'pending').length
+  const openDisputes = d.disputes.filter((x) => x.status === 'open').length
+  // Key Metrics from the Lean Canvas: users, buyer requests, pitches, closed deals, revenue
   const stats = [
     { k: t('admin.stat.users'), v: d.users.length },
+    { k: t('admin.stat.requests'), v: d.buyerRequests.length },
+    { k: t('admin.stat.pitches'), v: d.pitches.length },
     { k: t('admin.stat.live'), v: d.listings.filter((l) => l.status === 'published').length },
     { k: t('admin.stat.deals'), v: d.deals.filter((x) => x.status === 'closed').length },
     { k: t('admin.stat.revenue'), v: money(paidTotal, 'THB') },
@@ -30,19 +35,22 @@ export default function Admin() {
   return (
     <Page>
       <h1 className="mb-6 text-2xl font-bold">{t('admin.title')}</h1>
-      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+      <p className="mb-2 text-xs font-semibold uppercase text-muted">{t('admin.keyMetrics')}</p>
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         {stats.map((s) => <Card key={s.k} className="p-5"><p className="text-xs text-muted">{s.k}</p><p className="mt-1 text-2xl font-bold">{s.v}</p></Card>)}
       </div>
       <Card className="overflow-hidden">
         <Tabs
           value={tab}
           onChange={(x) => setSp({ tab: x })}
-          items={(['review', 'listings', 'users', 'contracts', 'deals', 'reports', 'invoices', 'plans'] as Tab[]).map((x) => ({
-            id: x, label: t('admin.tab.' + x), count: x === 'review' ? pending : x === 'reports' ? openReports : x === 'invoices' ? unpaid.length : 0,
+          items={(['review', 'kyc', 'listings', 'users', 'contracts', 'deals', 'disputes', 'reports', 'invoices', 'plans'] as Tab[]).map((x) => ({
+            id: x, label: t('admin.tab.' + x), count: x === 'review' ? pending : x === 'kyc' ? pendingKyc : x === 'disputes' ? openDisputes : x === 'reports' ? openReports : x === 'invoices' ? unpaid.length : 0,
           }))}
         />
         <div className="p-5">
           {tab === 'review' && <Review />}
+          {tab === 'kyc' && <KycQueue />}
+          {tab === 'disputes' && <Disputes />}
           {tab === 'listings' && <AllListings />}
           {tab === 'users' && <Users />}
           {tab === 'contracts' && <Contracts />}
@@ -102,7 +110,10 @@ function AllListings() {
             <td className="py-2"><Link to={`/listing/${l.id}`} className="font-semibold hover:text-brand-500">{l.displayName}</Link><p className="text-xs text-muted">{catName(l.category, lang)}</p></td>
             <td>{d.users.find((u) => u.id === l.sellerId)?.name}</td>
             <td><StatusBadge status={l.status} /></td>
-            <td className="text-right">{['published', 'under_offer', 'hidden'].includes(l.status) && <Button size="sm" variant="danger" onClick={() => admin.takeDown(l.id)}>{t('admin.takeDown')}</Button>}</td>
+            <td className="space-x-1 whitespace-nowrap text-right">
+              <Button size="sm" variant={l.docsVerified ? 'ghost' : 'outline'} onClick={() => admin.setDocsVerified(l.id, !l.docsVerified)}><FileCheck2 size={14} /> {l.docsVerified ? t('admin.unverifyDocs') : t('admin.verifyDocs')}</Button>
+              {['published', 'under_offer', 'hidden'].includes(l.status) && <Button size="sm" variant="danger" onClick={() => admin.takeDown(l.id)}>{t('admin.takeDown')}</Button>}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -268,6 +279,7 @@ function Plans() {
   return (
     <div className="space-y-4">
       <Alert t="blue">{t('admin.plansNote')}</Alert>
+      <AdSettings />
       <div className="grid gap-4 lg:grid-cols-2">
         {d.plans.map((p) => <PlanEditor key={p.id} plan={p} />)}
       </div>
@@ -314,6 +326,97 @@ function PlanEditor({ plan }: { plan: Plan }) {
       <div className="mt-3 flex items-center justify-end gap-3">
         {saved && <span className="text-xs text-green-600">✓ {t('common.saved')}</span>}
         <Button size="sm" onClick={() => { admin.updatePlan(p); setSaved(true) }}>{t('common.save')}</Button>
+      </div>
+    </div>
+  )
+}
+
+function KycQueue() {
+  const d = useDB()
+  const { t, lang } = usePrefs()
+  const [rejecting, setRejecting] = useState<string | null>(null)
+  const [note, setNote] = useState('')
+  const items = d.users.filter((u) => u.kyc && !u.isAdmin).sort((a, b) => Number(b.kyc!.status === 'pending') - Number(a.kyc!.status === 'pending') || b.kyc!.submittedAt - a.kyc!.submittedAt)
+  if (!items.length) return <Empty icon="Inbox" title={t('admin.noKyc')} />
+  return (
+    <div className="divide-y">
+      {items.map((u) => (
+        <div key={u.id} className="flex flex-wrap items-center gap-4 py-3 text-sm">
+          {u.kyc!.idImage ? <a href={u.kyc!.idImage} target="_blank" rel="noreferrer"><img src={u.kyc!.idImage} alt="ID" className="h-14 w-20 rounded border object-cover" /></a> : <div className="flex h-14 w-20 items-center justify-center rounded border bg-surface text-[10px] text-muted">seed</div>}
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold">{u.kyc!.fullName} <span className="font-normal text-muted">({u.email})</span></p>
+            <p className="text-xs text-muted">ID: {u.kyc!.idNumber} · {fmtDate(u.kyc!.submittedAt, lang, true)}{u.kyc!.note && ` · ${u.kyc!.note}`}</p>
+          </div>
+          <Badge t={u.kyc!.status === 'verified' ? 'green' : u.kyc!.status === 'pending' ? 'amber' : 'red'}>{t('kyc.status.' + u.kyc!.status)}</Badge>
+          {u.kyc!.status === 'pending' && <>
+            <Button size="sm" variant="danger" onClick={() => setRejecting(u.id)}><X size={14} /> {t('common.reject')}</Button>
+            <Button size="sm" onClick={() => admin.reviewKyc(u.id, true)}><Check size={14} /> {t('admin.approve')}</Button>
+          </>}
+        </div>
+      ))}
+      <Modal open={!!rejecting} onClose={() => setRejecting(null)} title={t('admin.kycReject')}>
+        <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('admin.kycRejectPh')} />
+        <div className="mt-4 flex justify-end">
+          <Button variant="danger" disabled={!note.trim()} onClick={() => { admin.reviewKyc(rejecting!, false, note.trim()); setRejecting(null); setNote('') }}>{t('common.reject')}</Button>
+        </div>
+      </Modal>
+    </div>
+  )
+}
+
+function Disputes() {
+  const d = useDB()
+  const { t, lang, money } = usePrefs()
+  const [resolving, setResolving] = useState<string | null>(null)
+  const [text, setText] = useState('')
+  const items = [...d.disputes].sort((a, b) => Number(b.status === 'open') - Number(a.status === 'open') || b.createdAt - a.createdAt)
+  if (!items.length) return <Empty icon="Inbox" title={t('admin.noDisputes')} />
+  return (
+    <div className="divide-y">
+      {items.map((x) => {
+        const deal = d.deals.find((y) => y.id === x.dealId)
+        const l = deal && d.listings.find((y) => y.id === deal.listingId)
+        const th = deal && d.threads.find((y) => y.listingId === deal.listingId && y.buyerId === deal.buyerId)
+        return (
+          <div key={x.id} className="flex flex-wrap items-center gap-4 py-3 text-sm">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{l?.displayName} {deal && <span className="font-normal text-muted">· {money(deal.agreedPrice, deal.currency, { exact: true })}</span>}</p>
+              <p className="mt-1 text-gray-600">"{x.reason}"</p>
+              <p className="text-xs text-muted">{d.users.find((u) => u.id === x.openedBy)?.name} · {fmtDate(x.createdAt, lang, true)}{x.resolution && ` · ${t('dispute.resolvedNote')}: ${x.resolution}`}</p>
+            </div>
+            <StatusBadge status={x.status === 'open' ? 'open' : 'resolved'} />
+            {th && <Link to={`/room/${th.id}`}><Button size="sm" variant="outline">Deal Room</Button></Link>}
+            {x.status === 'open' && <Button size="sm" onClick={() => setResolving(x.id)}>{t('admin.resolve')}</Button>}
+          </div>
+        )
+      })}
+      <Modal open={!!resolving} onClose={() => setResolving(null)} title={t('admin.resolveDispute')}>
+        <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder={t('admin.resolutionPh')} />
+        <div className="mt-4 flex justify-end">
+          <Button disabled={!text.trim()} onClick={() => { admin.resolveDispute(resolving!, text); setResolving(null); setText('') }}>{t('common.confirm')}</Button>
+        </div>
+      </Modal>
+    </div>
+  )
+}
+
+function AdSettings() {
+  const d = useDB()
+  const { t } = usePrefs()
+  const [s, setS] = useState(d.settings)
+  const [saved, setSaved] = useState(false)
+  const num = (k: keyof typeof s) => (e: React.ChangeEvent<HTMLInputElement>) => { setSaved(false); setS({ ...s, [k]: Number(e.target.value) }) }
+  return (
+    <div className="rounded-lg border p-4">
+      <p className="mb-3 font-semibold">{t('admin.adSettings')}</p>
+      <div className="grid grid-cols-3 gap-3">
+        <Field label={t('admin.priceTHB')}><Input type="number" min={0} value={s.adPriceTHB} onChange={num('adPriceTHB')} /></Field>
+        <Field label={t('admin.priceUSD')}><Input type="number" min={0} value={s.adPriceUSD} onChange={num('adPriceUSD')} /></Field>
+        <Field label={t('admin.adDays')}><Input type="number" min={1} value={s.adDays} onChange={num('adDays')} /></Field>
+      </div>
+      <div className="mt-3 flex items-center justify-end gap-3">
+        {saved && <span className="text-xs text-green-600">✓ {t('common.saved')}</span>}
+        <Button size="sm" onClick={() => { admin.updateSettings(s); setSaved(true) }}>{t('common.save')}</Button>
       </div>
     </div>
   )

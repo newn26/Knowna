@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { BadgeCheck, Building, Calendar, Eye, FileText, Flag, Heart, Lock, MapPin, MessageSquare, Pencil, Send, Unlock, Users } from 'lucide-react'
+import { BadgeCheck, Building, Calendar, Eye, FileCheck2, FileText, Flag, Heart, LayoutDashboard, Lock, MapPin, Megaphone, MessageSquare, Pencil, Send, Unlock, Users } from 'lucide-react'
 import { catName, provName } from '../lib/constants'
 import { usePrefs } from '../lib/prefs'
 import { canViewFull, chat, featuredIds, listings, useDB, useMe, useSession } from '../lib/store'
@@ -102,7 +102,7 @@ export default function ListingDetail() {
           </Card>
 
           <Card className="p-6">
-            <h2 className="mb-4 text-lg font-bold">{t('detail.financials')}</h2>
+            <h2 className="mb-4 flex flex-wrap items-center gap-2 text-lg font-bold">{t('detail.financials')} {l.docsVerified ? <Badge t="green"><FileCheck2 size={12} /> {t('card.docsVerified')}</Badge> : <Badge>{t('detail.docsNotVerified')}</Badge>}</h2>
             <div className="grid gap-4 sm:grid-cols-4">
               <Stat label={t('form.askingPrice')} value={money(l.askingPrice, l.currency)} />
               <Stat label={t('form.revenue')} value={money(l.annualRevenue, l.currency)} />
@@ -145,6 +145,7 @@ export default function ListingDetail() {
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm font-medium text-brand-500">{catName(l.category, lang)}</p>
               <div className="flex gap-1">
+                {(l.sponsoredUntil ?? 0) > Date.now() && <Badge t="amber"><Megaphone size={12} /> {t('card.sponsored')}</Badge>}
                 {featuredIds(d).has(l.id) && <Badge t="dark">{t('card.featured')}</Badge>}
                 {l.status !== 'published' && <StatusBadge status={l.status} />}
               </div>
@@ -166,6 +167,7 @@ export default function ListingDetail() {
                 {full && l.status === 'published' && !myLoi && (
                   <Button variant="dark" className="w-full" onClick={() => setLoiOpen(true)}><Send size={16} /> {t('detail.makeOffer')}</Button>
                 )}
+                {me && (() => { const th = d.threads.find((x) => x.listingId === l.id && x.buyerId === me.id); return th ? <Link to={`/room/${th.id}`} className="block"><Button variant="outline" className="w-full"><LayoutDashboard size={16} /> Deal Room</Button></Link> : null })()}
                 {myLoi && <Link to={`/contract/loi/${myLoi.id}`} className="block text-center text-sm font-semibold text-brand-500">{t('detail.viewMyOffer')}</Link>}
                 <div className="flex gap-2 pt-1">
                   <Button variant="ghost" size="sm" className="flex-1" onClick={() => run(() => listings.toggleFavorite(l.id))}><Heart size={14} className={cls(fav && 'fill-red-500 text-red-500')} /> {t('detail.save')}</Button>
