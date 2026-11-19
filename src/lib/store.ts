@@ -5,7 +5,7 @@
  */
 import { useSyncExternalStore } from 'react'
 import type {
-  Bi, Currency, DB, Deal, FileAsset, Invoice, Listing, Loi, LoiRound, Nda, Plan, Role, SearchParams, Thread, User,
+  Bi, BuyerRequest, Currency, DB, Deal, FileAsset, Invoice, Listing, Loi, LoiRound, Nda, Plan, Role, SearchParams, Thread, User,
 } from './types'
 import { DB_VERSION, makeSeed } from './seed'
 import { demoHash, startOfMonth, uid, DAY } from './utils'
@@ -625,6 +625,77 @@ export const alerts = {
       d.notifications.forEach((n) => {
         if (n.userId === u.id) n.read = true
       })
+    })
+  },
+}
+
+// ---------- buyer requests & pitches (reverse marketplace) ----------
+export type RequestInput = Pick<BuyerRequest, 'title' | 'category' | 'province' | 'maxBudget' | 'minProfit' | 'description'>
+
+/** Does a listing satisfy a buyer request? Money is compared in THB. */
+export function requestMatches(l: Listing, r: BuyerRequest, usdThb: number) {
+  const k = l.currency === 'USD' ? usdThb : 1
+  return (!r.category || l.category === r.category) &&
+    (!r.province || l.province === r.province) &&
+    l.askingPrice * k <= r.maxBudget &&
+    l.netProfit * k >= r.minProfit
+}
+
+export const requests = {
+  create(input: RequestInput) {
+    const u = me()
+    if (!input.title.trim() || !(input.maxBudget > 0) || input.minProfit < 0) throw new AppError('invalid')
+    const id = uid('r-')
+    commit((d) => {
+      const r: BuyerRequest = { ...input, title: input.title.trim(), id, buyerId: u.id, status: 'open', createdAt: Date.now() }
+      d.buyerRequests.push(r)
+      // tell sellers who already have a matching live listing
+      const sellers = new Set(d.listings.filter((l) => l.status === 'published' && l.sellerId !== u.id && requestMatches(l, r, d.fx.usdThb)).map((l) => l.sellerId))
+      sellers.forEach((s) => notify(d, s, { th: `มีผู้ซื้อกำลังหาธุรกิจที่ตรงกับประกาศของคุณ: ${r.title}`, en: `A buyer is looking for a business like yours: ${r.title}` }, `/requests/${id}`))
+    })
+    return id
+  },
+  close(id: string) {
+    const u = me()
+    commit((d) => {
+      const r = d.buyerRequests.find((x) => x.id === id)
+      if (!r || r.buyerId !== u.id) throw new AppError('forbidden')
+      r.status = 'closed'
+    })
+  },
+}
+
+export const pitches = {
+  send(requestId: string, listingId: string, message: string) {
+    const u = me()
+    const r = db.buyerRequests.find((x) => x.id === requestId)
+    const l = db.listings.find((x) => x.id === listingId)
+    if (!r || !l) throw new AppError('not_found')
+    if (r.status !== 'open') throw new AppError('request_closed')
+    if (r.buyerId === u.id) throw new AppError('own_request')
+    if (l.sellerId !== u.id || l.status !== 'published') throw new AppError('forbidden')
+    if (db.pitches.some((p) => p.requestId === requestId && p.listingId === listingId)) throw new AppError('pitch_exists')
+    commit((d) => {
+      d.pitches.push({ id: uid('p-'), requestId, listingId, sellerId: u.id, buyerId: r.buyerId, message: message.trim(), status: 'pending', createdAt: Date.now() })
+      notify(d, r.buyerId, { th: `มีธุรกิจเสนอตัวเข้ามา: "${l.displayName}" สำหรับ "${r.title}"`, en: `New pitch: "${l.displayName}" for "${r.title}"` }, `/requests/${requestId}`)
+    })
+  },
+  decide(pitchId: string, status: 'shortlisted' | 'declined') {
+    const u = me()
+    commit((d) => {
+      const p = d.pitches.find((x) => x.id === pitchId)
+      if (!p || p.buyerId !== u.id || p.status !== 'pending') throw new AppError('forbidden')
+      p.status = status
+      p.decidedAt = Date.now()
+      const l = d.listings.find((x) => x.id === p.listingId)!
+      if (status === 'shortlisted') {
+        // shortlisting opens a chat so both sides can move on to NDA → LOI
+        const t = ensureThread(d, p.listingId, p.buyerId)
+        sysMsg(d, t.id, 'pitch_shortlisted', `/requests/${p.requestId}`)
+      }
+      notify(d, p.sellerId, status === 'shortlisted'
+        ? { th: `ผู้ซื้อสนใจ "${l.displayName}" ที่คุณเสนอ — เริ่มแชทได้แล้ว`, en: `The buyer shortlisted "${l.displayName}" — chat is open` }
+        : { th: `ผู้ซื้อไม่เลือก "${l.displayName}" ในครั้งนี้`, en: `The buyer passed on "${l.displayName}"` }, '/dashboard?tab=pitches')
     })
   },
 }

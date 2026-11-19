@@ -60,6 +60,20 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 pt-10">
+        <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border-2 border-brand-500 bg-white p-6 md:flex-row md:items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase text-brand-500">{t('req.homeKicker')}</p>
+            <h2 className="mt-1 text-xl font-bold">{t('req.homeTitle')}</h2>
+            <p className="mt-1 max-w-2xl text-sm text-gray-600">{t('req.homeBody')}</p>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Link to="/requests/new" className="rounded-full bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-600">{t('req.new')}</Link>
+            <Link to="/requests" className="flex items-center gap-1 rounded-full border-2 border-brand-500 px-5 py-2 text-sm font-semibold text-brand-500 hover:bg-brand-50">{t('nav.requests')} <ArrowRight size={14} /></Link>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-12">
         <h2 className="mb-6 text-2xl font-bold">{t('home.categories')}</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">

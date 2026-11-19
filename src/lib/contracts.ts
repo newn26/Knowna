@@ -4,7 +4,7 @@ import type { Lang } from './types'
 export function ndaText(lang: Lang, v: { buyer: string; listing: string; date: string }): string[] {
   if (lang === 'th')
     return [
-      `สัญญาไม่เปิดเผยข้อมูล (Non-Disclosure Agreement) ฉบับนี้ทำขึ้นเมื่อวันที่ ${v.date} ระหว่าง "ผู้รับข้อมูล" คือ ${v.buyer} และ "ผู้เปิดเผยข้อมูล" คือเจ้าของกิจการที่ประกาศขายในชื่อ "${v.listing}" ผ่านแพลตฟอร์ม BizMarket`,
+      `สัญญาไม่เปิดเผยข้อมูล (Non-Disclosure Agreement) ฉบับนี้ทำขึ้นเมื่อวันที่ ${v.date} ระหว่าง "ผู้รับข้อมูล" คือ ${v.buyer} และ "ผู้เปิดเผยข้อมูล" คือเจ้าของกิจการที่ประกาศขายในชื่อ "${v.listing}" ผ่านแพลตฟอร์ม RUB Job`,
       '1. ข้อมูลลับ หมายถึงข้อมูลทั้งหมดที่ผู้เปิดเผยข้อมูลให้ไว้ผ่านแพลตฟอร์ม ไม่ว่าจะเป็นชื่อกิจการ ที่ตั้ง งบการเงิน รายชื่อลูกค้า สัญญา เอกสาร รูปภาพ หรือข้อมูลที่ได้จากการสนทนา',
       '2. ผู้รับข้อมูลจะใช้ข้อมูลลับเพื่อวัตถุประสงค์ในการพิจารณาซื้อกิจการเท่านั้น และจะไม่เปิดเผยต่อบุคคลภายนอก เว้นแต่ที่ปรึกษาทางกฎหมาย บัญชี หรือการเงินที่มีหน้าที่รักษาความลับเช่นเดียวกัน',
       '3. ผู้รับข้อมูลจะไม่ติดต่อพนักงาน ลูกค้า คู่ค้า หรือผู้ให้เช่าของกิจการโดยตรงโดยไม่ได้รับความยินยอมเป็นลายลักษณ์อักษรจากผู้เปิดเผยข้อมูล',
@@ -14,7 +14,7 @@ export function ndaText(lang: Lang, v: { buyer: string; listing: string; date: s
       '— เอกสารนี้เป็นตัวอย่างในระบบต้นแบบ (prototype) ไม่ใช่คำแนะนำทางกฎหมาย —',
     ]
   return [
-    `This Non-Disclosure Agreement is made on ${v.date} between ${v.buyer} (the "Recipient") and the owner of the business listed as "${v.listing}" (the "Discloser") on the BizMarket platform.`,
+    `This Non-Disclosure Agreement is made on ${v.date} between ${v.buyer} (the "Recipient") and the owner of the business listed as "${v.listing}" (the "Discloser") on the RUB Job platform.`,
     '1. Confidential Information means all information provided by the Discloser through the platform, including business name, location, financial statements, customer lists, contracts, documents, images and information exchanged in conversation.',
     '2. The Recipient shall use Confidential Information solely to evaluate a potential acquisition and shall not disclose it to third parties other than legal, accounting or financial advisers bound by equivalent confidentiality obligations.',
     '3. The Recipient shall not contact employees, customers, suppliers or landlords of the business without the Discloser\'s prior written consent.',

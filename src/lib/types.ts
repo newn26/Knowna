@@ -209,7 +209,34 @@ export interface SearchParams {
   maxPrice?: number
   minRevenue?: number
   maxRevenue?: number
-  sort?: 'newest' | 'price_asc' | 'price_desc' | 'revenue_desc'
+  minProfit?: number
+  sort?: 'newest' | 'price_asc' | 'price_desc' | 'revenue_desc' | 'profit_desc'
+}
+
+/** Reverse marketplace: a buyer posts what they want, sellers pitch matching listings. */
+export interface BuyerRequest {
+  id: string
+  buyerId: string
+  title: string
+  category: string // '' = any
+  province: string // '' = any
+  maxBudget: number // THB
+  minProfit: number // THB per year, 0 = no minimum
+  description: string
+  status: 'open' | 'closed'
+  createdAt: number
+}
+
+export interface Pitch {
+  id: string
+  requestId: string
+  listingId: string
+  sellerId: string
+  buyerId: string
+  message: string
+  status: 'pending' | 'shortlisted' | 'declined'
+  createdAt: number
+  decidedAt?: number
 }
 
 export interface SavedSearch {
@@ -234,6 +261,8 @@ export interface DB {
   reports: Report[]
   notifications: Notification[]
   savedSearches: SavedSearch[]
+  buyerRequests: BuyerRequest[]
+  pitches: Pitch[]
   favorites: { userId: string; listingId: string }[]
   fx: { usdThb: number; updatedAt: number }
 }

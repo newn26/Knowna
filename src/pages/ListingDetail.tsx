@@ -8,6 +8,8 @@ import { cls, fmtBytes, fmtDate } from '../lib/utils'
 import { Page } from '../components/Layout'
 import { Alert, Badge, Button, Card, Empty, Img, Modal, StatusBadge, Textarea, useErrorText } from '../components/ui'
 import { LoiModal, NdaModal } from '../components/ContractForms'
+import { estimateValue } from '../lib/valuation'
+import type { Listing } from '../lib/types'
 
 export default function ListingDetail() {
   const { id } = useParams()
@@ -108,6 +110,7 @@ export default function ListingDetail() {
               <Stat label={t('detail.margin')} value={`${margin}% · ${multiple}x`} hint={t('detail.multipleHint')} />
             </div>
             <p className="mt-3 text-xs text-muted">{t('detail.baseCurrency', { c: l.currency, v: money(l.askingPrice, l.currency, { exact: true }) })}</p>
+            <ListingValuation l={l} />
           </Card>
 
           <Card className={cls('p-6', !full && 'border-dashed')}>
@@ -211,3 +214,20 @@ const Stat = ({ label, value, hint }: { label: string; value: string; hint?: str
     <p className="mt-1 font-bold">{value}</p>
   </div>
 )
+
+/** Estimated value range next to the asking price, so buyers can tell if the price is fair. */
+function ListingValuation({ l }: { l: Listing }) {
+  const { t, money } = usePrefs()
+  const est = estimateValue(l.category, l.netProfit, new Date().getFullYear() - l.yearEstablished)
+  if (!est) return null
+  const verdict = l.askingPrice < est.low ? 'below' : l.askingPrice > est.high ? 'above' : 'within'
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm">
+      <div>
+        <p className="font-semibold">{t('val.listingTitle')}: {money(est.low, l.currency)} – {money(est.high, l.currency)}</p>
+        <p className="text-gray-600">{t('val.verdict.' + verdict)}</p>
+      </div>
+      <Link to="/valuation" className="font-semibold text-brand-600">{t('val.howCalc')} →</Link>
+    </div>
+  )
+}

@@ -140,6 +140,8 @@ function Header() {
   const unread = me ? unreadCount(d, me.id) : 0
   const links = [
     { to: '/search', label: t('nav.browse') },
+    { to: '/requests', label: t('nav.requests') },
+    { to: '/valuation', label: t('nav.valuation') },
     { to: '/sell', label: t('nav.sell') },
     { to: '/pricing', label: t('nav.pricing') },
   ]
@@ -148,8 +150,8 @@ function Header() {
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
         <button className="md:hidden" onClick={() => setMobile(!mobile)} aria-label="menu">{mobile ? <X /> : <Menu />}</button>
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 font-bold text-white">B</span>
-          <span className="hidden text-lg font-bold sm:block">BizMarket</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 font-bold text-white">R</span>
+          <span className="hidden text-lg font-bold sm:block">RUB Job</span>
         </Link>
         <nav className="ml-4 hidden items-center gap-6 md:flex">
           {links.map((l) => (
@@ -159,13 +161,13 @@ function Header() {
           ))}
         </nav>
         <form
-          className="ml-auto hidden max-w-sm flex-1 items-center rounded-full border border-gray-200 bg-surface px-4 lg:flex"
+          className="ml-auto hidden max-w-sm flex-1 items-center rounded-full border border-gray-200 bg-surface px-4 xl:flex"
           onSubmit={(e) => { e.preventDefault(); nav('/search?q=' + encodeURIComponent(q)) }}
         >
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('nav.searchPlaceholder')} className="w-full bg-transparent py-2 text-sm outline-none" />
           <Search size={18} className="text-gray-500" />
         </form>
-        <div className="ml-auto flex items-center gap-1 lg:ml-2">
+        <div className="ml-auto flex items-center gap-1 xl:ml-2">
           {me && session ? (
             <>
               {me.isAdmin && <Badge t="dark" className="mr-1 hidden sm:inline-flex">Admin</Badge>}
@@ -203,14 +205,16 @@ function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-3">
         <div>
           <div className="mb-3 flex items-center gap-2 text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-bold">B</span>
-            <span className="text-lg font-bold">BizMarket</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-bold">R</span>
+            <span className="text-lg font-bold">RUB Job</span>
           </div>
           <p className="text-sm">{t('footer.about')}</p>
         </div>
         <div className="text-sm">
           <p className="mb-3 font-semibold text-white">{t('footer.links')}</p>
           <Link to="/search" className="block py-1 hover:text-white">{t('nav.browse')}</Link>
+          <Link to="/requests" className="block py-1 hover:text-white">{t('nav.requests')}</Link>
+          <Link to="/valuation" className="block py-1 hover:text-white">{t('nav.valuation')}</Link>
           <Link to="/sell" className="block py-1 hover:text-white">{t('nav.sell')}</Link>
           <Link to="/pricing" className="block py-1 hover:text-white">{t('nav.pricing')}</Link>
         </div>
@@ -219,7 +223,7 @@ function Footer() {
           <p>{t('footer.disclaimer')}</p>
         </div>
       </div>
-      <div className="border-t border-gray-800 py-4 text-center text-xs">© 2026 BizMarket — prototype</div>
+      <div className="border-t border-gray-800 py-4 text-center text-xs">© 2026 RUB Job — prototype</div>
     </footer>
   )
 }

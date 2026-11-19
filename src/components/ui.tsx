@@ -61,7 +61,7 @@ export function StatusBadge({ status }: { status: string }) {
   const map: Record<string, keyof typeof tone> = {
     draft: 'gray', pending: 'amber', published: 'green', rejected: 'red', under_offer: 'blue', sold: 'dark', hidden: 'gray', archived: 'gray',
     approved: 'green', open: 'amber', accepted: 'green', withdrawn: 'gray', in_progress: 'blue', closed: 'dark', cancelled: 'gray',
-    unpaid: 'red', paid: 'green', resolved: 'green',
+    unpaid: 'red', paid: 'green', resolved: 'green', shortlisted: 'green', declined: 'gray',
   }
   return <Badge t={map[status] ?? 'gray'}>{t('status.' + status)}</Badge>
 }
