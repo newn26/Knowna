@@ -72,8 +72,8 @@ export default function ListingDetail() {
       )}
       {session?.role === 'seller' && !isOwner && me && <div className="mb-4"><Alert>{t('detail.switchToBuyer')}</Alert></div>}
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0 space-y-6">
           <div>
             <div className="aspect-[16/10] overflow-hidden rounded-xl border bg-white">
               <Img src={images[img]} alt={l.displayName} className="h-full w-full" />
