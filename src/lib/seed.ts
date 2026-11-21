@@ -1,8 +1,17 @@
 import type { DB, Listing, Plan, User } from './types'
-import { coverPhoto, coverSvg } from './covers'
+import { coverPhoto, coverSvg, unsplash } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 6
+export const DB_VERSION = 7
+
+/** Cover photo matched to each seeded listing (same order as `raw`); extra gallery shots come from the category. */
+const LISTING_COVERS = [
+  '1641124962413-4eee4dff807e', '1675150277436-9c7348972c11', '1583209814683-c023dd293cc6', '1604719312566-8912e9227c6a',
+  '1551288049-bebda4e38f71', '1761470575018-135c213340eb', '1700165644892-3dd6b67b25bc', '1734770580735-796a00e42cb2',
+  '1758685733985-695e588224d5', '1606857521015-7f9fcf423740', '1639776738932-956082f0b704', '1568254183919-78a4f43a2877',
+  '1527192491265-7e15c55b1ed2', '1633681926022-84c23e8cb2d6', '1631856954655-966f97d809de', '1534972195531-d756b9bfa9f2',
+  '1536939459926-301728717817', '1675409145919-277c0fc2aa7d', '1548199973-03cce0bbc87b', '1651614158095-b98b6c1da74b',
+]
 
 export const DEMO_ACCOUNTS = [
   { email: 'buyer@demo.com', password: 'demo1234', role: 'buyer' },
@@ -94,7 +103,7 @@ function listing(r: Raw, i: number): Listing {
     employees,
     reasonForSale,
     description,
-    coverImages: [0, 1, 2].map((k) => coverPhoto(category, i + k)),
+    coverImages: [unsplash(LISTING_COVERS[i]), coverPhoto(category, i), coverPhoto(category, i + 1)],
     confidential: {
       legalName: `บริษัท ${displayName.split(' ')[0]} จำกัด (ตัวอย่าง)`,
       address: `เลขที่ ${100 + i} ถนนตัวอย่าง ${province}`,

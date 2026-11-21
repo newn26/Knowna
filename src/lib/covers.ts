@@ -26,9 +26,11 @@ const PHOTOS: Record<string, string[]> = {
   other: ['1486406146926-c627a92ad1ab', '1497366754035-f200968a6e72', '1553877522-43269d4ea984'],
 }
 
+export const unsplash = (id: string) => `https://images.unsplash.com/photo-${id}?w=1200&q=70&auto=format&fit=crop`
+
 export function coverPhoto(category: string, variant: number): string {
   const p = PHOTOS[category] ?? PHOTOS.other
-  return `https://images.unsplash.com/photo-${p[variant % p.length]}?w=1200&q=70&auto=format&fit=crop`
+  return unsplash(p[variant % p.length])
 }
 
 export function coverSvg(category: string, variant: number, label = ''): string {
