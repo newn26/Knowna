@@ -6,7 +6,7 @@ import { usePrefs } from '../lib/prefs'
 import { canViewFull, chat, featuredIds, listings, useDB, useMe, useSession } from '../lib/store'
 import { cls, fmtBytes, fmtDate } from '../lib/utils'
 import { Page } from '../components/Layout'
-import { Alert, Badge, Button, Card, Empty, Img, Modal, StatusBadge, Textarea, toast, useErrorText } from '../components/ui'
+import { Alert, Badge, Button, Card, Empty, Figure, Img, Modal, StatusBadge, Textarea, toast, useErrorText } from '../components/ui'
 import { LoiModal, NdaModal } from '../components/ContractForms'
 import { estimateValue } from '../lib/valuation'
 import type { Listing } from '../lib/types'
@@ -103,11 +103,18 @@ export default function ListingDetail() {
 
           <Card className="p-6">
             <h2 className="mb-4 flex flex-wrap items-center gap-2 text-lg font-bold">{t('detail.financials')} {l.docsVerified ? <Badge t="green"><FileCheck2 size={12} /> {t('card.docsVerified')}</Badge> : <Badge>{t('detail.docsNotVerified')}</Badge>}</h2>
-            <div className="grid gap-4 sm:grid-cols-4">
-              <Stat label={t('form.askingPrice')} value={money(l.askingPrice, l.currency)} />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-6">
+              <div className="col-span-2 rounded-xl bg-navy p-5 text-white sm:col-span-3">
+                <p className="text-xs font-medium text-gray-300">{t('form.askingPrice')}</p>
+                <Figure value={money(l.askingPrice, l.currency)} className="mt-1 block text-3xl font-extrabold tracking-tight" />
+              </div>
+              <div className="col-span-2 rounded-xl border border-brand-100 bg-brand-50 p-5 sm:col-span-3">
+                <p className="text-xs font-medium text-brand-700">{t('form.profit')}</p>
+                <Figure value={money(l.netProfit, l.currency)} className="mt-1 block text-3xl font-extrabold tracking-tight text-brand-600" />
+              </div>
               <Stat label={t('form.revenue')} value={money(l.annualRevenue, l.currency)} />
-              <Stat label={t('form.profit')} value={money(l.netProfit, l.currency)} />
-              <Stat label={t('detail.margin')} value={`${margin}% · ${multiple}x`} hint={t('detail.multipleHint')} />
+              <Stat label={t('detail.marginOnly')} value={`${margin}%`} />
+              <Stat label={t('detail.multipleOnly')} value={`${multiple}×`} sub={l.netProfit ? t('detail.payback', { n: multiple }) : undefined} />
             </div>
             <p className="mt-3 text-xs text-muted">{t('detail.baseCurrency', { c: l.currency, v: money(l.askingPrice, l.currency, { exact: true }) })}</p>
             <ListingValuation l={l} />
@@ -153,7 +160,7 @@ export default function ListingDetail() {
             <h1 className="mt-1 text-2xl font-bold leading-tight">{l.displayName}</h1>
             <p className="mt-1 flex items-center gap-3 text-xs text-muted"><span className="flex items-center gap-1"><MapPin size={12} /> {provName(l.province, lang)}</span><span className="flex items-center gap-1"><Eye size={12} /> {l.views}</span></p>
             <p className="mt-4 text-xs text-muted">{t('card.asking')}</p>
-            <p className="text-3xl font-bold">{money(l.askingPrice, l.currency)}</p>
+            <Figure value={money(l.askingPrice, l.currency)} className="block text-4xl font-extrabold tracking-tight text-navy" />
 
             {error && <div className="mt-4"><Alert t="red">{error}</Alert></div>}
             {notice && <div className="mt-4"><Alert t="green">{notice}</Alert></div>}
@@ -210,10 +217,11 @@ const Info = ({ icon, label, value }: { icon: React.ReactNode; label: string; va
     <div><p className="text-xs text-muted">{label}</p><p className="text-sm font-semibold">{value}</p></div>
   </div>
 )
-const Stat = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
-  <div className="rounded-lg bg-surface p-4" title={hint}>
-    <p className="text-xs text-muted">{label}</p>
-    <p className="mt-1 font-bold">{value}</p>
+const Stat = ({ label, value, sub }: { label: string; value: string; sub?: string }) => (
+  <div className="col-span-2 rounded-xl bg-surface p-4 sm:col-span-2">
+    <p className="text-xs font-medium text-muted">{label}</p>
+    <Figure value={value} className="mt-1 block text-xl font-bold tracking-tight text-navy" />
+    {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
   </div>
 )
 
@@ -226,7 +234,8 @@ function ListingValuation({ l }: { l: Listing }) {
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm">
       <div>
-        <p className="font-semibold">{t('val.listingTitle')}: {money(est.low, l.currency)} – {money(est.high, l.currency)}</p>
+        <p className="text-sm font-medium text-brand-700">{t('val.listingTitle')}</p>
+        <Figure value={`${money(est.low, l.currency)} – ${money(est.high, l.currency)}`} className="block text-xl font-bold tracking-tight text-navy" />
         <p className="text-gray-600">{t('val.verdict.' + verdict)}</p>
       </div>
       <Link to="/valuation" className="font-semibold text-brand-600">{t('val.howCalc')} →</Link>
