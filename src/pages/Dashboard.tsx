@@ -274,6 +274,7 @@ function DealCard({ deal, role }: { deal: Deal; role: Role }) {
       {deal.status === 'in_progress' && (
         <div className="mt-4 space-y-3">
           <p className="text-sm text-gray-600">{t('deal.explain')}</p>
+          {!deal.handoverAt && <Alert>{t('deal.needSteps')} {(() => { const th = d.threads.find((x) => x.listingId === deal.listingId && x.buyerId === deal.buyerId); return th ? <Link to={`/room/${th.id}`} className="font-semibold underline">Deal Room →</Link> : null })()}</Alert>}
           <div className="grid gap-2 text-xs sm:grid-cols-2">
             <span className={cls('rounded bg-surface px-3 py-2', mine && 'text-green-700')}>{t('deal.you')}: {mine ? `✓ ${money(mine.price, deal.currency, { exact: true })}` : t('deal.notYet')}</span>
             <span className={cls('rounded bg-surface px-3 py-2', theirs && 'text-green-700')}>{t('deal.them')}: {theirs ? `✓ ${money(theirs.price, deal.currency, { exact: true })}` : t('deal.notYet')}</span>
@@ -281,7 +282,7 @@ function DealCard({ deal, role }: { deal: Deal; role: Role }) {
           {mine && theirs && mine.price !== theirs.price && <Alert t="red">{t('deal.result.mismatch')}</Alert>}
           <div className="flex flex-wrap items-end gap-2">
             <Field label={`${t('deal.finalPrice')} (${deal.currency})`} className="w-48"><Input type="number" value={deal.agreedPrice} readOnly /></Field>
-            <Button onClick={confirm}>{t('deal.confirm')}</Button>
+            <Button onClick={confirm} disabled={!deal.handoverAt}>{t('deal.confirm')}</Button>
             <Button variant="ghost" onClick={() => { if (confirm_(t('deal.cancelConfirm'))) deals.cancel(deal.id) }}>{t('deal.cancel')}</Button>
           </div>
           {msg && <p className="text-sm text-brand-600">{msg}</p>}
