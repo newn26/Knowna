@@ -43,7 +43,7 @@ export default function Home() {
     const tick = window.setInterval(() => {
       setFading(true) // fade out 200ms, then swap content and slide it in
       swap = window.setTimeout(() => { setIdx((i) => i + 1); setFading(false) }, 200)
-    }, 5000)
+    }, 10000)
     return () => { clearInterval(tick); clearTimeout(swap); setFading(false) }
   }, [paused, pool.length])
 
