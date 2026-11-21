@@ -137,11 +137,6 @@ export default function Home() {
                   <p className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-600 shadow-lift">{t('hero.empty')}</p>
                 )}
               </div>
-              <div className="absolute -right-3 top-8 w-56 animate-rise rounded-2xl bg-navy p-4 text-white shadow-lift [animation-delay:300ms] lg:w-60" aria-hidden="true">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-400/20 text-brand-400"><Lock size={18} /></span>
-                <p className="mt-3 text-sm font-semibold">{t('hero.ndaTitle')}</p>
-                <p className="mt-1 text-xs leading-relaxed text-gray-300">{t('hero.ndaBody')}</p>
-              </div>
           </div>
         </div>
       </section>
