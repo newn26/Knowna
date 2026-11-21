@@ -3,7 +3,33 @@
 @tailwind utilities;
 
 body {
-  @apply bg-surface text-gray-900 antialiased;
+  @apply bg-surface text-fg antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+::selection {
+  background: #d1fae5;
+  color: #10243a;
+}
+
+:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
 
 @media print {
