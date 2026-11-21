@@ -251,12 +251,11 @@ function DealCard({ deal, role }: { deal: Deal; role: Role }) {
   const l = d.listings.find((x) => x.id === deal.listingId)!
   const mine = role === 'buyer' ? deal.buyerConfirm : deal.sellerConfirm
   const theirs = role === 'buyer' ? deal.sellerConfirm : deal.buyerConfirm
-  const [price, setPrice] = useState(String(mine?.price ?? deal.agreedPrice))
   const [msg, setMsg] = useState('')
   const inv = deal.invoiceId ? d.invoices.find((i) => i.id === deal.invoiceId) : undefined
   const confirm = () => {
     try {
-      const r = deals.confirm(deal.id, Number(price))
+      const r = deals.confirm(deal.id, deal.agreedPrice)
       setMsg(t('deal.result.' + r))
     } catch (e) {
       setMsg(err(e))
@@ -281,8 +280,8 @@ function DealCard({ deal, role }: { deal: Deal; role: Role }) {
           </div>
           {mine && theirs && mine.price !== theirs.price && <Alert t="red">{t('deal.result.mismatch')}</Alert>}
           <div className="flex flex-wrap items-end gap-2">
-            <Field label={`${t('deal.finalPrice')} (${deal.currency})`} className="w-48"><Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} /></Field>
-            <Button onClick={confirm} disabled={!(Number(price) > 0)}>{t('deal.confirm')}</Button>
+            <Field label={`${t('deal.finalPrice')} (${deal.currency})`} className="w-48"><Input type="number" value={deal.agreedPrice} readOnly /></Field>
+            <Button onClick={confirm}>{t('deal.confirm')}</Button>
             <Button variant="ghost" onClick={() => { if (confirm_(t('deal.cancelConfirm'))) deals.cancel(deal.id) }}>{t('deal.cancel')}</Button>
           </div>
           {msg && <p className="text-sm text-brand-600">{msg}</p>}
