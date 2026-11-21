@@ -42,4 +42,5 @@ export const provName = (id: string, lang: 'th' | 'en') =>
   PROVINCES.find((p) => p.id === id)?.name[lang] ?? id
 
 export const MAX_COVER_IMAGES = 5
-export const MAX_DOC_BYTES = 800 * 1024
+// each file is stored as base64 in localStorage (~5MB total), so keep files small
+export const MAX_DOC_BYTES = 300 * 1024

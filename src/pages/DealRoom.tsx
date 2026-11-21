@@ -292,7 +292,7 @@ function FeeCard({ deal, fee, rate, listing, isSeller }: { deal?: Deal; fee?: Re
         <div className="flex justify-between border-t pt-2"><dt className="font-semibold">{t('dr.fee.amount')}</dt><dd className="tabular text-lg font-bold text-navy">{deal ? money(amount, deal.currency, { exact: true }) : '—'}</dd></div>
       </dl>
       {deal && state === 'not_due' && <p className="mt-3 text-xs text-muted">{t('dr.fee.est')}</p>}
-      {state === 'paid' && fee?.payment && <p className="mt-3 text-xs text-green-700">{t('dr.fee.paidNote', { id: fee.payment.id, method: fee.payment.method })}</p>}
+      {state === 'paid' && fee?.payment && <p className="mt-3 text-xs text-green-700">{t('dr.fee.paidNote', { id: fee.payment.id, method: fee.payment.method })}{fee.payment.provider === 'demo' && <span className="mt-1 block text-amber-700">{t('dr.fee.demo')}</span>}</p>}
       {state === 'unverified' && <p className="mt-3 text-xs text-red-700">{t('dr.fee.unverifiedNote')}</p>}
       {state === 'unpaid' && fee?.invoice && (isSeller
         ? <Link to={`/checkout/${fee.invoice.id}`}><Button className="mt-3 w-full" size="sm">{t('dr.fee.pay')}</Button></Link>

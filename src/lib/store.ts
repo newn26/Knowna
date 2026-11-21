@@ -274,6 +274,8 @@ export const auth = {
 // ---------- listings ----------
 export type ListingInput = Omit<Listing, 'id' | 'sellerId' | 'status' | 'views' | 'createdAt' | 'updatedAt' | 'publishedAt' | 'rejectReason'>
 
+const viewed = new Set<string>()
+
 export const listings = {
   save(input: ListingInput, opts: { id?: string; submit: boolean }) {
     const u = me()
@@ -323,6 +325,8 @@ export const listings = {
     })
   },
   view(id: string) {
+    if (viewed.has(id)) return
+    viewed.add(id)
     try {
       commit((d) => {
         const l = d.listings.find((x) => x.id === id)
@@ -789,12 +793,13 @@ export const billing = {
     })
     return inv.id
   },
-  recordPayment(invoiceId: string, ok: boolean, method: 'card' | 'promptpay', detail: string) {
+  // shortcut: the browser reports the charge result, so a succeeded payment is only as trustworthy as the provider. Real gateway: set it from a server webhook.
+  recordPayment(invoiceId: string, ok: boolean, method: 'card' | 'promptpay', detail: string, provider: string) {
     const u = me()
     commit((d) => {
       const inv = d.invoices.find((x) => x.id === invoiceId)
       if (!inv || inv.userId !== u.id || inv.status === 'paid') throw new AppError('forbidden')
-      const pay = { id: uid('pay-'), invoiceId, method, status: ok ? 'succeeded' : 'failed', detail, createdAt: Date.now() } as const
+      const pay = { id: uid('pay-'), invoiceId, method, status: ok ? 'succeeded' : 'failed', detail, provider, createdAt: Date.now() } as const
       d.payments.push({ ...pay })
       if (!ok) return
       inv.status = 'paid'
@@ -918,6 +923,12 @@ const adminOnly = () => {
   return u
 }
 
+function setFxRate(rate: number) {
+  commit((d) => {
+    d.fx = { usdThb: rate, updatedAt: Date.now() }
+  })
+}
+
 export const admin = {
   review(listingId: string, approve: boolean, reason?: string) {
     adminOnly()
@@ -1029,9 +1040,8 @@ export const admin = {
     })
   },
   setFx(rate: number) {
-    commit((d) => {
-      d.fx = { usdThb: rate, updatedAt: Date.now() }
-    })
+    adminOnly()
+    setFxRate(rate)
   },
   resetDemo() {
     localStorage.removeItem(KEY)
@@ -1047,7 +1057,7 @@ export async function refreshFx() {
     const r = await fetch('https://open.er-api.com/v6/latest/USD')
     const j = await r.json()
     const rate = Number(j?.rates?.THB)
-    if (rate > 0) admin.setFx(Math.round(rate * 100) / 100)
+    if (rate > 0) setFxRate(Math.round(rate * 100) / 100)
   } catch {
     /* offline: keep fallback rate */
   }
