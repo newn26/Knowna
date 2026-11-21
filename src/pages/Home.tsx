@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, BadgeCheck, FileText, Flag, Lock, MapPin, MessagesSquare, Search, ShieldCheck } from 'lucide-react'
 import { CATEGORIES, catName, PROVINCES, provName } from '../lib/constants'
@@ -26,10 +26,26 @@ export default function Home() {
   // paid promotions (advertising) first, then plan-featured listings
   const promoted = pub.filter((l) => spons.has(l.id) || feat.has(l.id)).sort((a, b) => Number(spons.has(b.id)) - Number(spons.has(a.id)) || b.views - a.views)
   // top up with the most-viewed listings so the row is always full
-  const featured = [...promoted, ...pub.filter((l) => !promoted.includes(l)).sort((a, b) => b.views - a.views)].slice(0, 3)
+  const ranked = [...promoted, ...pub.filter((l) => !promoted.includes(l)).sort((a, b) => b.views - a.views)]
+  const featured = ranked.slice(0, 3)
   const latest = [...pub].sort((a, b) => (b.publishedAt ?? 0) - (a.publishedAt ?? 0)).slice(0, 6)
-  const showcase = featured.find((l) => HERO_CATS.includes(l.category)) ?? featured[0]
+  // hero rotation pool: top 5 real listings, hero-friendly categories first
+  const pool = [...ranked.slice(0, 5)].sort((a, b) => Number(HERO_CATS.includes(b.category)) - Number(HERO_CATS.includes(a.category)))
+  const [idx, setIdx] = useState(0)
+  const [fading, setFading] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const showcase = pool[idx % Math.max(pool.length, 1)]
   const showcaseSeller = showcase && d.users.find((u) => u.id === showcase.sellerId)
+
+  useEffect(() => {
+    if (paused || pool.length < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    let swap: number
+    const tick = window.setInterval(() => {
+      setFading(true) // fade out 200ms, then swap content and slide it in
+      swap = window.setTimeout(() => { setIdx((i) => i + 1); setFading(false) }, 200)
+    }, 5000)
+    return () => { clearInterval(tick); clearTimeout(swap); setFading(false) }
+  }, [paused, pool.length])
 
   const go = () => {
     const sp = new URLSearchParams()
@@ -87,30 +103,46 @@ export default function Home() {
             <p className="mt-4 text-sm text-gray-600">{t('hero.facts', { n: pub.length, c: CATEGORIES.length })}</p>
           </div>
 
-          {showcase && (
-            <div className="relative mx-auto hidden w-full max-w-md md:block lg:max-w-none" aria-hidden="true">
-              <div className="overflow-hidden rounded-[2rem] rounded-tl-[6rem] shadow-lift">
-                <Img src={showcase.coverImages[0]} alt="" className="aspect-[10/11] w-full" />
+          <div
+              className="relative mx-auto hidden w-full max-w-md md:block lg:max-w-none"
+              onMouseEnter={() => setPaused(true)}
+              onMouseLeave={() => setPaused(false)}
+              onFocus={() => setPaused(true)}
+              onBlur={() => setPaused(false)}
+            >
+              <div className="overflow-hidden rounded-[2rem] rounded-tl-[6rem] bg-surface shadow-lift" aria-hidden="true">
+                {showcase && (
+                  <div key={showcase.id} className={cls('transition-opacity duration-200', fading ? 'opacity-0' : 'animate-swap')}>
+                    <Img src={showcase.coverImages[0]} alt="" className="aspect-[10/11] w-full" />
+                  </div>
+                )}
+                {!showcase &&<div className="aspect-[10/11] w-full" />}
               </div>
-              <Link
-                to={`/listing/${showcase.id}`}
-                tabIndex={-1}
-                className="absolute -left-6 bottom-8 w-64 animate-rise rounded-2xl border border-gray-200 bg-white p-4 shadow-lift [animation-delay:150ms] lg:-left-12 lg:w-72"
-              >
-                <p className="text-xs font-medium text-brand-500">{catName(showcase.category, lang)}</p>
-                <p className="mt-1 line-clamp-1 font-semibold text-navy">{showcase.displayName}</p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-gray-600"><MapPin size={12} /> {provName(showcase.province, lang)}
-                  {showcaseSeller?.sellerVerified && <span className="ml-2 inline-flex items-center gap-1 text-brand-600"><BadgeCheck size={12} /> {t('card.verified')}</span>}
-                </p>
-                <p className="tabular mt-3 text-xl font-bold text-navy">{money(showcase.askingPrice, showcase.currency)}</p>
-              </Link>
-              <div className="absolute -right-3 top-8 w-56 animate-rise rounded-2xl bg-navy p-4 text-white shadow-lift [animation-delay:300ms] lg:w-60">
+              <div className="absolute -left-6 bottom-8 w-64 animate-float lg:-left-12 lg:w-72">
+                {showcase ? (
+                  <Link
+                    key={showcase.id}
+                    to={`/listing/${showcase.id}`}
+                    aria-label={showcase.displayName}
+                    className={cls('block rounded-2xl border border-gray-200 bg-white p-4 shadow-lift transition-opacity duration-200', fading ? 'opacity-0' : 'animate-swap')}
+                  >
+                    <p className="text-xs font-medium text-brand-500">{catName(showcase.category, lang)}</p>
+                    <p className="mt-1 line-clamp-1 font-semibold text-navy">{showcase.displayName}</p>
+                    <p className="mt-1 flex items-center gap-1 text-xs text-gray-600"><MapPin size={12} /> {provName(showcase.province, lang)}
+                      {showcaseSeller?.sellerVerified && <span className="ml-2 inline-flex items-center gap-1 text-brand-600"><BadgeCheck size={12} /> {t('card.verified')}</span>}
+                    </p>
+                    <p className="tabular mt-3 text-xl font-bold text-navy">{money(showcase.askingPrice, showcase.currency)}</p>
+                  </Link>
+                ) : (
+                  <p className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-600 shadow-lift">{t('hero.empty')}</p>
+                )}
+              </div>
+              <div className="absolute -right-3 top-8 w-56 animate-rise rounded-2xl bg-navy p-4 text-white shadow-lift [animation-delay:300ms] lg:w-60" aria-hidden="true">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-400/20 text-brand-400"><Lock size={18} /></span>
                 <p className="mt-3 text-sm font-semibold">{t('hero.ndaTitle')}</p>
                 <p className="mt-1 text-xs leading-relaxed text-gray-300">{t('hero.ndaBody')}</p>
               </div>
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
