@@ -23,7 +23,7 @@ const raw: Record<string, [th: string, en: string]> = {
 
   // home
   'home.kicker': ['ตลาดซื้อขายกิจการออนไลน์', 'Business-for-sale marketplace'],
-  'home.title': ['ซื้อ–ขายธุรกิจ อย่างมั่นใจและเป็นความลับ', 'Buy and sell businesses — confidentially'],
+  'home.title': ['ซื้อ–ขายธุรกิจ\nอย่างมั่นใจและเป็นความลับ', 'Buy and sell businesses — confidentially'],
   'home.subtitle': ['ค้นหากิจการตามประเภท ทำเล และงบประมาณ คุยกับเจ้าของโดยตรง เซ็น NDA และยื่นข้อเสนอได้ในแอปเดียว', 'Search by category, location and budget. Talk to owners, sign NDAs and send offers — all in one app.'],
   'home.searchName': ['ชื่อธุรกิจ หรือคำค้น', 'Business name or keyword'],
   'home.search': ['ค้นหา', 'Search'],
