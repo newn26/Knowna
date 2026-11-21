@@ -7,7 +7,7 @@ import { activeListingCount, auth, listings, planOf, unpaidFeeInvoices, useDB, u
 import type { Currency, FileAsset } from '../lib/types'
 import { compressImage, fmtBytes, readFileAsDataUrl } from '../lib/utils'
 import { Page } from '../components/Layout'
-import { Alert, Button, Card, Field, Img, Input, Select, Textarea, useErrorText } from '../components/ui'
+import { Alert, Button, Card, Field, Img, Input, Select, Textarea, toast, useErrorText } from '../components/ui'
 
 const empty: ListingInput = {
   displayName: '', category: 'food', province: 'bangkok', currency: 'THB', askingPrice: 0, annualRevenue: 0, netProfit: 0,
@@ -67,6 +67,7 @@ export default function ListingForm() {
     if (submit && !valid) return setError(t('form.incomplete'))
     try {
       const newId = listings.save(f, { id: existing?.id, submit })
+      toast(t(submit ? 'toast.submitted' : 'toast.draftSaved'))
       nav(submit ? '/dashboard?tab=listings&submitted=1' : `/listing/${newId}/edit`, { replace: true })
     } catch (e) {
       setError(err(e))
