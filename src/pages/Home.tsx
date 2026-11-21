@@ -116,35 +116,36 @@ export default function Home() {
 
       {/* 2. How it works + safety: the trust story comes before any listing */}
       <section className="mx-auto max-w-7xl px-4 pt-12 md:pt-16">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="grid gap-8 rounded-3xl border-2 border-gray-200 bg-white p-6 shadow-card md:p-10 lg:grid-cols-[1fr_340px] lg:gap-12">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-navy md:text-3xl">{t('trust.title')}</h2>
-            <p className="mt-2 max-w-xl text-gray-600">{t('trust.sub')}</p>
-          </div>
-          <div role="tablist" aria-label={t('trust.title')} className="flex rounded-full border border-gray-200 bg-white p-1 shadow-card">
-            {(['buyer', 'seller'] as const).map((s) => (
-              <button key={s} role="tab" aria-selected={side === s} onClick={() => setSide(s)} className={cls('min-h-[44px] rounded-full px-5 text-sm font-semibold transition', side === s ? 'bg-navy text-white' : 'text-gray-600 hover:text-navy')}>
-                {t('trust.' + s)}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-[1fr_1fr_1fr_0.95fr] lg:gap-5">
-          {steps.map((s, i) => (
-            <div key={side + s.k} className="flex animate-rise flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-card" style={{ animationDelay: `${i * 70}ms` }}>
-              <div className="flex items-center justify-between">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy text-brand-400"><s.icon size={22} /></span>
-                <span className="tabular text-4xl font-bold text-gray-200" aria-hidden="true">{i + 1}</span>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <h2 className="text-2xl font-bold tracking-tight text-navy md:text-3xl">{t('trust.title')}</h2>
+              <div role="tablist" aria-label={t('trust.title')} className="flex rounded-full bg-surface p-1">
+                {(['buyer', 'seller'] as const).map((s) => (
+                  <button key={s} role="tab" aria-selected={side === s} onClick={() => setSide(s)} className={cls('min-h-[44px] rounded-full px-5 text-sm font-semibold transition', side === s ? 'bg-navy text-white shadow-card' : 'text-gray-600 hover:text-navy')}>
+                    {t('trust.' + s)}
+                  </button>
+                ))}
               </div>
-              <p className="mt-5 text-lg font-semibold text-navy"><span className="sr-only">{i + 1}. </span>{t(`trust.${s.k}t`)}</p>
-              <p className="mt-2 text-sm leading-relaxed text-gray-600">{t(`trust.${s.k}b`)}</p>
             </div>
-          ))}
-          <aside className="rounded-2xl bg-brand-50 p-6 sm:col-span-3 lg:col-span-1">
-            <p className="flex items-center gap-2 font-semibold text-navy"><ShieldCheck size={20} className="text-brand-500" /> {t('safety.title')}</p>
-            <ul className="mt-4 divide-y divide-brand-100 text-sm leading-relaxed text-gray-700">
+            <ol className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
+              {steps.map((s, i) => (
+                <li key={side + s.k} className="animate-rise" style={{ animationDelay: `${i * 70}ms` }}>
+                  <div className="flex items-center gap-4">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500"><s.icon size={24} /></span>
+                    {i < steps.length - 1 && <span className="hidden h-0.5 flex-1 rounded-full bg-gray-200 sm:block" aria-hidden="true" />}
+                  </div>
+                  <p className="mt-5 text-lg font-semibold text-navy"><span className="tabular text-brand-500">{i + 1}.</span> {t(`trust.${s.k}t`)}</p>
+                  <p className="mt-2 text-[15px] leading-relaxed text-gray-600">{t(`trust.${s.k}b`)}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <aside className="rounded-2xl bg-surface p-6 md:p-7">
+            <p className="flex items-center gap-2.5 text-lg font-semibold text-navy"><ShieldCheck size={22} className="text-brand-500" /> {t('safety.title')}</p>
+            <ul className="mt-5 space-y-4 text-[15px] leading-relaxed text-gray-600">
               {[MessagesSquare, Lock, Flag].map((I, i) => (
-                <li key={i} className="flex gap-3 py-3 first:pt-0 last:pb-0"><I size={17} className="mt-0.5 shrink-0 text-brand-500" /> {t(`safety.${i + 1}`)}</li>
+                <li key={i} className="flex gap-3"><I size={19} className="mt-0.5 shrink-0 text-gray-400" /> {t(`safety.${i + 1}`)}</li>
               ))}
             </ul>
           </aside>
