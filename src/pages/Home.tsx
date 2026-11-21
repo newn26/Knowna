@@ -19,7 +19,9 @@ export default function Home() {
   const feat = featuredIds(d)
   const spons = sponsoredIds(d)
   // paid promotions (advertising) first, then plan-featured listings
-  const featured = pub.filter((l) => spons.has(l.id) || feat.has(l.id)).sort((a, b) => Number(spons.has(b.id)) - Number(spons.has(a.id)) || b.views - a.views).slice(0, 4)
+  const promoted = pub.filter((l) => spons.has(l.id) || feat.has(l.id)).sort((a, b) => Number(spons.has(b.id)) - Number(spons.has(a.id)) || b.views - a.views)
+  // top up with the most-viewed listings so the row is always full
+  const featured = [...promoted, ...pub.filter((l) => !promoted.includes(l)).sort((a, b) => b.views - a.views)].slice(0, 4)
   const latest = [...pub].sort((a, b) => (b.publishedAt ?? 0) - (a.publishedAt ?? 0)).slice(0, 8)
 
   const go = () => {
@@ -35,7 +37,7 @@ export default function Home() {
       <section className="bg-gradient-to-br from-ink via-[#0b1a3d] to-brand-700 text-white">
         <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
           <p className="mb-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{t('home.kicker')}</p>
-          <h1 className="max-w-3xl text-3xl font-bold leading-tight md:text-5xl">{t('home.title')}</h1>
+          <h1 className="max-w-3xl whitespace-pre-line text-3xl font-bold leading-tight md:text-5xl">{t('home.title')}</h1>
           <p className="mt-4 max-w-2xl text-gray-300">{t('home.subtitle')}</p>
           <form
             onSubmit={(e) => { e.preventDefault(); go() }}
