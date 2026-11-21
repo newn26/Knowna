@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "esbuild scripts/flow.test.ts --bundle --platform=node --format=cjs --inject:scripts/shim.js --outfile=node_modules/.flow-test.cjs --log-level=error && node node_modules/.flow-test.cjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

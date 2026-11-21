@@ -737,6 +737,8 @@ const raw: Record<string, [th: string, en: string]> = {
   'sys.contract_signed': ['✍️ มีการลงนามสัญญาซื้อขาย', '✍️ A party signed the sale contract'],
   'sys.handover_done': ['📦 ผู้ซื้อยืนยันรับมอบกิจการแล้ว', '📦 Buyer confirmed the handover'],
   'err.step_order': ['ยังทำขั้นตอนนี้ไม่ได้ ต้องผ่านขั้นก่อนหน้าให้ครบก่อน', 'This step is not available yet — finish the earlier stages first'],
+  'err.deal_in_progress': ['ประกาศนี้มีดีลที่กำลังดำเนินการ เปลี่ยนสถานะไม่ได้', 'This listing has a deal in progress, so its status cannot change'],
+  'err.cancel_after_payment': ['มีการแจ้งชำระเงินแล้ว ยกเลิกดีลไม่ได้ กรุณาแจ้งข้อพิพาท', 'Payment was already reported, so the deal cannot be cancelled — open a dispute instead'],
   'err.file_too_big': ['ไฟล์ใหญ่เกินกำหนด', 'File is too large'],
   'room.notFound': ['ไม่พบ Deal Room', 'Deal Room not found'],
   'room.chat': ['แชท', 'Chat'],

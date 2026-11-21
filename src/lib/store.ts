@@ -309,6 +309,7 @@ export const listings = {
       const l = d.listings.find((x) => x.id === id)
       if (!l || l.sellerId !== u.id) throw new AppError('forbidden')
       if (status === 'published' && l.status !== 'hidden') throw new AppError('forbidden')
+      if (d.deals.some((x) => x.listingId === id && x.status === 'in_progress')) throw new AppError('deal_in_progress')
       l.status = status
       l.updatedAt = Date.now()
     })
@@ -485,7 +486,7 @@ export const lois = {
       if (last.by === myRole) throw new AppError('not_your_turn')
       if (action === 'accept' && last.expiresAt < Date.now()) throw new AppError('loi_expired')
       if (action === 'accept') {
-        if (l.status !== 'published') throw new AppError('not_available')
+        if (l.status !== 'published' || d.deals.some((x) => x.listingId === l.id && x.status === 'in_progress')) throw new AppError('not_available')
         loi.status = 'accepted'
         loi.acceptedSignature = { name: payload?.signatureName || u.name, at: Date.now() }
         l.status = 'under_offer'
@@ -547,6 +548,7 @@ export const deals = {
       const deal = d.deals.find((x) => x.id === dealId)
       if (!deal || deal.status !== 'in_progress') throw new AppError('forbidden')
       if (!deal.handoverAt) throw new AppError('step_order') // cannot close before payment + handover are on record
+      if (price !== deal.agreedPrice) throw new AppError('invalid') // the success fee is charged on the agreed price; changing it needs a new LOI round
       const c = { price, at: Date.now() }
       if (deal.buyerId === u.id) deal.buyerConfirm = c
       else if (deal.sellerId === u.id) deal.sellerConfirm = c
@@ -633,9 +635,10 @@ export const deals = {
     commit((d) => {
       const deal = d.deals.find((x) => x.id === dealId)
       if (!deal || deal.status !== 'in_progress' || (deal.buyerId !== u.id && deal.sellerId !== u.id)) throw new AppError('forbidden')
+      if (deal.transaction?.buyerPaidAt) throw new AppError('cancel_after_payment') // money already reported: use a dispute
       deal.status = 'cancelled'
       const l = d.listings.find((x) => x.id === deal.listingId)!
-      l.status = 'published'
+      if (l.status === 'under_offer') l.status = 'published'
       const t = ensureThread(d, deal.listingId, deal.buyerId)
       sysMsg(d, t.id, 'deal_cancelled')
       notify(d, u.id === deal.buyerId ? deal.sellerId : deal.buyerId, { th: `ดีล "${l.displayName}" ถูกยกเลิก`, en: `Deal "${l.displayName}" was cancelled` }, '/dashboard?tab=deals')
