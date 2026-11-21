@@ -12,6 +12,25 @@ const STYLE: Record<string, { emoji: string; colors: [string, string][] }> = {
   other: { emoji: '🏢', colors: [['#334155', '#94a3b8'], ['#1e293b', '#cbd5e1'], ['#0f172a', '#64748b']] },
 }
 
+// Free-licence Unsplash photos per category. If the CDN is unreachable, <Img> falls back to its placeholder.
+const PHOTOS: Record<string, string[]> = {
+  food: ['1521017432531-fbd92d768814', '1453614512568-c4024d13c247', '1538333581680-29dd4752ddf2'],
+  retail: ['1441984904996-e0b6ba687e04', '1567401893414-76b7b1e5a7a5', '1441986300917-64674bd600d8'],
+  ecommerce: ['1587293852726-70cdb56c2866', '1586528116311-ad8dd3c8310d', '1664382953403-fc1ac77073a0'],
+  service: ['1568992687947-868a62a9f521', '1606857521015-7f9fcf423740', '1553877522-43269d4ea984'],
+  manufacturing: ['1610891015188-5369212db097', '1717386255773-1e3037c81788', '1578776349090-de61da00ff1a'],
+  franchise: ['1571974448718-ac26a9af7d8b', '1605513524006-063ed6ed31e7', '1561710309-9a739908b336'],
+  beauty: ['1600334089648-b0d9d3028eb2', '1515377905703-c4788e51af15', '1544161515-4ab6ce6db874'],
+  education: ['1580582932707-520aed937b7b', '1509062522246-3755977927d7', '1503676260728-1c00da094a0b'],
+  tech: ['1498050108023-c5249f4df085', '1461749280684-dccba630e2f6', '1607799279861-4dd421887fb3'],
+  other: ['1486406146926-c627a92ad1ab', '1497366754035-f200968a6e72', '1553877522-43269d4ea984'],
+}
+
+export function coverPhoto(category: string, variant: number): string {
+  const p = PHOTOS[category] ?? PHOTOS.other
+  return `https://images.unsplash.com/photo-${p[variant % p.length]}?w=1200&q=70&auto=format&fit=crop`
+}
+
 export function coverSvg(category: string, variant: number, label = ''): string {
   const s = STYLE[category] ?? STYLE.other
   const [a, b] = s.colors[variant % s.colors.length]

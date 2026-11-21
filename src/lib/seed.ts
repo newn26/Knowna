@@ -1,8 +1,8 @@
 import type { DB, Listing, Plan, User } from './types'
-import { coverSvg } from './covers'
+import { coverPhoto, coverSvg } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 5
+export const DB_VERSION = 6
 
 export const DEMO_ACCOUNTS = [
   { email: 'buyer@demo.com', password: 'demo1234', role: 'buyer' },
@@ -94,7 +94,7 @@ function listing(r: Raw, i: number): Listing {
     employees,
     reasonForSale,
     description,
-    coverImages: [0, 1, 2].map((k) => coverSvg(category, i + k)),
+    coverImages: [0, 1, 2].map((k) => coverPhoto(category, i + k)),
     confidential: {
       legalName: `บริษัท ${displayName.split(' ')[0]} จำกัด (ตัวอย่าง)`,
       address: `เลขที่ ${100 + i} ถนนตัวอย่าง ${province}`,
