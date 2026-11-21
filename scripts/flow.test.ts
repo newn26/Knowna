@@ -46,9 +46,9 @@ function toPaid(id: string) {
   inv.status = 'paid'
   assert.equal(feeStatus(getDB(), getDB().deals.find((x) => x.id === deal.id)!).state, 'unverified', 'paid flag alone is not evidence')
   inv.status = 'unpaid'
-  billing.recordPayment(inv.id, true, 'card', 'test')
+  billing.recordPayment(inv.id, true, 'card', 'test', 'demo')
   f = feeStatus(getDB(), getDB().deals.find((x) => x.id === deal.id)!)
-  assert.equal(f.state, 'paid'); assert.ok(f.payment)
+  assert.equal(f.state, 'paid'); assert.equal(f.payment!.provider, 'demo')
   assert.equal(dealSteps(getDB(), T).pct, 100)
 }
 
@@ -73,5 +73,11 @@ function toPaid(id: string) {
   deals.cancel(deal.id)
   assert.equal(getDB().deals.find((x) => x.id === deal.id)!.status, 'cancelled')
   assert.equal(getDB().listings.find((l) => l.id === L)!.status, 'published')
+}
+// 4. only admins change the FX rate
+{
+  admin.resetDemo()
+  as('buyer@demo.com'); assert.equal(codeOf(() => admin.setFx(1)), 'forbidden')
+  auth.login('admin@demo.com', 'admin1234'); assert.equal(codeOf(() => admin.setFx(30)), 'ok')
 }
 console.log('ALL OK')

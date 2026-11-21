@@ -194,6 +194,8 @@ export interface Payment {
   method: 'card' | 'promptpay'
   status: 'succeeded' | 'failed'
   detail: string
+  /** Which payment provider reported this charge ('demo' = simulated, no real money). */
+  provider?: string
   createdAt: number
 }
 

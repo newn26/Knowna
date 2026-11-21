@@ -689,6 +689,7 @@ const raw: Record<string, [th: string, en: string]> = {
   'dr.fee.unpaid': ['รอชำระ', 'Awaiting payment'],
   'dr.fee.paid': ['ชำระแล้ว', 'Paid'],
   'dr.fee.unverified': ['ไม่มีหลักฐานการชำระ', 'No payment evidence'],
+  'dr.fee.demo': ['ผู้ให้บริการ: ระบบชำระเงินจำลอง ไม่มีเงินจริงเคลื่อนไหว', 'Provider: simulated payment, no real money moved'],
   'dr.fee.paidNote': ['อ้างอิงรายการชำระเงิน {id} ({method})', 'Payment record {id} ({method})'],
   'dr.fee.unverifiedNote': ['ใบแจ้งหนี้ถูกทำเครื่องหมายว่าจ่ายแล้ว แต่ไม่พบรายการชำระที่สำเร็จ จึงไม่แสดงว่าชำระสำเร็จ', 'The invoice is marked paid but no successful payment record exists, so it is not shown as paid'],
   'dr.fee.pay': ['ชำระค่าธรรมเนียม', 'Pay fee'],

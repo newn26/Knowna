@@ -28,7 +28,7 @@ export default function Checkout() {
     setBusy(true)
     setFailed(false)
     const r = await paymentProvider.charge({ amount: inv.amount, currency: inv.currency, method, cardNumber: card, simulateFailure })
-    billing.recordPayment(inv.id, r.ok, method, `${r.detail} · ${r.reference}`)
+    billing.recordPayment(inv.id, r.ok, method, `${r.detail} · ${r.reference}`, paymentProvider.name)
     setFailed(!r.ok)
     setBusy(false)
   }
