@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { BadgeCheck, Bell, Building2, ChevronDown, LogOut, Menu, MessageSquare, Search, Shield, User as UserIcon, X } from 'lucide-react'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { BadgeCheck, Bell, Building2, ChevronDown, Heart, Home, LogOut, Menu, MessageSquare, Search, Shield, User as UserIcon, X } from 'lucide-react'
 import { alerts, auth, refreshFx, unreadCount, useDB, useMe, useSession } from '../lib/store'
 import { usePrefs } from '../lib/prefs'
 import { cls, fmtDate } from '../lib/utils'
-import { Badge } from './ui'
+import { Badge, Toaster } from './ui'
 
 function useOutside(ref: React.RefObject<HTMLElement>, onOut: () => void) {
   useEffect(() => {
@@ -149,14 +149,14 @@ function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-        <button className="md:hidden" onClick={() => setMobile(!mobile)} aria-label="menu">{mobile ? <X /> : <Menu />}</button>
+        <button className="-ml-2 flex h-11 w-11 items-center justify-center md:hidden" onClick={() => setMobile(!mobile)} aria-label="menu" aria-expanded={mobile}>{mobile ? <X /> : <Menu />}</button>
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 font-bold text-white">R</span>
-          <span className="hidden text-lg font-bold sm:block">RUB Job</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy font-bold text-white">R<span className="text-brand-400">.</span></span>
+          <span className="hidden text-lg font-bold tracking-tight text-navy sm:block">RUB Job</span>
         </Link>
         <nav className="ml-4 hidden items-center gap-6 md:flex">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} className={({ isActive }) => cls('text-sm font-semibold', isActive ? 'text-brand-500' : 'text-gray-700 hover:text-brand-500')}>
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => cls('relative py-1 text-sm font-semibold transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:rounded-full after:bg-brand-400 after:transition-transform after:duration-200', isActive ? 'text-navy after:scale-x-100' : 'text-gray-600 after:scale-x-0 hover:text-navy hover:after:scale-x-100')}>
               {l.label}
             </NavLink>
           ))}
@@ -182,8 +182,8 @@ function Header() {
             </>
           ) : (
             <>
-              <Link to="/login" className="px-3 text-sm font-semibold text-gray-700 hover:text-brand-500">{t('nav.login')}</Link>
-              <Link to="/register" className="rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">{t('nav.register')}</Link>
+              <Link to="/login" className="hidden whitespace-nowrap px-3 text-sm font-semibold text-gray-700 hover:text-brand-500 sm:block">{t('nav.login')}</Link>
+              <Link to="/register" className="whitespace-nowrap rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600">{t('nav.register')}</Link>
             </>
           )}
         </div>
@@ -202,11 +202,11 @@ function Header() {
 function Footer() {
   const { t } = usePrefs()
   return (
-    <footer className="mt-16 bg-ink text-gray-400">
+    <footer className="mt-16 bg-ink text-gray-300">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-3">
         <div>
           <div className="mb-3 flex items-center gap-2 text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 font-bold">R</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 font-bold">R<span className="text-brand-400">.</span></span>
             <span className="text-lg font-bold">RUB Job</span>
           </div>
           <p className="text-sm">{t('footer.about')}</p>
@@ -224,8 +224,35 @@ function Footer() {
           <p>{t('footer.disclaimer')}</p>
         </div>
       </div>
-      <div className="border-t border-gray-800 py-4 text-center text-xs">© 2026 RUB Job — prototype</div>
+      <div className="border-t border-white/10 py-4 text-center text-xs">© 2026 RUB Job — prototype</div>
     </footer>
+  )
+}
+
+/** Thumb-reach navigation on phones. Every tab points at a real route. */
+function BottomNav() {
+  const me = useMe()
+  const { t } = usePrefs()
+  const { pathname, search } = useLocation()
+  const items = [
+    { to: '/', label: t('bnav.home'), icon: Home, on: pathname === '/' },
+    { to: '/search', label: t('bnav.search'), icon: Search, on: pathname === '/search' },
+    { to: me ? '/dashboard?tab=favorites' : '/login?next=/dashboard?tab=favorites', label: t('bnav.saved'), icon: Heart, on: pathname === '/dashboard' && search.includes('favorites') },
+    { to: me ? '/dashboard' : '/login', label: t('bnav.profile'), icon: UserIcon, on: (pathname === '/dashboard' && !search.includes('favorites')) || pathname === '/login' },
+  ]
+  return (
+    <nav aria-label={t('bnav.home')} className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <ul className="grid grid-cols-4">
+        {items.map(({ to, label, icon: I, on }) => (
+          <li key={label}>
+            <Link to={to} aria-current={on ? 'page' : undefined} className={cls('flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-colors', on ? 'text-brand-500' : 'text-gray-500')}>
+              <I size={21} strokeWidth={on ? 2.4 : 1.8} />
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   )
 }
 
@@ -237,7 +264,8 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col bg-surface">
       <div className="print:hidden"><TopBar /><Header /></div>
       <main className="flex-1">{children}</main>
-      <div className="print:hidden"><Footer /></div>
+      <div className="pb-[calc(56px+env(safe-area-inset-bottom))] print:hidden md:pb-0"><Footer /></div>
+      <div className="print:hidden"><BottomNav /><Toaster /></div>
     </div>
   )
 }

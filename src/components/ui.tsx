@@ -1,5 +1,5 @@
-import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
-import { X, Building2, Circle, Coffee, Store, ShoppingCart, Briefcase, Factory, Network, Sparkles, GraduationCap, Cpu, LayoutGrid, Inbox, MessageSquare, FileText, Search, Bell, type LucideIcon } from 'lucide-react'
+import { useEffect, useState, useSyncExternalStore, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { X, Building2, CheckCircle2, AlertCircle, Info, Circle, Coffee, Store, ShoppingCart, Briefcase, Factory, Network, Sparkles, GraduationCap, Cpu, LayoutGrid, Inbox, MessageSquare, FileText, Search, Bell, type LucideIcon } from 'lucide-react'
 
 const ICONS: Record<string, LucideIcon> = { Coffee, Store, ShoppingCart, Briefcase, Factory, Network, Sparkles, GraduationCap, Cpu, LayoutGrid, Inbox, MessageSquare, FileText, Search, Bell }
 import { cls } from '../lib/utils'
@@ -126,6 +126,35 @@ export function useErrorText() {
 export function Alert({ t = 'amber', children }: { t?: 'amber' | 'red' | 'blue' | 'green'; children: ReactNode }) {
   const c = { amber: 'border-amber-200 bg-amber-50 text-amber-800', red: 'border-red-200 bg-red-50 text-red-700', blue: 'border-brand-100 bg-brand-50 text-brand-700', green: 'border-green-200 bg-green-50 text-green-800' }[t]
   return <div className={cls('rounded-lg border px-4 py-3 text-sm', c)}>{children}</div>
+}
+
+/* ---------- toasts: one global queue, announced to screen readers ---------- */
+type ToastItem = { id: number; text: string; tone: 'success' | 'error' | 'info' }
+let toasts: ToastItem[] = []
+const toastSubs = new Set<() => void>()
+const emitToasts = () => toastSubs.forEach((f) => f())
+export function toast(text: string, tone: ToastItem['tone'] = 'success') {
+  const id = Date.now() + Math.random()
+  toasts = [...toasts.slice(-2), { id, text, tone }]
+  emitToasts()
+  setTimeout(() => { toasts = toasts.filter((x) => x.id !== id); emitToasts() }, 3200)
+}
+export function Toaster() {
+  const items = useSyncExternalStore((f) => { toastSubs.add(f); return () => { toastSubs.delete(f) } }, () => toasts)
+  const ic = { success: CheckCircle2, error: AlertCircle, info: Info }
+  return (
+    <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex flex-col items-center gap-2 px-4 md:bottom-6 md:items-end md:pr-6">
+      {items.map((x) => {
+        const I = ic[x.tone]
+        return (
+          <div key={x.id} className="pointer-events-auto flex max-w-sm animate-rise items-center gap-2.5 rounded-xl bg-navy px-4 py-3 text-sm font-medium text-white shadow-lift">
+            <I size={18} className={x.tone === 'error' ? 'text-red-300' : 'text-brand-400'} />
+            {x.text}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { id: T; label: string; count?: number }[] }) {
