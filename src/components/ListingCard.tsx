@@ -6,7 +6,7 @@ import { catName, provName } from '../lib/constants'
 import { usePrefs } from '../lib/prefs'
 import { listings, useDB, useMe } from '../lib/store'
 import { cls } from '../lib/utils'
-import { Badge, Img, toast } from './ui'
+import { Badge, Figure, Img, toast } from './ui'
 
 /** A listing counts as "new" for this many days after it was published. */
 const NEW_DAYS = 14
@@ -64,11 +64,11 @@ export function ListingCard({ l, featured }: { l: Listing; featured?: boolean })
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
           <div className="min-w-0">
             <p className="text-xs text-muted">{t('card.asking')}</p>
-            <p className="tabular truncate text-xl font-bold tracking-tight text-navy">{money(l.askingPrice, l.currency)}</p>
+            <Figure value={money(l.askingPrice, l.currency)} className="block truncate text-2xl font-extrabold tracking-tight text-navy" />
           </div>
           <div className="shrink-0 text-right">
             <p className="text-xs text-muted">{t('card.revenue')}</p>
-            <p className="tabular flex items-center justify-end gap-1 text-sm font-semibold text-gray-700"><TrendingUp size={14} className="text-brand-500" /> {money(l.annualRevenue, l.currency, { compact: true })}</p>
+            <p className="tabular flex items-center justify-end gap-1 text-base font-bold text-gray-700"><TrendingUp size={14} className="text-brand-500" /> {money(l.annualRevenue, l.currency, { compact: true })}</p>
           </div>
         </div>
       </div>

@@ -173,3 +173,14 @@ export function Tabs<T extends string>({ value, onChange, items }: { value: T; o
     </div>
   )
 }
+
+/** A formatted money/number string with its currency prefix toned down, so the digits carry the weight. */
+export function Figure({ value, className }: { value: string; className?: string }) {
+  const m = /^([^\d-]+)(.*)$/.exec(value)
+  return (
+    <span className={cls('tabular', className)}>
+      {m && <span className="mr-[0.1em] text-[0.7em] font-semibold opacity-70">{m[1]}</span>}
+      {m ? m[2] : value}
+    </span>
+  )
+}
