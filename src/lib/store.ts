@@ -5,11 +5,12 @@
  */
 import { useSyncExternalStore } from 'react'
 import type {
-  Bi, BuyerRequest, Currency, DB, Deal, FileAsset, Invoice, Listing, Loi, LoiRound, Nda, Plan, Role, SearchParams, Thread, User,
+  Bi, BuyerRequest, Currency, DB, Deal, DealDoc, FileAsset, Invoice, Listing, Loi, LoiRound, Nda, Payment, Plan, Role, SearchParams, Thread, User,
 } from './types'
 import { DB_VERSION, makeSeed } from './seed'
 import { demoHash, startOfMonth, uid, DAY } from './utils'
 import { matches } from './search'
+import { MAX_DOC_BYTES } from './constants'
 
 const KEY = 'bizm:db'
 const SESSION_KEY = 'bizm:session'
@@ -545,6 +546,7 @@ export const deals = {
     commit((d) => {
       const deal = d.deals.find((x) => x.id === dealId)
       if (!deal || deal.status !== 'in_progress') throw new AppError('forbidden')
+      if (!deal.handoverAt) throw new AppError('step_order') // cannot close before payment + handover are on record
       const c = { price, at: Date.now() }
       if (deal.buyerId === u.id) deal.buyerConfirm = c
       else if (deal.sellerId === u.id) deal.sellerConfirm = c
@@ -564,6 +566,7 @@ export const deals = {
     commit((d) => {
       const deal = d.deals.find((x) => x.id === dealId)
       if (!deal || deal.status !== 'in_progress' || deal.buyerId !== u.id) throw new AppError('forbidden')
+      if (!deal.contract?.buyer || !deal.contract.seller || deal.transaction?.buyerPaidAt) throw new AppError('step_order')
       deal.transaction = { ...deal.transaction, buyerPaidAt: Date.now() }
       const l = d.listings.find((x) => x.id === deal.listingId)!
       const t = ensureThread(d, deal.listingId, deal.buyerId)
@@ -583,6 +586,48 @@ export const deals = {
       notify(d, deal.buyerId, { th: `ผู้ขายยืนยันรับเงินสำหรับ "${l.displayName}" แล้ว`, en: `The seller confirmed receiving payment for "${l.displayName}"` }, `/room/${t.id}`)
     })
   },
+  /** Stage 5: the buyer records that due diligence is finished. */
+  completeDD(dealId: string, note: string) {
+    const u = me()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress' || deal.buyerId !== u.id) throw new AppError('forbidden')
+      if (deal.dd) throw new AppError('step_order')
+      deal.dd = { by: u.id, at: Date.now(), note: note.trim().slice(0, 500) }
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'dd_done')
+      notify(d, deal.sellerId, { th: 'ผู้ซื้อตรวจสอบกิจการเสร็จแล้ว พร้อมลงนามสัญญา', en: 'The buyer finished due diligence — ready to sign the contract' }, `/room/${t.id}`)
+    })
+  },
+  /** Stage 6: each party signs once, only after due diligence. */
+  signContract(dealId: string, name: string) {
+    const u = me()
+    if (!name.trim()) throw new AppError('invalid')
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress') throw new AppError('forbidden')
+      const side = deal.buyerId === u.id ? 'buyer' : deal.sellerId === u.id ? 'seller' : null
+      if (!side) throw new AppError('forbidden')
+      if (!deal.dd || deal.contract?.[side]) throw new AppError('step_order')
+      deal.contract = { ...deal.contract, [side]: { name: name.trim(), at: Date.now() } }
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'contract_signed')
+      notify(d, side === 'buyer' ? deal.sellerId : deal.buyerId, { th: 'อีกฝ่ายลงนามสัญญาซื้อขายแล้ว', en: 'The other party signed the sale contract' }, `/room/${t.id}`)
+    })
+  },
+  /** End of stage 7: the buyer confirms the handover, only after the seller confirmed the money. */
+  confirmHandover(dealId: string) {
+    const u = me()
+    commit((d) => {
+      const deal = d.deals.find((x) => x.id === dealId)
+      if (!deal || deal.status !== 'in_progress' || deal.buyerId !== u.id) throw new AppError('forbidden')
+      if (!deal.transaction?.sellerReceivedAt || deal.handoverAt) throw new AppError('step_order')
+      deal.handoverAt = Date.now()
+      const t = ensureThread(d, deal.listingId, deal.buyerId)
+      sysMsg(d, t.id, 'handover_done')
+      notify(d, deal.sellerId, { th: 'ผู้ซื้อยืนยันการส่งมอบกิจการแล้ว กรุณายืนยันปิดดีล', en: 'The buyer confirmed the handover — please confirm closing' }, `/room/${t.id}`)
+    })
+  },
   cancel(dealId: string) {
     const u = me()
     commit((d) => {
@@ -596,6 +641,71 @@ export const deals = {
       notify(d, u.id === deal.buyerId ? deal.sellerId : deal.buyerId, { th: `ดีล "${l.displayName}" ถูกยกเลิก`, en: `Deal "${l.displayName}" was cancelled` }, '/dashboard?tab=deals')
     })
   },
+}
+
+// ---------- deal room: documents, steps, fee status ----------
+export const room = {
+  upload(threadId: string, file: FileAsset, access: DealDoc['access']) {
+    const u = me()
+    if (file.size > MAX_DOC_BYTES) throw new AppError('file_too_big')
+    commit((d) => {
+      const t = d.threads.find((x) => x.id === threadId)
+      if (!t || (t.buyerId !== u.id && t.sellerId !== u.id)) throw new AppError('forbidden')
+      const l = d.listings.find((x) => x.id === t.listingId)!
+      if (!canViewFull(d, t.buyerId, l)) throw new AppError('nda_required')
+      if (access === 'deal' && !d.deals.some((x) => x.listingId === t.listingId && x.buyerId === t.buyerId && x.status !== 'cancelled')) throw new AppError('step_order')
+      d.roomDocs.push({ id: uid('rd-'), threadId, file, by: u.id, access, at: Date.now() })
+    })
+  },
+}
+
+/** Documents of a room as this user may see them: files they may not open come back with file = null. */
+export function roomDocsFor(d: DB, userId: string, threadId: string) {
+  const t = d.threads.find((x) => x.id === threadId)
+  const u = d.users.find((x) => x.id === userId)
+  if (!t || !u || (!u.isAdmin && t.buyerId !== userId && t.sellerId !== userId)) return []
+  const l = d.listings.find((x) => x.id === t.listingId)!
+  const ndaOk = canViewFull(d, t.buyerId, l)
+  const dealOk = d.deals.some((x) => x.listingId === t.listingId && x.buyerId === t.buyerId && x.status !== 'cancelled')
+  return d.roomDocs.filter((x) => x.threadId === threadId).map((x) => {
+    const open = x.by === userId || u.isAdmin || (x.access === 'nda' ? ndaOk : ndaOk && dealOk)
+    return { id: x.id, by: x.by, access: x.access, at: x.at, file: open ? x.file : null }
+  })
+}
+
+export type StepKey = 'nda' | 'disclose' | 'loi' | 'negotiate' | 'dd' | 'contract' | 'payment' | 'close'
+export const STEP_KEYS: StepKey[] = ['nda', 'disclose', 'loi', 'negotiate', 'dd', 'contract', 'payment', 'close']
+
+/** The 8 deal stages, derived only from stored records so the UI cannot show a stage the data does not support. */
+export function dealSteps(d: DB, threadId: string) {
+  const t = d.threads.find((x) => x.id === threadId)!
+  const l = d.listings.find((x) => x.id === t.listingId)!
+  const nda = d.ndas.filter((n) => n.listingId === l.id && n.buyerId === t.buyerId).sort((a, b) => b.createdAt - a.createdAt)[0]
+  const loi = d.lois.filter((o) => o.listingId === l.id && o.buyerId === t.buyerId).sort((a, b) => b.updatedAt - a.updatedAt)[0]
+  const deal = d.deals.filter((x) => x.listingId === l.id && x.buyerId === t.buyerId && x.status !== 'cancelled').sort((a, b) => b.createdAt - a.createdAt)[0]
+  const shared = l.confidential.documents.length > 0 || d.roomDocs.some((x) => x.threadId === threadId && x.by === l.sellerId)
+  const done = [
+    nda?.status === 'approved',
+    nda?.status === 'approved' && shared,
+    !!loi && loi.status !== 'withdrawn',
+    !!deal,
+    !!deal?.dd,
+    !!(deal?.contract?.buyer && deal.contract.seller),
+    !!deal?.handoverAt,
+    deal?.status === 'closed',
+  ]
+  for (let i = done.length - 2; i >= 0; i--) done[i] = done[i] || done[i + 1] // a later stage implies the earlier ones
+  const current = done.indexOf(false)
+  return { nda, loi, deal, done, current: current === -1 ? done.length : current, pct: Math.round((done.filter(Boolean).length / done.length) * 100) }
+}
+
+/** Success-fee status, kept apart from the deal status. 'paid' needs a succeeded Payment record as evidence. */
+export function feeStatus(d: DB, deal: Deal): { state: 'not_due' | 'unpaid' | 'paid' | 'unverified'; invoice?: Invoice; payment?: Payment } {
+  const invoice = deal.status === 'closed' && deal.invoiceId ? d.invoices.find((i) => i.id === deal.invoiceId) : undefined
+  if (!invoice) return { state: 'not_due' }
+  if (invoice.status === 'unpaid') return { state: 'unpaid', invoice }
+  const payment = d.payments.find((p) => p.invoiceId === invoice.id && p.status === 'succeeded')
+  return payment ? { state: 'paid', invoice, payment } : { state: 'unverified', invoice }
 }
 
 // ---------- disputes ----------
