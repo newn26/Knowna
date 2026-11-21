@@ -287,6 +287,7 @@ const raw: Record<string, [th: string, en: string]> = {
   'dash.noAlertsHint': ['ไปที่หน้าค้นหาแล้วกด "แจ้งเตือนเมื่อมีประกาศใหม่"', 'Go to search and click "Alert me"'],
   'dash.allListings': ['ทุกประกาศ', 'All listings'],
   'deal.agreed': ['ราคาที่ตกลงใน LOI', 'LOI agreed price'],
+  'deal.needSteps': ['ยังยืนยันปิดดีลไม่ได้ ต้องทำใน Deal Room ให้ครบก่อน: ตรวจสอบกิจการ ลงนามสัญญา ชำระเงิน และรับมอบ', 'You cannot confirm the close yet. Finish these in the Deal Room first: due diligence, contract signing, payment and handover.'],
   'deal.explain': ['เมื่อการโอนกิจการเสร็จสิ้น ให้ทั้งสองฝ่ายยืนยันราคาสุดท้าย ระบบจะปิดดีลและออกใบแจ้งค่าธรรมเนียมให้ผู้ขาย', 'When the handover completes, both parties confirm the final price. The deal then closes and the seller is invoiced the success fee.'],
   'deal.you': ['คุณ', 'You'],
   'deal.them': ['อีกฝ่าย', 'Other party'],
