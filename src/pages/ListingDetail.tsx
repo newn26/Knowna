@@ -6,7 +6,7 @@ import { usePrefs } from '../lib/prefs'
 import { canViewFull, chat, featuredIds, listings, useDB, useMe, useSession } from '../lib/store'
 import { cls, fmtBytes, fmtDate } from '../lib/utils'
 import { Page } from '../components/Layout'
-import { Alert, Badge, Button, Card, Empty, Img, Modal, StatusBadge, Textarea, useErrorText } from '../components/ui'
+import { Alert, Badge, Button, Card, Empty, Img, Modal, StatusBadge, Textarea, toast, useErrorText } from '../components/ui'
 import { LoiModal, NdaModal } from '../components/ContractForms'
 import { estimateValue } from '../lib/valuation'
 import type { Listing } from '../lib/types'
@@ -170,7 +170,7 @@ export default function ListingDetail() {
                 {me && (() => { const th = d.threads.find((x) => x.listingId === l.id && x.buyerId === me.id); return th ? <Link to={`/room/${th.id}`} className="block"><Button variant="outline" className="w-full"><LayoutDashboard size={16} /> Deal Room</Button></Link> : null })()}
                 {myLoi && <Link to={`/contract/loi/${myLoi.id}`} className="block text-center text-sm font-semibold text-brand-500">{t('detail.viewMyOffer')}</Link>}
                 <div className="flex gap-2 pt-1">
-                  <Button variant="ghost" size="sm" className="flex-1" onClick={() => run(() => listings.toggleFavorite(l.id))}><Heart size={14} className={cls(fav && 'fill-red-500 text-red-500')} /> {t('detail.save')}</Button>
+                  <Button variant="ghost" size="sm" className="flex-1" onClick={() => run(() => { listings.toggleFavorite(l.id); toast(t(fav ? 'toast.unsaved' : 'toast.saved')) })}><Heart size={14} className={cls(fav && 'fill-red-500 text-red-500')} /> {t('detail.save')}</Button>
                   <Button variant="ghost" size="sm" className="flex-1" onClick={() => (me ? setReportOpen(true) : needLogin())}><Flag size={14} /> {t('detail.report')}</Button>
                 </div>
               </div>
