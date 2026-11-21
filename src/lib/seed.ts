@@ -2,7 +2,7 @@ import type { DB, Listing, Plan, User } from './types'
 import { coverPhoto, coverSvg, unsplash } from './covers'
 import { demoHash, DAY } from './utils'
 
-export const DB_VERSION = 7
+export const DB_VERSION = 8
 
 /** Cover photo matched to each seeded listing (same order as `raw`); extra gallery shots come from the category. */
 const LISTING_COVERS = [
@@ -20,7 +20,7 @@ export const DEMO_ACCOUNTS = [
 ] as const
 
 const plans: Plan[] = [
-  { id: 'seller-free', audience: 'seller', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: null, feePercent: 3, ndaLimitPerMonth: null, featured: false, alerts: false, active: true },
+  { id: 'seller-free', audience: 'seller', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: null, feePercent: 4.5, ndaLimitPerMonth: null, featured: false, alerts: false, active: true },
   { id: 'seller-pro', audience: 'seller', name: { th: 'Pro', en: 'Pro' }, priceTHB: 990, priceUSD: 29, listingLimit: 5, feePercent: 2, ndaLimitPerMonth: null, featured: true, alerts: false, active: false },
   { id: 'seller-business', audience: 'seller', name: { th: 'Business', en: 'Business' }, priceTHB: 2990, priceUSD: 89, listingLimit: null, feePercent: 1, ndaLimitPerMonth: null, featured: true, alerts: false, active: false },
   { id: 'buyer-free', audience: 'buyer', name: { th: 'Free', en: 'Free' }, priceTHB: 0, priceUSD: 0, listingLimit: null, feePercent: 0, ndaLimitPerMonth: 3, featured: false, alerts: false, active: true },
@@ -147,6 +147,7 @@ export function makeSeed(): DB {
     ],
     lois: [],
     deals: [],
+    roomDocs: [],
     invoices: [],
     payments: [],
     threads: [

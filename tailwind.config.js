@@ -25,10 +25,14 @@ export default {
       keyframes: {
         rise: { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'none' } },
         sheet: { from: { transform: 'translateY(100%)' }, to: { transform: 'none' } },
+        swap: { from: { opacity: '0', transform: 'translateY(14px)' }, to: { opacity: '1', transform: 'none' } },
+        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
       },
       animation: {
         rise: 'rise 500ms cubic-bezier(0.16,1,0.3,1) both',
         sheet: 'sheet 220ms cubic-bezier(0.16,1,0.3,1)',
+        swap: 'swap 400ms cubic-bezier(0.16,1,0.3,1) both',
+        float: 'float 5.5s ease-in-out infinite',
       },
     },
   },

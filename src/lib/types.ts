@@ -154,7 +154,24 @@ export interface Deal {
   invoiceId?: string
   /** Simulated transaction status (no real money moves through the prototype). */
   transaction?: { buyerPaidAt?: number; sellerReceivedAt?: number }
+  /** Due diligence completed by the buyer (stage 5). */
+  dd?: { by: string; at: number; note: string }
+  /** Sale contract signed by each party (stage 6) — name + time are the evidence. */
+  contract?: { buyer?: Signature; seller?: Signature }
+  /** Buyer confirms the business was handed over (end of stage 7). */
+  handoverAt?: number
   createdAt: number
+}
+
+/** A file shared inside a Deal Room. `access` decides who may open it, checked in store.roomDocsFor. */
+export interface DealDoc {
+  id: string
+  threadId: string
+  file: FileAsset
+  by: string
+  /** nda = visible once the buyer's NDA is approved; deal = only after an LOI is accepted. */
+  access: 'nda' | 'deal'
+  at: number
 }
 
 export interface Invoice {
@@ -277,6 +294,7 @@ export interface DB {
   ndas: Nda[]
   lois: Loi[]
   deals: Deal[]
+  roomDocs: DealDoc[]
   invoices: Invoice[]
   payments: Payment[]
   threads: Thread[]
