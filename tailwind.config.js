@@ -33,6 +33,8 @@ export default {
         page: { from: { opacity: '0', transform: 'translateY(10px)' }, to: { opacity: '1', transform: 'none' } },
         swap: { from: { opacity: '0', transform: 'translateX(18px) scale(.98)' }, to: { opacity: '1', transform: 'none' } },
         bump: { '0%,100%': { transform: 'none' }, '40%': { transform: 'scale(1.28) rotate(-8deg)' } },
+        turn: { from: { opacity: '0', transform: 'rotateY(-80deg) scale(.9)' }, to: { opacity: '1', transform: 'none' } },
+        flip: { from: { opacity: '0', transform: 'rotateX(-150deg) scale(.9)' }, to: { opacity: '1', transform: 'none' } },
       },
       animation: {
         rise: 'rise 700ms cubic-bezier(0.16,1,0.3,1) both',
@@ -44,6 +46,8 @@ export default {
         page: 'page 450ms cubic-bezier(0.16,1,0.3,1) both',
         swap: 'swap 500ms cubic-bezier(0.16,1,0.3,1) both',
         bump: 'bump 450ms cubic-bezier(0.16,1,0.3,1)',
+        turn: 'turn 800ms cubic-bezier(0.16,1,0.3,1) both',
+        flip: 'flip 900ms cubic-bezier(0.16,1,0.3,1) both',
       },
     },
   },

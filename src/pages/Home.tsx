@@ -1,7 +1,7 @@
 import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
+import { Shoe, ShoeFlat } from '../components/Shoe'
 import { ConditionBar, Container, FakeQR, GradeBadge, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
 import { COLORS, GRADES, PRODUCT } from '../lib/catalog'
 import { baht, preownedPrice } from '../lib/pricing'
@@ -196,19 +196,34 @@ const FLOW = [
 ]
 
 const STORY = [
-  { t: 'Old Pair', h: 'คู่เดิม เท้าโตแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แต่คับเกินไปสำหรับเทอมหน้า' },
-  { t: 'Condition Check', h: 'ตรวจสภาพ 5 จุด', d: 'ยืนยันว่าซื้อจากเราด้วย QR ใต้ลิ้น แล้วเช็กหนัง พื้น แผ่นรอง ตะเข็บ เชือก' },
-  { t: '75%+ Approved', h: 'ผ่านเกณฑ์ 75%', d: 'คู่นี้ได้ 94% เกรด A ต่ำกว่า 75% ร้านไม่รับเทิร์น' },
-  { t: '10–15% Trade-in', h: 'ลดทันที 15%', d: '90–100% ลด 15% · 75–89% ลด 10% หักจากคู่ใหม่ในบิลเดียวกัน ไม่มีคูปอง' },
-  { t: 'New Pair', h: 'คู่ใหม่ ไซซ์ใหม่', d: 'ไรเดอร์ส่งคู่ใหม่ แล้วรับคู่เก่ากลับไปในรอบเดียว' },
-  { t: 'Trade-in', h: 'คู่เก่ากลับถึงร้าน', d: 'ปิดถุงพร้อมแท็ก Product ID เข้าคิวรอตรวจ' },
-  { t: 'Clean', h: 'ล้างและขัดใหม่', d: 'ล้างคราบ ขัดเงาหนัง เปลี่ยนเชือกใหม่' },
-  { t: 'Sanitize', h: 'อบโอโซนฆ่าเชื้อ', d: 'ฆ่าเชื้อด้านในทั้งคู่ เปลี่ยนแผ่นรองใหม่' },
-  { t: 'Quality Check', h: 'ตรวจรอบสุดท้าย', d: 'ช่างตรวจซ้ำ 5 จุด ให้เกรด และถ่ายรูปจริงก่อนขึ้นร้าน' },
-  { t: 'Pre-owned', h: 'ขึ้นร้านมือสอง', d: 'บอกสภาพเป็นเปอร์เซ็นต์ ราคาเบาใจกว่าคู่ใหม่เกือบครึ่ง' },
-  { t: 'Next Student', h: 'ก้าวต่อกับรุ่นน้อง', d: 'หนึ่งคู่ สองเจ้าของ และยังเทิร์นต่อได้อีกครั้ง' },
-]
-const CHAPTER_SPLIT = 5 // steps before this are the customer's trade-in, the rest is the old pair's journey
+  { id: 'old', t: 'Old Pair', h: 'คู่เดิม เท้าโตแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แต่คับเกินไปสำหรับเทอมหน้า' },
+  { id: 'verify', t: 'Verify', h: 'ยืนยันว่าซื้อจากเรา', d: 'สแกน QR ใต้ลิ้น ระบบเจอในประวัติการขายทันที' },
+  { id: 'upper', t: 'Check 1/5', h: 'หนังด้านบน', d: 'ส่องจากด้านบน หารอยถลอก รอยย่น และสีลอก' },
+  { id: 'sole', t: 'Check 2/5', h: 'พื้นรองเท้า', d: 'พลิกดูดอกยาง จุดสึกใต้ฝ่าเท้าและส้น พื้นหลุดหรืออ้า' },
+  { id: 'insole', t: 'Check 3/5', h: 'แผ่นรองด้านใน', d: 'ส่องเข้าด้านใน แผ่นรองยุบ ขาด หรือมีกลิ่นติดแน่นไหม' },
+  { id: 'stitch', t: 'Check 4/5', h: 'ตะเข็บและทรง', d: 'ไล่ตะเข็บรอบตัว ดูทรงเบี้ยวและส้นยุบ' },
+  { id: 'laces', t: 'Check 5/5', h: 'เชือกและรูร้อย', d: 'รูร้อยครบ ไม่หลุด เชือกไม่ขาด' },
+  { id: 'approved', t: '75%+ Approved', h: 'ผ่านเกณฑ์ 75%', d: 'คู่นี้ได้ 94% เกรด A ต่ำกว่า 75% ร้านไม่รับเทิร์น' },
+  { id: 'discount', t: '10–15% Trade-in', h: 'ลดทันที 15%', d: '90–100% ลด 15% · 75–89% ลด 10% หักจากคู่ใหม่ในบิลเดียวกัน ไม่มีคูปอง' },
+  { id: 'new', t: 'New Pair', h: 'คู่ใหม่ ไซซ์ใหม่', d: 'ไรเดอร์ส่งคู่ใหม่ แล้วรับคู่เก่ากลับไปในรอบเดียว' },
+  { id: 'back', t: 'Trade-in', h: 'คู่เก่ากลับถึงร้าน', d: 'ปิดถุงพร้อมแท็ก Product ID เข้าคิวรอตรวจ' },
+  { id: 'clean', t: 'Clean', h: 'ล้างและขัดใหม่', d: 'ล้างคราบ ขัดเงาหนัง เปลี่ยนเชือกใหม่' },
+  { id: 'sanitize', t: 'Sanitize', h: 'อบโอโซนฆ่าเชื้อ', d: 'ฆ่าเชื้อด้านในทั้งคู่ เปลี่ยนแผ่นรองใหม่' },
+  { id: 'qc', t: 'Quality Check', h: 'ตรวจรอบสุดท้าย', d: 'ช่างตรวจซ้ำ 5 จุด ให้เกรด และถ่ายรูปจริงก่อนขึ้นร้าน' },
+  { id: 'preowned', t: 'Pre-owned', h: 'ขึ้นร้านมือสอง', d: 'บอกสภาพเป็นเปอร์เซ็นต์ ราคาเบาใจกว่าคู่ใหม่เกือบครึ่ง' },
+  { id: 'next', t: 'Next Student', h: 'ก้าวต่อกับรุ่นน้อง', d: 'หนึ่งคู่ สองเจ้าของ และยังเทิร์นต่อได้อีกครั้ง' },
+] as const
+type StepId = (typeof STORY)[number]['id']
+const CHAPTER_SPLIT = STORY.findIndex((s) => s.id === 'back') // before: the customer's trade-in; after: the old pair's journey
+
+// Five-point check as a camera move around the pair: top → flip to sole → into the opening → back to the side → laces.
+const CHECKS: Partial<Record<StepId, { view: 'top' | 'sole' | 'side'; zoom: number; origin: string; part: string }>> = {
+  upper: { view: 'top', zoom: 1, origin: '50% 50%', part: 'upper' },
+  sole: { view: 'sole', zoom: 1, origin: '50% 50%', part: 'sole' },
+  insole: { view: 'top', zoom: 2, origin: '24% 50%', part: 'insole' },
+  stitch: { view: 'side', zoom: 1.7, origin: '12% 62%', part: 'stitch' },
+  laces: { view: 'top', zoom: 2.2, origin: '64% 50%', part: 'laces' },
+}
 
 /** Sticky, scroll-driven walk through one pair's trade-in. Scroll position picks the step; CSS transitions do the motion. */
 function TradeInStory() {
@@ -233,15 +248,27 @@ function TradeInStory() {
       removeEventListener('resize', update)
     }
   }, [])
+  const at = STORY[step].id
+  const check = CHECKS[at]
+  const checkIdx = CHECKLIST.findIndex((c) => c.id === check?.part)
   const move = 'transition-[transform,opacity] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none'
   const show = (on: boolean, off = 'translate-y-3') => (on ? 'opacity-100 translate-y-0' : `pointer-events-none opacity-0 ${off}`)
-  // where the old pair sits at each step: steps aside for the check, leaves for the new pair, comes back for its own journey
-  const oldPair = ['', '-translate-x-[14%] scale-90', '-translate-x-[14%] scale-90', '-translate-x-[14%] scale-[.85] opacity-30', '-translate-x-[130%] scale-90 opacity-0', '', '', '', '-translate-x-[8%] scale-95', 'scale-95', 'translate-x-[10%] scale-90'][step]
-  const wear = step <= 5 ? 22 : step === 6 ? 12 : step === 7 ? 6 : 3
+  // where the old pair sits: aside for verify, hidden while the camera inspects, leaves for the new pair, back for its own journey
+  const oldPair: Partial<Record<StepId, string>> = {
+    verify: '-translate-x-[14%] scale-90',
+    approved: '-translate-x-[14%] scale-90',
+    discount: '-translate-x-[14%] scale-[.85] opacity-30',
+    new: '-translate-x-[130%] scale-90 opacity-0',
+    qc: '-translate-x-[8%] scale-95',
+    preowned: 'scale-95',
+    next: 'translate-x-[10%] scale-90',
+  }
+  const oldClass = check ? 'scale-75 opacity-0' : (oldPair[at] ?? '')
+  const wear = at === 'clean' ? 12 : at === 'sanitize' ? 6 : ['qc', 'preowned', 'next'].includes(at) ? 3 : 22
   const discount = Math.round(PRODUCT.price * 0.15)
   const yours = step < CHAPTER_SPLIT
   return (
-    <section ref={ref} aria-label="เส้นทางของรองเท้าหนึ่งคู่" className="relative" style={{ height: `${STORY.length * 55}vh` }}>
+    <section ref={ref} aria-label="เส้นทางของรองเท้าหนึ่งคู่" className="relative" style={{ height: `${STORY.length * 50}vh` }}>
       <div className="sticky top-16 flex h-[calc(100dvh-4rem)] items-center overflow-hidden">
         <Container className="grid items-center gap-6 lg:grid-cols-[1fr_1.25fr] lg:gap-16">
           <div>
@@ -250,7 +277,7 @@ function TradeInStory() {
             </p>
             <div className="mt-3 grid">
               {STORY.map((s, i) => (
-                <div key={s.h} className={`[grid-area:1/1] ${move} ${show(step === i)}`} aria-hidden={step !== i}>
+                <div key={s.id} className={`[grid-area:1/1] ${move} ${show(step === i)}`} aria-hidden={step !== i}>
                   <h2 className="font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl" style={display}>
                     {s.h}
                   </h2>
@@ -258,17 +285,19 @@ function TradeInStory() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 grid grid-cols-[5fr_6fr] gap-3" aria-hidden>
-              {[
-                ['การเทิร์นของคุณ', 0, CHAPTER_SPLIT],
-                ['เส้นทางของคู่เก่า', CHAPTER_SPLIT, STORY.length],
-              ].map(([label, from, to]) => (
-                <div key={label as string}>
-                  <p className={`mb-2 text-xs font-semibold transition-colors ${(label === 'การเทิร์นของคุณ') === yours ? 'text-ink' : 'text-sub'}`}>{label}</p>
+            <div className="mt-6 grid gap-3" style={{ gridTemplateColumns: `${CHAPTER_SPLIT}fr ${STORY.length - CHAPTER_SPLIT}fr` }} aria-hidden>
+              {(
+                [
+                  ['การเทิร์นของคุณ', 0, CHAPTER_SPLIT, true],
+                  ['เส้นทางของคู่เก่า', CHAPTER_SPLIT, STORY.length, false],
+                ] as const
+              ).map(([label, from, to, mine]) => (
+                <div key={label}>
+                  <p className={`mb-2 text-xs font-semibold transition-colors ${mine === yours ? 'text-ink' : 'text-sub'}`}>{label}</p>
                   <div className="flex gap-1">
-                    {STORY.slice(from as number, to as number).map((s, k) => (
-                      <span key={s.h} className="h-1 flex-1 overflow-hidden rounded-full bg-line">
-                        <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${(from as number) + k <= step ? 'scale-x-100' : 'scale-x-0'}`} />
+                    {STORY.slice(from, to).map((s, k) => (
+                      <span key={s.id} className="h-1 flex-1 overflow-hidden rounded-full bg-line">
+                        <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${from + k <= step ? 'scale-x-100' : 'scale-x-0'}`} />
                       </span>
                     ))}
                   </div>
@@ -277,23 +306,39 @@ function TradeInStory() {
             </div>
           </div>
 
-          <div className="relative aspect-[4/3] max-h-[50dvh] w-full overflow-hidden rounded-3xl bg-stone lg:max-h-none" aria-hidden>
+          <div className="relative aspect-[4/3] max-h-[50dvh] w-full overflow-hidden rounded-3xl bg-stone [perspective:1200px] lg:max-h-none" aria-hidden>
             <div className="absolute inset-0 grid place-items-center">
-              <div className={`w-[78%] ${move} ${oldPair}`}>
+              <div className={`w-[78%] ${move} ${oldClass}`}>
                 <Shoe color="black" wear={wear} seed={11} className="w-full" />
               </div>
             </div>
             <div className="absolute inset-0 grid place-items-center">
-              <div className={`w-[78%] ${move} ${step === 4 ? '' : 'translate-x-[130%] opacity-0'}`}>
+              <div className={`w-[78%] ${move} ${at === 'new' ? '' : 'translate-x-[130%] opacity-0'}`}>
                 <Shoe color="black" className="w-full" />
               </div>
             </div>
 
-            {(step === 1 || step === 6 || step === 7) && (
-              <span className={`absolute inset-0 animate-scan bg-gradient-to-b from-transparent ${step === 1 ? 'via-signal/20' : step === 6 ? 'via-white/40' : 'via-ok/20'} to-transparent`} />
+            {/* inspection camera: a view change turns/flips the pair, a zoom change glides to the part */}
+            {check && (
+              <div className="absolute inset-0 grid place-items-center [transform-style:preserve-3d]">
+                <div key={check.view} className={`w-[78%] ${check.view === 'sole' ? 'animate-flip' : 'animate-turn'}`}>
+                  <div className={`${move}`} style={{ transform: `scale(${check.zoom})`, transformOrigin: check.origin }}>
+                    {check.view === 'side' ? <Shoe color="black" wear={22} seed={11} className="w-full" /> : <ShoeFlat color="black" side={check.view} wear={22} className="w-full" />}
+                  </div>
+                </div>
+              </div>
             )}
-            <Tag on={step === 0} at="left-4 top-4">EU 36 · ใส่มา 1 ปี</Tag>
-            <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(step === 1, '-translate-y-3')}`}>
+
+            {(at === 'verify' || check || at === 'clean' || at === 'sanitize') && (
+              <span className={`absolute inset-0 animate-scan bg-gradient-to-b from-transparent ${at === 'clean' ? 'via-white/40' : at === 'sanitize' ? 'via-ok/20' : 'via-signal/20'} to-transparent`} />
+            )}
+            <Tag on={at === 'old'} at="left-4 top-4">
+              EU 36 · ใส่มา 1 ปี
+            </Tag>
+            <Tag on={!!check} at="left-4 top-4" dark>
+              ตรวจ {checkIdx + 1}/5 · {CHECKLIST[Math.max(0, checkIdx)].label}
+            </Tag>
+            <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(at === 'verify', '-translate-y-3')}`}>
               <FakeQR value="KW-BK36-240117" size={44} />
               <div className="text-xs">
                 <p className="font-semibold tabular">KW-BK36-240117</p>
@@ -303,52 +348,62 @@ function TradeInStory() {
               </div>
             </div>
             <ul className="absolute inset-x-4 bottom-4 flex flex-wrap gap-1.5">
-              {CHECKLIST.map((c, i) => (
-                <li
-                  key={c.id}
-                  className={`flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-xs font-medium ${move} ${show(step === 1 || step === 8, 'translate-y-2')}`}
-                  style={{ transitionDelay: step === 1 || step === 8 ? `${i * 90}ms` : '0ms' }}
-                >
-                  <Check size={12} className="text-ok" /> {c.label}
-                </li>
-              ))}
+              {CHECKLIST.map((c, i) => {
+                const current = i === checkIdx
+                const done = at === 'qc' || (check && i < checkIdx)
+                return (
+                  <li
+                    key={c.id}
+                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${move} ${current ? 'bg-ink text-paper' : 'bg-card'} ${show(!!check || at === 'qc', 'translate-y-2')}`}
+                    style={{ transitionDelay: at === 'qc' ? `${i * 90}ms` : '0ms' }}
+                  >
+                    {done ? <Check size={12} className="text-ok" /> : <span className={`h-1.5 w-1.5 rounded-full ${current ? 'bg-signal' : 'bg-line'}`} />} {c.label}
+                  </li>
+                )
+              })}
             </ul>
-            <div className={`absolute inset-x-6 bottom-6 rounded-2xl bg-card p-4 shadow-lg ${move} ${show(step === 2, 'translate-y-4')}`}>
+            <div className={`absolute inset-x-6 bottom-6 rounded-2xl bg-card p-4 shadow-lg ${move} ${show(at === 'approved', 'translate-y-4')}`}>
               <div className="flex items-end justify-between">
                 <span className="flex items-center gap-1.5 text-sm font-semibold text-ok">
                   <Check size={16} /> ผ่านเกณฑ์
                 </span>
                 <span className="font-display text-4xl font-black" style={display}>
-                  <Num value={step >= 2 ? 94 : 0} format={(n) => `${n}%`} />
+                  <Num value={step >= STORY.findIndex((s) => s.id === 'approved') ? 94 : 0} format={(n) => `${n}%`} />
                 </span>
               </div>
               <div className="mt-3">
-                <ConditionBar pct={step >= 2 ? 94 : 0} />
+                <ConditionBar pct={at === 'approved' ? 94 : 0} />
               </div>
             </div>
-            <div className={`absolute inset-0 grid place-items-center ${move} ${step === 3 ? 'scale-100 opacity-100' : 'pointer-events-none scale-90 opacity-0'}`}>
+            <div className={`absolute inset-0 grid place-items-center ${move} ${at === 'discount' ? 'scale-100 opacity-100' : 'pointer-events-none scale-90 opacity-0'}`}>
               <div className="text-center">
                 <p className="font-display text-7xl font-black text-signal sm:text-8xl" style={display}>
                   −15%
                 </p>
                 <p className="mt-1 font-semibold">
-                  {baht(PRODUCT.price)} → <Num value={step >= 3 ? PRODUCT.price - discount : PRODUCT.price} format={baht} />
+                  {baht(PRODUCT.price)} → <Num value={at === 'discount' ? PRODUCT.price - discount : PRODUCT.price} format={baht} />
                 </p>
               </div>
             </div>
-            <Tag on={step === 4} at="left-4 top-4" dark>
+            <Tag on={at === 'new'} at="left-4 top-4" dark>
               New · EU 37
             </Tag>
-            <Tag on={step === 5} at="left-4 top-4">รับคู่เก่ากลับแล้ว</Tag>
-            <Tag on={step === 6} at="left-4 top-4">Clean · ล้าง ขัด เปลี่ยนเชือก</Tag>
-            <Tag on={step === 7} at="left-4 top-4">Sanitize · อบโอโซน</Tag>
-            <div className={`absolute left-4 top-4 ${move} ${show(step >= 8, '-translate-y-3')}`}>
+            <Tag on={at === 'back'} at="left-4 top-4">
+              รับคู่เก่ากลับแล้ว
+            </Tag>
+            <Tag on={at === 'clean'} at="left-4 top-4">
+              Clean · ล้าง ขัด เปลี่ยนเชือก
+            </Tag>
+            <Tag on={at === 'sanitize'} at="left-4 top-4">
+              Sanitize · อบโอโซน
+            </Tag>
+            <div className={`absolute left-4 top-4 ${move} ${show(['qc', 'preowned', 'next'].includes(at), '-translate-y-3')}`}>
               <GradeBadge grade="A" pct={94} />
             </div>
-            <Tag on={step >= 9} at="bottom-4 right-4" dark>
+            <Tag on={at === 'preowned' || at === 'next'} at="bottom-4 right-4" dark>
               Pre-owned {baht(preownedPrice(PRODUCT.price, 'A'))}
             </Tag>
-            <Tag on={step === 10} at="right-4 top-4">
+            <Tag on={at === 'next'} at="right-4 top-4">
               ส่งต่อให้รุ่นน้อง ป.6
             </Tag>
           </div>

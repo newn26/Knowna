@@ -161,7 +161,9 @@ body {
   .animate-rise,
   .animate-sheet,
   .animate-page,
-  .animate-swap {
+  .animate-swap,
+  .animate-turn,
+  .animate-flip {
     animation-name: fade !important;
   }
   .reveal {

@@ -160,3 +160,68 @@ export function Shoe({
     </svg>
   )
 }
+
+// Top-down and underside views for the inspection walkthrough (same palette, toe to the right).
+const OUTLINE = 'M30 100 C30 58 62 40 112 36 C190 30 300 34 352 52 C384 64 396 84 396 100 C396 116 384 136 352 148 C300 166 190 170 112 164 C62 160 30 142 30 100 Z'
+const UPPER_TOP = 'M38 100 C38 63 67 47 113 43 C190 37 298 41 348 58 C377 69 388 86 388 100 C388 114 377 131 348 142 C298 159 190 163 113 157 C67 153 38 137 38 100 Z'
+
+export function ShoeFlat({ color, side, wear = 0, className = '', label }: { color: ColorId; side: 'top' | 'sole'; wear?: number; className?: string; label?: string }) {
+  const p = PALETTE[color]
+  const id = 'flat' + useId().replace(/:/g, '')
+  const eyes = [180, 202, 224, 246]
+  return (
+    <svg viewBox="0 0 420 200" className={className} role="img" aria-label={label ?? (side === 'top' ? 'มุมบนของรองเท้า' : 'พื้นรองเท้า')}>
+      <defs>
+        <linearGradient id={`${id}-g`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={p.counter} />
+          <stop offset="0.5" stopColor={p.hi} />
+          <stop offset="1" stopColor={p.counter} />
+        </linearGradient>
+        <clipPath id={`${id}-c`}>
+          <path d={OUTLINE} />
+        </clipPath>
+      </defs>
+      <ellipse cx="214" cy="178" rx="180" ry="9" fill="#000" opacity=".12" />
+      <path d={OUTLINE} fill={side === 'top' ? p.sole : p.edge} stroke={p.outline} strokeOpacity=".35" />
+      {side === 'top' ? (
+        <>
+          <path d={UPPER_TOP} fill={`url(#${id}-g)`} stroke={p.outline} strokeOpacity=".4" />
+          <path d={UPPER_TOP} fill="none" stroke={p.stitch} strokeWidth="1.2" strokeDasharray="4 3" transform="translate(214 100) scale(.93) translate(-214 -100)" />
+          <path d="M318 50 C300 72 300 128 318 150" stroke={p.outline} strokeOpacity=".45" strokeWidth="1.3" fill="none" />
+          <ellipse cx="116" cy="100" rx="60" ry="36" fill={p.lining} stroke={p.outline} strokeOpacity=".4" />
+          <ellipse cx="118" cy="100" rx="51" ry="28" fill={p.lining} opacity=".75" />
+          <text x="118" y="104" textAnchor="middle" fontSize="11" fontWeight="700" fill={p.stitch} opacity=".9">
+            KAOWNA
+          </text>
+          <path d="M168 82 L262 86 C271 90 271 110 262 114 L168 118 Z" fill={p.tongue} stroke={p.outline} strokeOpacity=".3" />
+          {eyes.map((x) => (
+            <g key={x}>
+              <path d={`M${x} 76 L${x + 22} 124 M${x} 124 L${x + 22} 76`} stroke={p.lace} strokeWidth="4" strokeLinecap="round" />
+              <circle cx={x} cy="76" r="3" fill={p.eyelet} />
+              <circle cx={x} cy="124" r="3" fill={p.eyelet} />
+            </g>
+          ))}
+          <ellipse cx="350" cy="88" rx="26" ry="9" fill="#fff" opacity={color === 'white' ? 0.5 : 0.15} />
+        </>
+      ) : (
+        <g clipPath={`url(#${id}-c)`}>
+          {/* heel block, then chevron tread toward the toe */}
+          <rect x="20" y="20" width="102" height="170" fill={p.sole} />
+          {Array.from({ length: 9 }, (_, i) => (
+            <line key={i} x1="30" x2="120" y1={44 + i * 14} y2={44 + i * 14} stroke={p.edge} strokeWidth="4" />
+          ))}
+          <rect x="122" y="20" width="290" height="170" fill={p.sole} opacity=".85" />
+          {Array.from({ length: 19 }, (_, i) => (
+            <path key={i} d={`M${134 + i * 14} 40 l 9 60 l -9 60`} stroke={p.edge} strokeWidth="4" fill="none" />
+          ))}
+          <text x="250" y="105" textAnchor="middle" fontSize="12" fontWeight="800" fill={p.edge} letterSpacing="2">
+            KAOWNA
+          </text>
+          {/* worn patches under the ball of the foot and the heel */}
+          <ellipse cx="300" cy="100" rx="40" ry="30" fill="#fff" opacity={Math.min(0.18, wear / 120)} />
+          <ellipse cx="72" cy="100" rx="30" ry="26" fill="#fff" opacity={Math.min(0.15, wear / 140)} />
+        </g>
+      )}
+    </svg>
+  )
+}
