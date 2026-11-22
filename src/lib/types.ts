@@ -109,5 +109,4 @@ export interface User {
   phone: string
   email: string
   address: string
-  addressParts?: AddressParts // prefills the checkout form
 }

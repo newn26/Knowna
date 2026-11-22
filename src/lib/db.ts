@@ -35,7 +35,6 @@ export const DEMO_USER: User = {
   phone: '0812345678',
   email: 'napa@example.com',
   address: '99/12 ซ.ลาดพร้าว 71 แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพมหานคร 10230',
-  addressParts: { line: '99/12 ซ.ลาดพร้าว 71', subdistrict: 'ลาดพร้าว', district: 'ลาดพร้าว', province: 'กรุงเทพมหานคร', zip: '10230' },
 }
 
 function seed(): DB {

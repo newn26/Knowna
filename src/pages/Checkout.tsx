@@ -26,17 +26,8 @@ export default function Checkout() {
   const tradeIns = useStore((s) => s.tradeIns)
   const user = useStore((s) => s.user)
   const navigate = useNavigate()
-  const a = user?.addressParts
-  const [form, setForm] = useState({
-    name: user?.name ?? '',
-    phone: user?.phone ?? '',
-    email: user?.email ?? '',
-    line: a?.line ?? '',
-    subdistrict: a?.subdistrict ?? '',
-    district: a?.district ?? '',
-    province: a?.province ?? '',
-    zip: a?.zip ?? '',
-  })
+  // every field starts empty; placeholders are only faint hints
+  const [form, setForm] = useState({ name: '', phone: '', email: '', line: '', subdistrict: '', district: '', province: '', zip: '' })
   const [fulfilment, setFulfilment] = useState<Fulfilment>('delivery')
   const [store, setStore] = useState(STORES[0])
   const [payment, setPayment] = useState<Payment>('promptpay')
