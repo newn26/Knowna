@@ -1,63 +1,61 @@
 import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
-import { PHOTOS } from '../lib/photos'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe, ShoeFlat } from '../components/Shoe'
-import { ConditionBar, Container, FakeQR, GradeBadge, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
-import { COLORS, GRADES, PRODUCT } from '../lib/catalog'
+import { Shoe } from '../components/Shoe'
+import { ConditionBar, Container, LinkButton, Num, useReveal } from '../components/ui'
+import { GRADES, PRODUCT, SIZES } from '../lib/catalog'
+import { PHOTO } from '../lib/photos'
 import { baht, preownedPrice } from '../lib/pricing'
 import { CHECKLIST, gradeFor, rateFor } from '../lib/tradein'
-import type { ColorId } from '../lib/types'
 
 const display = { fontStretch: '78%' } as const
 
 function Hero() {
-  const [color, setColor] = useState<ColorId>('black')
   return (
     <section className="relative overflow-hidden">
       <Container className="grid items-center gap-8 pb-12 pt-8 lg:grid-cols-[1fr_1.15fr] lg:pb-24 lg:pt-14">
         {/* phones: headline → shoe → copy (display:contents lets the shoe slot between); desktop keeps two columns */}
         <div className="contents lg:relative lg:z-10 lg:block">
           <div className="relative z-10 order-1">
-          <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-xs font-medium">
-            <span className="h-1.5 w-1.5 rounded-full bg-signal" />
-            เอาคู่เก่ามาเทิร์น ลดคู่ใหม่ทันทีในบิลเดียว
-          </p>
-          <h1 className="mt-6 font-display text-[clamp(3.2rem,11vw,8.5rem)] font-black uppercase leading-[0.84] tracking-tightest [word-spacing:0.14em]" style={display}>
-            <span className="block animate-rise [animation-delay:80ms]">Step up.</span>
-            <span className="block animate-rise [animation-delay:180ms]">
-              <span className="text-sub/70">Pass it</span> on<span className="text-signal">.</span>
-            </span>
-          </h1>
+            <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-xs font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-signal" />
+              เอาคู่เก่ามาเทิร์น ลดคู่ใหม่ทันทีในบิลเดียว
+            </p>
+            <h1 className="mt-6 font-display text-[clamp(3.2rem,11vw,8.5rem)] font-black uppercase leading-[0.84] tracking-tightest [word-spacing:0.14em]" style={display}>
+              <span className="block animate-rise [animation-delay:80ms]">Step up.</span>
+              <span className="block animate-rise [animation-delay:180ms]">
+                <span className="text-sub/70">Pass it</span> on<span className="text-signal">.</span>
+              </span>
+            </h1>
           </div>
           <div className="order-3">
-          <p className="mt-2 max-w-md lg:mt-6 animate-rise text-lg text-sub [animation-delay:160ms]">
-            รองเท้านักเรียนชายรุ่นเดียว ทำให้ดีที่สุด ใส่ได้ตั้งแต่ ป.1 ถึง ม.6 พอเท้าโต เอาคู่เดิมมาเทิร์นรับส่วนลด <b className="text-ink">สูงสุด 15%</b> แล้วคู่นั้นจะถูกล้าง ตรวจ และส่งต่อให้รุ่นน้อง
-          </p>
-          <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:240ms]">
-            <LinkButton to="/shop" size="lg">
-              Shop Now <ArrowRight size={18} />
-            </LinkButton>
-            <LinkButton to="/trade-in" size="lg" variant="outline">
-              Trade-in คู่เก่า
-            </LinkButton>
-          </div>
-          <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
-            {(
-              [
-                [PRODUCT.price, baht, 'คู่ใหม่'],
-                [15, (n: number) => `${n}%`, 'ส่วนลดเทิร์นสูงสุด'],
-                [preownedPrice(PRODUCT.price, 'B'), (n: number) => `${baht(n)}+`, 'Pre-owned'],
-              ] as const
-            ).map(([v, f, l]) => (
-              <div key={l}>
-                <dt className="font-display text-2xl font-black" style={display}>
-                  <Num from={0} value={v} format={f} />
-                </dt>
-                <dd className="text-xs text-sub">{l}</dd>
-              </div>
-            ))}
-          </dl>
+            <p className="mt-2 max-w-md animate-rise text-lg text-sub [animation-delay:160ms] lg:mt-6">
+              รองเท้าผ้าใบนักเรียนชาย ป.1–ป.6 พอเท้าลูกโต เอาคู่เดิมมาเทิร์นรับส่วนลด <b className="text-ink">สูงสุด 15%</b> แล้วคู่นั้นจะถูกซัก ตรวจ และส่งต่อให้รุ่นน้อง
+            </p>
+            <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:240ms]">
+              <LinkButton to="/shop" size="lg">
+                ซื้อคู่ใหม่ <ArrowRight size={18} />
+              </LinkButton>
+              <LinkButton to="/trade-in" size="lg" variant="outline">
+                เทิร์นคู่เก่า
+              </LinkButton>
+            </div>
+            <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
+              {(
+                [
+                  [PRODUCT.price, baht, 'คู่ใหม่'],
+                  [15, (n: number) => `${n}%`, 'ส่วนลดเทิร์นสูงสุด'],
+                  [preownedPrice(PRODUCT.price, 'B'), (n: number) => `${baht(n)}+`, 'มือสองเริ่มต้น'],
+                ] as const
+              ).map(([v, f, l]) => (
+                <div key={l}>
+                  <dt className="font-display text-2xl font-black" style={display}>
+                    <Num from={0} value={v} format={f} />
+                  </dt>
+                  <dd className="text-xs text-sub">{l}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
 
@@ -65,25 +63,8 @@ function Hero() {
           <div className="absolute inset-x-[16%] top-1/2 -z-0 aspect-square -translate-y-1/2 rounded-full bg-stone lg:inset-x-14" />
           <div className="parallax relative">
             <div className="animate-rise [animation-delay:200ms]">
-              <div key={color} className="animate-swap">
-                <Shoe color={color} view="pair" className="relative w-full animate-step drop-shadow-xl" />
-              </div>
+              <img src={PHOTO.side.src} alt={PHOTO.side.alt} className="relative w-full animate-step" />
             </div>
-          </div>
-          <div className="relative mt-4 flex items-center justify-center gap-3">
-            {COLORS.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setColor(c.id)}
-                aria-label={`ดูสี ${c.name}`}
-                aria-pressed={color === c.id}
-                className={`h-9 w-9 rounded-full ring-1 ring-inset ring-black/15 transition hover:scale-110 ${color === c.id ? 'outline outline-2 outline-offset-4 outline-ink' : ''}`}
-                style={{ background: SWATCH[c.id] }}
-              />
-            ))}
-            <span className="ml-2 w-28 text-sm font-medium">
-              {COLORS.find((c) => c.id === color)!.name} — {COLORS.find((c) => c.id === color)!.nameTh}
-            </span>
           </div>
         </div>
       </Container>
@@ -92,7 +73,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['New', 'Pre-owned', 'Trade-in', 'ป.1 – ม.6', 'EU 30 – 45', 'Black · White · Brown', 'Quality Checked']
+  const words = ['คู่ใหม่', 'มือสอง', 'เทิร์นคู่เก่า', 'ป.1 – ป.6', 'EU 28 – 40', 'ผ้าใบน้ำตาล', 'ตรวจทุกคู่']
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
@@ -107,47 +88,36 @@ function Marquee() {
   )
 }
 
-function Colors() {
+function Spotlight() {
   return (
     <section className="py-20 sm:py-28">
-      <Container>
-        <div className="reveal flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h2 className="mt-0 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
-              สามสี ครบทุกระเบียบ
-            </h2>
-          </div>
-          <Link to="/shop" className="group inline-flex items-center gap-2 text-sm font-semibold">
-            ดูทุกไซซ์ <ArrowRight size={16} className="transition group-hover:translate-x-1" />
-          </Link>
-        </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {COLORS.map((c, i) => (
-            <Link
-              key={c.id}
-              to={`/product?color=${c.id}`}
-              className="reveal group relative overflow-hidden rounded-3xl bg-stone p-6 transition duration-500 hover:-translate-y-1"
-              style={{ transitionDelay: `${i * 80}ms` }}
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-display text-3xl font-black uppercase" style={display}>
-                    {c.name}
-                  </p>
-                  <p className="text-sm text-sub">{c.hint}</p>
-                </div>
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-card transition group-hover:bg-ink group-hover:text-paper">
-                  <ArrowRight size={16} />
-                </span>
-              </div>
-              <div className="mt-6 aspect-[4/3] overflow-hidden rounded-2xl bg-card">
-                <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} loading="lazy" className="h-full w-full bg-white object-contain transition duration-700 group-hover:scale-105" />
-              </div>
-              <p className="mt-2 text-sm">
-                <b className="tabular">{baht(PRODUCT.price)}</b> <span className="text-sub">· EU 30–45</span>
-              </p>
-            </Link>
-          ))}
+      <Container className="grid items-center gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
+        <Link to="/product" className="reveal group block overflow-hidden rounded-3xl bg-stone">
+          <img src={PHOTO.pair.src} alt={PHOTO.pair.alt} loading="lazy" className="aspect-[3/2] w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
+        </Link>
+        <div className="reveal">
+          <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl" style={display}>
+            คู่เดียว ใส่ได้ทั้งเทอม
+          </h2>
+          <ul className="mt-6 space-y-3">
+            {PRODUCT.details.slice(0, 4).map((d) => (
+              <li key={d} className="flex gap-3 text-sub">
+                <Check size={18} className="mt-1 shrink-0 text-signal" />
+                {d}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-8 flex items-baseline gap-3">
+            <b className="font-display text-4xl font-black tabular" style={display}>
+              {baht(PRODUCT.price)}
+            </b>
+            <span className="text-sm text-sub">
+              EU {SIZES[0]}–{SIZES[SIZES.length - 1]} · สีน้ำตาล
+            </span>
+          </p>
+          <LinkButton to="/product" size="lg" className="mt-6">
+            เลือกไซซ์ <ArrowRight size={18} />
+          </LinkButton>
         </div>
       </Container>
     </section>
@@ -167,7 +137,7 @@ function TwoStores() {
             </h3>
             <p className="mt-3 max-w-xs text-paper/70">ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ ใช้เทิร์นได้วันที่เท้าโต</p>
           </div>
-          <Shoe color="black" className="absolute -bottom-6 -right-10 w-[78%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
+          <img src={PHOTO.side.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink">
             {baht(PRODUCT.price)} · ช้อปเลย <ArrowRight size={16} />
           </span>
@@ -179,7 +149,7 @@ function TwoStores() {
               <br />
               ที่ไม่มือสอง
             </h3>
-            <p className="mt-3 max-w-xs text-sub">ทุกคู่ผ่าน Inspection, Cleaning & Sanitizing และ Quality Check บอกสภาพเป็นเปอร์เซ็นต์ เห็นรูปจริงก่อนซื้อ</p>
+            <p className="mt-3 max-w-xs text-sub">ทุกคู่ผ่านการตรวจ 5 จุด ซัก ฆ่าเชื้อ และตรวจซ้ำ บอกสภาพเป็นเปอร์เซ็นต์ พร้อมจุดที่มีรอยใช้งาน</p>
           </div>
           <Shoe color="brown" wear={14} seed={4} className="absolute -bottom-6 -right-10 w-[78%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
@@ -192,54 +162,53 @@ function TwoStores() {
 }
 
 const FLOW = [
-  { icon: Sparkles, t: 'เลือกคู่ใหม่', d: 'สี ไซซ์ แล้วกด “Trade-in Old Pair”' },
-  { icon: ScanLine, t: 'ยืนยันว่าซื้อจากเรา', d: 'Order History, Product ID หรือสแกน QR ใต้ลิ้น' },
+  { icon: Sparkles, t: 'เลือกคู่ใหม่', d: 'เลือกไซซ์ แล้วกด “เทิร์นคู่เก่า”' },
+  { icon: ScanLine, t: 'ยืนยันว่าซื้อจากเรา', d: 'ประวัติการสั่งซื้อ, Product ID หรือสแกน QR ใต้ลิ้น' },
   { icon: ShieldCheck, t: 'ประเมินสภาพ', d: 'ตอบเช็กลิสต์ 5 จุด + แนบรูป ระบบคำนวณ % ทันที' },
   { icon: BadgeCheck, t: 'หักส่วนลดในบิลนี้', d: 'ไม่ต้องรอ ไม่มีคูปอง ไรเดอร์รับคู่เก่าตอนส่งคู่ใหม่' },
 ]
 
-const STORY = [
-  { id: 'old', t: 'Old Pair', h: 'คู่เดิม เท้าโตแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แต่คับเกินไปสำหรับเทอมหน้า' },
-  { id: 'verify', t: 'Verify', h: 'ยืนยันว่าซื้อจากเรา', d: 'สแกน QR ใต้ลิ้น ระบบเจอในประวัติการขายทันที' },
-  { id: 'upper', t: 'Check 1/5', h: 'หนังด้านบน', d: 'ส่องจากด้านบน หารอยถลอก รอยย่น และสีลอก' },
-  { id: 'sole', t: 'Check 2/5', h: 'พื้นรองเท้า', d: 'พลิกดูดอกยาง จุดสึกใต้ฝ่าเท้าและส้น พื้นหลุดหรืออ้า' },
-  { id: 'insole', t: 'Check 3/5', h: 'แผ่นรองด้านใน', d: 'ส่องเข้าด้านใน แผ่นรองยุบ ขาด หรือมีกลิ่นติดแน่นไหม' },
-  { id: 'stitch', t: 'Check 4/5', h: 'ตะเข็บและทรง', d: 'ไล่ตะเข็บรอบตัว ดูทรงเบี้ยวและส้นยุบ' },
-  { id: 'laces', t: 'Check 5/5', h: 'เชือกและรูร้อย', d: 'รูร้อยครบ ไม่หลุด เชือกไม่ขาด' },
-  { id: 'approved', t: '75%+ Approved', h: 'ผ่านเกณฑ์ 75%', d: 'คู่นี้ได้ 94% เกรด A ต่ำกว่า 75% ร้านไม่รับเทิร์น' },
-  { id: 'discount', t: '10–15% Trade-in', h: 'ลดทันที 15%', d: '90–100% ลด 15% · 75–89% ลด 10% หักจากคู่ใหม่ในบิลเดียวกัน ไม่มีคูปอง' },
-  { id: 'new', t: 'New Pair', h: 'คู่ใหม่ ไซซ์ใหม่', d: 'ไรเดอร์ส่งคู่ใหม่ แล้วรับคู่เก่ากลับไปในรอบเดียว' },
-  { id: 'back', t: 'Trade-in', h: 'คู่เก่ากลับถึงร้าน', d: 'ปิดถุงพร้อมแท็ก Product ID เข้าคิวรอตรวจ' },
-  { id: 'clean', t: 'Clean', h: 'ล้างและขัดใหม่', d: 'ล้างคราบ ขัดเงาหนัง เปลี่ยนเชือกใหม่' },
-  { id: 'sanitize', t: 'Sanitize', h: 'อบโอโซนฆ่าเชื้อ', d: 'ฆ่าเชื้อด้านในทั้งคู่ เปลี่ยนแผ่นรองใหม่' },
-  { id: 'qc', t: 'Quality Check', h: 'ตรวจรอบสุดท้าย', d: 'ช่างตรวจซ้ำ 5 จุด ให้เกรด และถ่ายรูปจริงก่อนขึ้นร้าน' },
-  { id: 'preowned', t: 'Pre-owned', h: 'ขึ้นร้านมือสอง', d: 'บอกสภาพเป็นเปอร์เซ็นต์ ราคาเบาใจกว่าคู่ใหม่เกือบครึ่ง' },
-  { id: 'next', t: 'Next Student', h: 'ก้าวต่อกับรุ่นน้อง', d: 'หนึ่งคู่ สองเจ้าของ และยังเทิร์นต่อได้อีกครั้ง' },
+const CHAPTERS = [
+  { id: 'old', label: 'คู่เดิม', h: 'เท้าโต คู่เดิมคับแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แค่ไม่พอสำหรับเทอมหน้า อย่าเพิ่งทิ้ง' },
+  { id: 'check', label: 'ตรวจ', h: 'ตรวจ 5 จุด รู้ผลทันที', d: 'สภาพ 75% ขึ้นไปรับเทิร์น ต่ำกว่านั้นส่งคืนเจ้าของ' },
+  { id: 'discount', label: 'ส่วนลด', h: 'ลดคู่ใหม่ทันที', d: '90–100% ลด 15% · 75–89% ลด 10% หักในบิลเดียวกัน ไม่มีคูปอง' },
+  { id: 'next', label: 'ส่งต่อ', h: 'ส่งต่อให้รุ่นน้อง', d: 'คู่เก่าถูกซัก อบโอโซน ตรวจซ้ำ แล้วขึ้นร้านมือสองในราคาเกือบครึ่ง' },
 ] as const
-type StepId = (typeof STORY)[number]['id']
-const CHAPTER_SPLIT = STORY.findIndex((s) => s.id === 'back') // before: the customer's trade-in; after: the old pair's journey
 
-// Five-point check as a camera move around the pair: top → flip to sole → into the opening → back to the side → laces.
-const CHECKS: Partial<Record<StepId, { view: 'top' | 'sole' | 'side'; zoom: number; origin: string; part: string }>> = {
-  upper: { view: 'top', zoom: 1, origin: '50% 50%', part: 'upper' },
-  sole: { view: 'sole', zoom: 1, origin: '50% 50%', part: 'sole' },
-  insole: { view: 'top', zoom: 2, origin: '24% 50%', part: 'insole' },
-  stitch: { view: 'side', zoom: 1.7, origin: '12% 62%', part: 'stitch' },
-  laces: { view: 'top', zoom: 2.2, origin: '64% 50%', part: 'laces' },
+// The shoe's pose along the scroll (t = 0…1): x/y in vw/vh, scale, tilt (rz) and spin (ry) in degrees.
+const POSES = [
+  { t: 0, x: 8, y: -6, s: 0.86, rz: -8, ry: 0 },
+  { t: 0.14, x: 8, y: -7, s: 0.9, rz: -6, ry: 0 },
+  { t: 0.4, x: 6, y: -10, s: 1.05, rz: 0, ry: 360 },
+  { t: 0.64, x: 24, y: -12, s: 0.6, rz: -16, ry: 360 },
+  { t: 0.86, x: 8, y: -8, s: 0.86, rz: 4, ry: 720 },
+  { t: 1, x: 60, y: -6, s: 0.7, rz: 16, ry: 720 },
+]
+const ease = (u: number) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2)
+function poseAt(p: number, sideways: number) {
+  const i = Math.max(0, POSES.findIndex((k) => k.t >= p) - 1)
+  const a = POSES[i]
+  const b = POSES[Math.min(i + 1, POSES.length - 1)]
+  const u = b.t === a.t ? 1 : ease((p - a.t) / (b.t - a.t))
+  const m = (k: 'x' | 'y' | 's' | 'rz' | 'ry') => a[k] + (b[k] - a[k]) * u
+  return `translate3d(${m('x') * sideways}vw, ${m('y')}vh, 0) rotateZ(${m('rz')}deg) rotateY(${m('ry')}deg) scale(${m('s')})`
 }
 
-/** Sticky, scroll-driven walk through one pair's trade-in. Scroll position picks the step; CSS transitions do the motion. */
+/** Full-screen, scroll-scrubbed: the pair spins and travels while four short chapters swap beside it. */
 function TradeInStory() {
   const ref = useRef<HTMLElement>(null)
-  const [step, setStep] = useState(0)
+  const shoe = useRef<HTMLDivElement>(null)
+  const [chapter, setChapter] = useState(0)
   useEffect(() => {
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     let raf = 0
     const update = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
         const r = ref.current!.getBoundingClientRect()
         const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)))
-        setStep(Math.min(STORY.length - 1, Math.floor(p * STORY.length)))
+        if (shoe.current) shoe.current.style.transform = still ? 'none' : poseAt(p, innerWidth < 640 ? 0.25 : 1) // phones: the shoe already fills the width, so travel less
+        setChapter(Math.min(CHAPTERS.length - 1, Math.floor(p * CHAPTERS.length)))
       })
     }
     update()
@@ -251,178 +220,61 @@ function TradeInStory() {
       removeEventListener('resize', update)
     }
   }, [])
-  const at = STORY[step].id
-  const check = CHECKS[at]
-  const checkIdx = CHECKLIST.findIndex((c) => c.id === check?.part)
-  const move = 'transition-[transform,opacity] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none'
-  const show = (on: boolean, off = 'translate-y-3') => (on ? 'opacity-100 translate-y-0' : `pointer-events-none opacity-0 ${off}`)
-  // where the old pair sits: aside for verify, hidden while the camera inspects, leaves for the new pair, back for its own journey
-  const oldPair: Partial<Record<StepId, string>> = {
-    verify: '-translate-x-[14%] scale-90',
-    approved: '-translate-x-[14%] scale-90',
-    discount: '-translate-x-[14%] scale-[.85] opacity-30',
-    new: '-translate-x-[130%] scale-90 opacity-0',
-    qc: '-translate-x-[8%] scale-95',
-    preowned: 'scale-95',
-    next: 'translate-x-[10%] scale-90',
-  }
-  const oldClass = check ? 'scale-75 opacity-0' : (oldPair[at] ?? '')
-  const wear = at === 'clean' ? 12 : at === 'sanitize' ? 6 : ['qc', 'preowned', 'next'].includes(at) ? 3 : 22
-  const discount = Math.round(PRODUCT.price * 0.15)
-  const yours = step < CHAPTER_SPLIT
+  const at = CHAPTERS[chapter].id
+  const fade = (on: boolean) =>
+    `transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${on ? 'opacity-100 translate-y-0 blur-0' : 'pointer-events-none opacity-0 translate-y-4 blur-sm'}`
   return (
-    <section ref={ref} aria-label="เส้นทางของรองเท้าหนึ่งคู่" className="relative" style={{ height: `${STORY.length * 50}vh` }}>
-      <div className="sticky top-16 flex h-[calc(100dvh-4rem)] items-center overflow-hidden">
-        <Container className="grid items-center gap-6 lg:grid-cols-[1fr_1.25fr] lg:gap-16">
-          <div>
-            <p className="font-display text-sm font-bold text-signal tabular">
-              {String(step + 1).padStart(2, '0')} / {STORY.length} · {STORY[step].t}
-            </p>
-            <div className="mt-3 grid">
-              {STORY.map((s, i) => (
-                <div key={s.id} className={`[grid-area:1/1] ${move} ${show(step === i)}`} aria-hidden={step !== i}>
-                  <h2 className="font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl" style={display}>
-                    {s.h}
-                  </h2>
-                  <p className="mt-3 max-w-sm text-sub sm:text-lg">{s.d}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 grid gap-3" style={{ gridTemplateColumns: `${CHAPTER_SPLIT}fr ${STORY.length - CHAPTER_SPLIT}fr` }} aria-hidden>
-              {(
-                [
-                  ['การเทิร์นของคุณ', 0, CHAPTER_SPLIT, true],
-                  ['เส้นทางของคู่เก่า', CHAPTER_SPLIT, STORY.length, false],
-                ] as const
-              ).map(([label, from, to, mine]) => (
-                <div key={label}>
-                  <p className={`mb-2 text-xs font-semibold transition-colors ${mine === yours ? 'text-ink' : 'text-sub'}`}>{label}</p>
-                  <div className="flex gap-1">
-                    {STORY.slice(from, to).map((s, k) => (
-                      <span key={s.id} className="h-1 flex-1 overflow-hidden rounded-full bg-line">
-                        <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${from + k <= step ? 'scale-x-100' : 'scale-x-0'}`} />
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+    <section ref={ref} aria-label="คู่เก่าไปไหนต่อ" className="relative bg-stone" style={{ height: `${CHAPTERS.length * 90}vh` }}>
+      <div className="sticky top-16 h-[calc(100dvh-4rem)] overflow-hidden [perspective:1600px]">
+        <div className="absolute inset-0 grid place-items-center" aria-hidden>
+          <div ref={shoe} className="w-[120vw] max-w-[1400px] will-change-transform sm:w-[84vw]">
+            <img src={PHOTO.side.src} alt="" className="w-full" />
           </div>
+        </div>
 
-          <div className="relative aspect-[4/3] max-h-[50dvh] w-full overflow-hidden rounded-3xl bg-stone [perspective:1200px] lg:max-h-none" aria-hidden>
-            <div className="absolute inset-0 grid place-items-center">
-              <div className={`w-[78%] ${move} ${oldClass}`}>
-                <Shoe color="black" wear={wear} seed={11} className="w-full" />
-              </div>
-            </div>
-            <div className="absolute inset-0 grid place-items-center">
-              <div className={`w-[78%] ${move} ${at === 'new' ? '' : 'translate-x-[130%] opacity-0'}`}>
-                <Shoe color="black" className="w-full" />
-              </div>
-            </div>
-
-            {/* inspection camera: a view change turns/flips the pair, a zoom change glides to the part */}
-            {check && (
-              <div className="absolute inset-0 grid place-items-center [transform-style:preserve-3d]">
-                <div key={check.view} className={`w-[78%] ${check.view === 'sole' ? 'animate-flip' : 'animate-turn'}`}>
-                  <div className={`${move}`} style={{ transform: `scale(${check.zoom})`, transformOrigin: check.origin }}>
-                    {check.view === 'side' ? <Shoe color="black" wear={22} seed={11} className="w-full" /> : <ShoeFlat color="black" side={check.view} wear={22} className="w-full" />}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {(at === 'verify' || check || at === 'clean' || at === 'sanitize') && (
-              <span className={`absolute inset-0 animate-scan bg-gradient-to-b from-transparent ${at === 'clean' ? 'via-white/40' : at === 'sanitize' ? 'via-ok/20' : 'via-signal/20'} to-transparent`} />
-            )}
-            <Tag on={at === 'old'} at="left-4 top-4">
-              EU 36 · ใส่มา 1 ปี
-            </Tag>
-            <Tag on={!!check} at="left-4 top-4" dark>
-              ตรวจ {checkIdx + 1}/5 · {CHECKLIST[Math.max(0, checkIdx)].label}
-            </Tag>
-            <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(at === 'verify', '-translate-y-3')}`}>
-              <FakeQR value="KN-BR33-240117" size={44} />
-              <div className="text-xs">
-                <p className="font-semibold tabular">KN-BR33-240117</p>
-                <p className="flex items-center gap-1 text-ok">
-                  <Check size={13} /> ซื้อจาก KNOWNA
-                </p>
-              </div>
-            </div>
-            <ul className="absolute inset-x-4 bottom-4 flex flex-wrap gap-1.5">
-              {CHECKLIST.map((c, i) => {
-                const current = i === checkIdx
-                const done = at === 'qc' || (check && i < checkIdx)
-                return (
-                  <li
-                    key={c.id}
-                    className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${move} ${current ? 'bg-ink text-paper' : 'bg-card'} ${show(!!check || at === 'qc', 'translate-y-2')}`}
-                    style={{ transitionDelay: at === 'qc' ? `${i * 90}ms` : '0ms' }}
-                  >
-                    {done ? <Check size={12} className="text-ok" /> : <span className={`h-1.5 w-1.5 rounded-full ${current ? 'bg-signal' : 'bg-line'}`} />} {c.label}
-                  </li>
-                )
-              })}
-            </ul>
-            <div className={`absolute inset-x-6 bottom-6 rounded-2xl bg-card p-4 shadow-lg ${move} ${show(at === 'approved', 'translate-y-4')}`}>
-              <div className="flex items-end justify-between">
-                <span className="flex items-center gap-1.5 text-sm font-semibold text-ok">
-                  <Check size={16} /> ผ่านเกณฑ์
+        <Container className="relative flex h-full flex-col justify-between py-6 sm:py-10">
+          <ol className="flex gap-2" aria-hidden>
+            {CHAPTERS.map((c, i) => (
+              <li key={c.id} className="flex-1 sm:max-w-40">
+                <span className="block h-1 overflow-hidden rounded-full bg-ink/10">
+                  <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${i <= chapter ? 'scale-x-100' : 'scale-x-0'}`} />
                 </span>
-                <span className="font-display text-4xl font-black" style={display}>
-                  <Num value={step >= STORY.findIndex((s) => s.id === 'approved') ? 94 : 0} format={(n) => `${n}%`} />
-                </span>
+                <span className={`mt-2 block text-xs font-semibold transition-colors ${i === chapter ? 'text-ink' : 'text-sub'}`}>{c.label}</span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="grid">
+            {CHAPTERS.map((c, i) => (
+              <div key={c.id} className={`max-w-xl [grid-area:1/1] ${fade(i === chapter)}`} aria-hidden={i !== chapter}>
+                <h2 className="font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-7xl" style={display}>
+                  {c.h}
+                </h2>
+                <p className="mt-3 max-w-md text-sub sm:text-lg">{c.d}</p>
               </div>
-              <div className="mt-3">
-                <ConditionBar pct={at === 'approved' ? 94 : 0} />
-              </div>
-            </div>
-            <div className={`absolute inset-0 grid place-items-center ${move} ${at === 'discount' ? 'scale-100 opacity-100' : 'pointer-events-none scale-90 opacity-0'}`}>
-              <div className="text-center">
-                <p className="font-display text-7xl font-black text-signal sm:text-8xl" style={display}>
-                  −15%
+            ))}
+            <div className="mt-5 flex min-h-12 flex-wrap items-center gap-2 [grid-area:2/1]">
+              {at === 'check' &&
+                CHECKLIST.map((c, i) => (
+                  <span key={c.id} className="flex animate-rise items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-medium shadow-sm" style={{ animationDelay: `${i * 70}ms` }}>
+                    <Check size={14} className="text-ok" /> {c.label}
+                  </span>
+                ))}
+              {at === 'discount' && (
+                <p className="animate-rise font-display text-3xl font-black tabular sm:text-4xl" style={display}>
+                  <span className="text-sub line-through decoration-2">{baht(PRODUCT.price)}</span> <span className="text-signal">{baht(PRODUCT.price - Math.round(PRODUCT.price * 0.15))}</span>
                 </p>
-                <p className="mt-1 font-semibold">
-                  {baht(PRODUCT.price)} → <Num value={at === 'discount' ? PRODUCT.price - discount : PRODUCT.price} format={baht} />
-                </p>
-              </div>
+              )}
+              {at === 'next' && (
+                <Link to="/preowned" className="inline-flex animate-rise items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
+                  มือสองเริ่ม {baht(preownedPrice(PRODUCT.price, 'B'))} <ArrowRight size={16} />
+                </Link>
+              )}
             </div>
-            <Tag on={at === 'new'} at="left-4 top-4" dark>
-              New · EU 37
-            </Tag>
-            <Tag on={at === 'back'} at="left-4 top-4">
-              รับคู่เก่ากลับแล้ว
-            </Tag>
-            <Tag on={at === 'clean'} at="left-4 top-4">
-              Clean · ล้าง ขัด เปลี่ยนเชือก
-            </Tag>
-            <Tag on={at === 'sanitize'} at="left-4 top-4">
-              Sanitize · อบโอโซน
-            </Tag>
-            <div className={`absolute left-4 top-4 ${move} ${show(['qc', 'preowned', 'next'].includes(at), '-translate-y-3')}`}>
-              <GradeBadge grade="A" pct={94} />
-            </div>
-            <Tag on={at === 'preowned' || at === 'next'} at="bottom-4 right-4" dark>
-              Pre-owned {baht(preownedPrice(PRODUCT.price, 'A'))}
-            </Tag>
-            <Tag on={at === 'next'} at="right-4 top-4">
-              ส่งต่อให้รุ่นน้อง ป.6
-            </Tag>
           </div>
         </Container>
       </div>
     </section>
-  )
-}
-
-function Tag({ on, at, dark = false, children }: { on: boolean; at: string; dark?: boolean; children: React.ReactNode }) {
-  return (
-    <span
-      className={`absolute ${at} rounded-full px-3 py-1.5 text-xs font-semibold transition-[transform,opacity] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${dark ? 'bg-ink text-paper' : 'bg-card'} ${on ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-3 opacity-0'}`}
-    >
-      {children}
-    </span>
   )
 }
 
@@ -521,7 +373,7 @@ function TradeInSection() {
             ))}
             <p className="px-1 text-xs text-sub">ไม่แลกเป็นเงินสด · ไม่มีคูปองหรือวันหมดอายุ · ใช้ได้กับการซื้อคู่ใหม่ในบิลเดียวกันเท่านั้น</p>
             <LinkButton to="/trade-in" variant="signal" className="mt-1">
-              เริ่ม Trade-in <ArrowRight size={16} />
+              เริ่มเทิร์นคู่เก่า <ArrowRight size={16} />
             </LinkButton>
           </div>
         </div>
@@ -531,7 +383,7 @@ function TradeInSection() {
 }
 
 function SizeTeaser() {
-  const [g, setG] = useState(GRADES[6])
+  const [g, setG] = useState(GRADES[2])
   return (
     <section className="py-20 sm:py-28">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
@@ -560,13 +412,13 @@ function SizeTeaser() {
             EU {g.range[0]}–{g.range[1]}
           </p>
           <div className="mt-6 flex gap-1">
-            {Array.from({ length: 16 }, (_, i) => 30 + i).map((s) => (
+            {SIZES.map((s) => (
               <span key={s} className={`h-10 flex-1 rounded transition-colors duration-500 ${s >= g.range[0] && s <= g.range[1] ? 'bg-ink' : 'bg-line'}`} title={`EU ${s}`} />
             ))}
           </div>
           <div className="mt-1 flex justify-between text-xs text-sub tabular">
-            <span>30</span>
-            <span>45</span>
+            <span>{SIZES[0]}</span>
+            <span>{SIZES[SIZES.length - 1]}</span>
           </div>
           <LinkButton to={`/size?grade=${g.id}`} variant="outline" className="mt-8 w-full">
             วัดเท้าให้แม่น 2 ขั้นตอน
@@ -577,7 +429,7 @@ function SizeTeaser() {
   )
 }
 
-const LOOP = ['Trade-in', 'Inspection', 'Cleaning & Sanitizing', 'Quality Check', 'Pre-owned Store']
+const LOOP = ['รับคู่เก่า', 'ตรวจ 5 จุด', 'ซักและฆ่าเชื้อ', 'ตรวจซ้ำ', 'ขึ้นร้านมือสอง']
 
 function SecondLife() {
   return (
@@ -620,10 +472,10 @@ function FinalCTA() {
           </h2>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <LinkButton to="/shop" size="lg">
-              Shop Now
+              ซื้อคู่ใหม่
             </LinkButton>
             <LinkButton to="/trade-in" size="lg" variant="signal">
-              Trade-in คู่เก่า
+              เทิร์นคู่เก่า
             </LinkButton>
           </div>
         </div>
@@ -638,7 +490,7 @@ export default function Home() {
     <div ref={ref}>
       <Hero />
       <Marquee />
-      <Colors />
+      <Spotlight />
       <TwoStores />
       <TradeInStory />
       <TradeInSection />

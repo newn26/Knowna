@@ -282,7 +282,7 @@ function Footer() {
           ))}
         </div>
         <div className="mt-16 flex flex-col gap-3 border-t border-paper/15 pt-6 text-xs text-paper/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 KNOWNA · เว็บสาธิต ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีการตัดเงินจริง</p>
+          <p>© 2026 KNOWNA · เว็บสาธิต ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีการตัดเงินจริง · ภาพสินค้าสร้างด้วย AI</p>
           <button
             className="self-start underline-offset-2 hover:text-paper hover:underline"
             onClick={() => {
