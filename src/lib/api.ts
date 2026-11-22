@@ -41,7 +41,7 @@ function syncPipeline() {
         sourceSerial: t.serial,
         wearSeed: Number(t.id.slice(-3)) || 7,
         photos: [],
-        notes: ['มาจากการเทิร์นล่าสุด', 'ขัดเงาใหม่ทั้งคู่'],
+        notes: ['มาจากการเทิร์นล่าสุด', 'ซักใหม่ทั้งคู่'],
         qc: { cleanedAt: listedAt, checkedAt: listedAt, inspector: 'ช่างฝน' },
         status: 'available',
         listedAt,

@@ -348,7 +348,7 @@ function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string
 }
 
 function Inspecting({ unit }: { unit: Unit }) {
-  const lines = ['เทียบกับ Product ID ในระบบ', 'ตรวจหนังด้านบนและพื้น', 'ตรวจแผ่นรอง ตะเข็บ เชือก', 'คำนวณคะแนนถ่วงน้ำหนัก']
+  const lines = ['เทียบกับ Product ID ในระบบ', 'ตรวจผ้าใบด้านบนและพื้น', 'ตรวจแผ่นรอง ตะเข็บ เชือก', 'คำนวณคะแนนถ่วงน้ำหนัก']
   const [i, setI] = useState(0)
   useEffect(() => {
     const t = setInterval(() => setI((x) => Math.min(x + 1, lines.length - 1)), 380)

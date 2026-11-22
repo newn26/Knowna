@@ -96,7 +96,7 @@ export default function Preowned() {
       <Container>
         <div className="grid gap-3 rounded-3xl bg-stone p-5 sm:grid-cols-4">
           {[
-            [Sparkles, 'Inspection 5 จุด', 'หนัง พื้น แผ่นรอง ตะเข็บ เชือก'],
+            [Sparkles, 'Inspection 5 จุด', 'ผ้าใบ พื้น แผ่นรอง ตะเข็บ เชือก'],
             [Droplets, 'Cleaning & Sanitizing', 'ล้าง ขัด อบโอโซน'],
             [ShieldCheck, 'Quality Check', 'ช่างตรวจซ้ำก่อนขึ้นร้าน'],
             [BadgeCheck, 'Grade A / B', 'A ≥ 90% · B 75–89%'],
@@ -180,8 +180,8 @@ export default function Preowned() {
           <ol className="relative space-y-6 border-l border-line pl-8">
             {[
               ['ยืนยันที่มา', 'เช็ก Product ID ใต้ลิ้นกับประวัติการขาย รับเฉพาะคู่ที่ขายจากร้านเรา'],
-              ['Inspection 5 จุด', 'หนังด้านบน พื้น แผ่นรอง ตะเข็บและทรง เชือกและรูร้อย คิดคะแนนถ่วงน้ำหนักเป็น %'],
-              ['Cleaning', 'ล้างคราบ ขัดเงาหนัง เปลี่ยนเชือกใหม่ทุกคู่'],
+              ['Inspection 5 จุด', 'ผ้าใบด้านบน พื้น แผ่นรอง ตะเข็บและทรง เชือกและรูร้อย คิดคะแนนถ่วงน้ำหนักเป็น %'],
+              ['Cleaning', 'ซักคราบทั้งคู่ เปลี่ยนเชือกใหม่ทุกคู่'],
               ['Sanitizing', 'อบโอโซนฆ่าเชื้อด้านใน และเปลี่ยนแผ่นรองใหม่'],
               ['Quality Check', 'ช่างอีกคนตรวจซ้ำ ให้เกรด ถ่ายรูปจริงของคู่นั้น แล้วจึงขึ้นร้าน'],
             ].map(([t, d], i) => (

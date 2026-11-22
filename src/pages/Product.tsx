@@ -10,48 +10,41 @@ import { allocateTradeIns, newPairsIn } from '../lib/tradein'
 import { Breakdown } from './TradeIn'
 import type { ColorId, Kind, PreownedItem } from '../lib/types'
 import { SizeTable } from './SizeFinder'
-import { PHOTOS } from '../lib/photos'
+import { PHOTO } from '../lib/photos'
 
-const VIEWS: { id: ShoeView; label: string }[] = [
-  { id: 'side', label: 'ด้านข้าง' },
-  { id: 'pair', label: 'ทั้งคู่' },
-  { id: 'toe', label: 'หัวรองเท้า' },
-  { id: 'heel', label: 'ส้น' },
+// Photos first; the drawn toe and heel views fill the angles not photographed yet.
+const VIEWS: { id: string; label: string; photo?: { src: string; alt: string }; shoe?: ShoeView }[] = [
+  { id: 'pair', label: 'ทั้งคู่', photo: PHOTO.pair },
+  { id: 'side', label: 'ด้านข้าง', photo: PHOTO.side },
+  { id: 'toe', label: 'หัวรองเท้า', shoe: 'toe' },
+  { id: 'heel', label: 'ส้น', shoe: 'heel' },
 ]
 
 function Gallery({ color }: { color: ColorId }) {
-  const [view, setView] = useState<ShoeView | 'photo'>('photo')
-  const photo = PHOTOS[color]
+  const [id, setId] = useState('pair')
+  const v = VIEWS.find((x) => x.id === id)!
   return (
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
-        {view === 'photo' ? (
-          <img key={color} src={photo.src} alt={photo.alt} className="h-full w-full animate-swap bg-white object-contain" />
+        {v.photo ? (
+          <img key={id} src={v.photo.src} alt={v.photo.alt} className={`animate-swap ${id === 'side' ? 'w-[92%]' : 'h-full w-full object-cover'}`} />
         ) : (
-          <div key={color + view} className="w-[88%] animate-swap">
-            <Shoe color={color} view={view} className="w-full" />
+          <div key={id} className="w-[88%] animate-swap">
+            <Shoe color={color} view={v.shoe!} className="w-full" />
           </div>
         )}
-        <span className="absolute bottom-4 left-4 text-xs text-sub">{view === 'photo' ? 'ภาพตัวอย่างสินค้า สร้างด้วย AI' : 'ภาพประกอบสินค้า'}</span>
+        <span className={`absolute bottom-4 left-4 rounded-full px-2.5 py-1 text-xs ${v.photo ? 'bg-card/90 text-ink' : 'text-sub'}`}>{v.photo ? 'ภาพตัวอย่างสินค้า สร้างด้วย AI' : 'ภาพประกอบสินค้า'}</span>
       </div>
-      <div className="mt-3 grid grid-cols-5 gap-3">
-        <button
-          onClick={() => setView('photo')}
-          aria-label="ดูรูปสินค้า"
-          aria-pressed={view === 'photo'}
-          className={`aspect-square overflow-hidden rounded-2xl bg-stone ring-2 transition ${view === 'photo' ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
-        >
-          <img src={photo.src} alt="" className="h-full w-full bg-white object-contain" />
-        </button>
-        {VIEWS.map((v) => (
+      <div className="mt-3 grid grid-cols-4 gap-3">
+        {VIEWS.map((x) => (
           <button
-            key={v.id}
-            onClick={() => setView(v.id)}
-            aria-label={`ดูมุม${v.label}`}
-            aria-pressed={view === v.id}
-            className={`grid aspect-square place-items-center overflow-hidden rounded-2xl bg-stone p-2 ring-2 transition ${view === v.id ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
+            key={x.id}
+            onClick={() => setId(x.id)}
+            aria-label={`ดูมุม${x.label}`}
+            aria-pressed={id === x.id}
+            className={`grid aspect-square place-items-center overflow-hidden rounded-2xl bg-stone ring-2 transition ${x.photo && x.id === 'pair' ? '' : 'p-2'} ${id === x.id ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
           >
-            <Shoe color={color} view={v.id} className="w-full" shadow={false} />
+            {x.photo ? <img src={x.photo.src} alt="" className={x.id === 'pair' ? 'h-full w-full object-cover' : 'w-full'} /> : <Shoe color={color} view={x.shoe!} className="w-full" shadow={false} />}
           </button>
         ))}
       </div>

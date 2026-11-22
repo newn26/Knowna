@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PHOTOS } from '../lib/photos'
+import { PHOTO } from '../lib/photos'
 import { Container, PageHead, SWATCH, useReveal } from '../components/ui'
 import { getStock, listPreowned, stockOf } from '../lib/api'
 import { COLORS, PRODUCT, SIZES } from '../lib/catalog'
@@ -24,10 +24,10 @@ export default function Shop() {
 
   return (
     <div ref={ref}>
-      <PageHead title="รองเท้าใหม่" sub="รุ่นเดียว 3 สี ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ใช้เทิร์นในอนาคต" />
+      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ใช้เทิร์นตอนเท้าโต" />
       <Container>
         <div className="sticky top-16 z-20 -mx-4 flex flex-wrap items-center gap-2 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
-          {(['all', ...COLORS.map((c) => c.id)] as const).map((c) => (
+          {COLORS.length > 1 && (['all', ...COLORS.map((c) => c.id)] as const).map((c) => (
             <button
               key={c}
               onClick={() => setColor(c)}
@@ -37,7 +37,7 @@ export default function Shop() {
               {c === 'all' ? 'ทุกสี' : COLORS.find((x) => x.id === c)!.name}
             </button>
           ))}
-          <span className="mx-1 hidden h-5 w-px bg-line sm:block" />
+          {COLORS.length > 1 && <span className="mx-1 hidden h-5 w-px bg-line sm:block" />}
           <label className="flex items-center gap-2 text-sm">
             <span className="text-sub">ไซซ์</span>
             <select
@@ -59,29 +59,29 @@ export default function Shop() {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className={`mt-8 grid gap-6 ${colors.length === 1 ? 'max-w-3xl' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
           {colors.map((c, i) => {
             const left = stock ? SIZES.filter((s) => stockOf(stock, c.id, s) > 0) : SIZES
             const sizeLeft = size && stock ? stockOf(stock, c.id, size) : null
             return (
               <article key={c.id} className="reveal group" style={{ transitionDelay: `${i * 70}ms` }}>
                 <Link to={`/product?color=${c.id}${size ? `&size=${size}` : ''}`} className="block">
-                  <div className="relative grid aspect-[4/3.4] place-items-center overflow-hidden rounded-3xl bg-white">
-                    <span className="absolute left-4 top-4 rounded-full bg-card px-3 py-1 text-xs font-semibold">New</span>
+                  <div className="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-3xl bg-stone">
+                    <span className="absolute left-4 top-4 z-10 rounded-full bg-ink px-3 py-1 text-xs font-semibold text-paper">คู่ใหม่</span>
                     {sizeLeft !== null && (
-                      <span className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-semibold ${sizeLeft === 0 ? 'bg-bad/10 text-bad' : sizeLeft <= 3 ? 'bg-signal text-paper' : 'bg-card'}`}>
+                      <span className={`absolute right-4 top-4 z-10 rounded-full px-3 py-1 text-xs font-semibold ${sizeLeft === 0 ? 'bg-bad/10 text-bad' : sizeLeft <= 3 ? 'bg-signal text-paper' : 'bg-card'}`}>
                         {sizeLeft === 0 ? `EU ${size} หมด` : sizeLeft <= 3 ? `EU ${size} เหลือ ${sizeLeft}` : `EU ${size} มีของ`}
                       </span>
                     )}
-                    <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} className="h-full w-full object-contain transition duration-700 group-hover:scale-105" />
+                    <img src={PHOTO.pair.src} alt={PHOTO.pair.alt} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
                     <div>
                       <h2 className="font-semibold">
-                        {PRODUCT.model} — {c.name}
+                        {PRODUCT.model} สี{c.nameTh}
                       </h2>
                       <p className="text-sm text-sub">
-                        {c.nameTh} · {c.hint}
+                        {PRODUCT.nameTh} · {c.hint}
                       </p>
                     </div>
                     <p className="font-semibold tabular">{baht(PRODUCT.price)}</p>
@@ -92,7 +92,7 @@ export default function Shop() {
                 </Link>
                 {poCount(c.id) > 0 && (
                   <Link to={`/preowned?color=${c.id}${size ? `&size=${size}` : ''}`} className="mt-3 inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline">
-                    หรือดู Pre-owned สี{c.nameTh} {poCount(c.id)} คู่ <ArrowRight size={14} />
+                    หรือดูมือสองสภาพดี {poCount(c.id)} คู่ <ArrowRight size={14} />
                   </Link>
                 )}
               </article>
@@ -102,7 +102,7 @@ export default function Shop() {
 
         <Link to="/preowned" className="reveal group mt-16 flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-8 text-paper sm:flex-row sm:items-center sm:p-10">
           <div>
-            <p className="text-sm text-paper/60">Pre-owned Store</p>
+            <p className="text-sm text-paper/60">ร้านมือสอง</p>
             <p className="mt-1 font-display text-3xl font-black uppercase sm:text-4xl" style={{ fontStretch: '80%' }}>
               ประหยัดขึ้น 45–55% กับคู่ที่ผ่าน QC
             </p>

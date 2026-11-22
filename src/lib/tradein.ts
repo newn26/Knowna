@@ -26,7 +26,7 @@ export const CONDITION_LEVELS = [
 
 /** What the customer rates and how much each part weighs in the final score. */
 export const CHECKLIST = [
-  { id: 'upper', label: 'หนังด้านบน', help: 'รอยถลอก รอยย่น สีลอก', weight: 30 },
+  { id: 'upper', label: 'ผ้าใบด้านบน', help: 'รอยขาด ผ้าบาง สีซีดเป็นด่าง', weight: 30 },
   { id: 'sole', label: 'พื้นรองเท้า', help: 'ความสึกของดอกยาง พื้นหลุด/อ้า', weight: 30 },
   { id: 'insole', label: 'แผ่นรองด้านใน', help: 'ยุบ ขาด มีกลิ่นติดแน่น', weight: 15 },
   { id: 'stitch', label: 'ตะเข็บและทรง', help: 'ด้ายขาด ทรงเบี้ยว ส้นยุบ', weight: 15 },
