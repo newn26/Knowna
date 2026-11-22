@@ -5,7 +5,7 @@ import { preownedPrice } from './pricing'
 import { gradeFor } from './tradein'
 import type { ColorId, Order, PreownedItem, Unit, User } from './types'
 
-const KEY = 'kw.db.v2'
+const KEY = 'kw.db.v3'
 
 export interface DB {
   users: User[]
@@ -75,7 +75,7 @@ function seed(): DB {
     }
   }
   orders.push(pastOrder('KN-240510-0031', '2024-05-10T10:12:00+07:00', [['brown', 33, 240117], ['brown', 35, 240118]], DEMO_USER.id))
-  orders.push(pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['brown', 36, 250233]], DEMO_USER.id))
+  orders.push(pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['white', 36, 250233]], DEMO_USER.id))
   orders.push(pastOrder('KN-230512-0009', '2023-05-12T09:05:00+07:00', [['brown', 31, 230512]], DEMO_USER.id))
   orders.push(pastOrder('KN-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 38, 240623]], null))
   // This pair was already traded in once, so it must be rejected if someone tries again.
@@ -84,7 +84,7 @@ function seed(): DB {
   const inspectors = ['ช่างต้น', 'ช่างแบงค์', 'ช่างฝน']
   const notesPool = ['รอยย่นหน้าเท้าเล็กน้อย', 'ดอกยางเหลือมากกว่า 80%', 'เปลี่ยนเชือกใหม่แล้ว', 'ซักและตากใหม่ทั้งคู่', 'แผ่นรองใหม่', 'รอยถลอกจุดเล็กที่ส้น']
   const preowned: PreownedItem[] = Array.from({ length: 14 }, (_, i) => {
-    const color: ColorId = 'brown'
+    const color = (['brown', 'brown', 'black', 'white'] as ColorId[])[Math.floor(r() * 4)]
     const size = 28 + Math.floor(r() * 13)
     const conditionPct = 76 + Math.floor(r() * 23)
     const grade = gradeFor(conditionPct) as 'A' | 'B'

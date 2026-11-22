@@ -6,7 +6,7 @@ export const PRODUCT = {
   id: 'kn-classic-01',
   model: 'KNOWNA Classic',
   nameTh: 'รองเท้าผ้าใบนักเรียนชาย ผูกเชือก',
-  price: 890,
+  price: 390,
   details: [
     'ผ้าใบทอแน่น ระบายอากาศ ซักทั้งคู่ได้',
     'พื้นยางกันลื่น ยึดติดพื้นรอบตัว ไม่อ้าปากง่าย',
@@ -22,14 +22,13 @@ export const PRODUCT = {
   ] as [string, string][],
 }
 
-const ALL_COLORS: ColorInfo[] = [
+export const ALL_COLORS: ColorInfo[] = [
   { id: 'brown', name: 'Brown', nameTh: 'น้ำตาล', hint: 'ชุดลูกเสือ และโรงเรียนที่ใช้ผ้าใบน้ำตาล', code: 'BR' },
   { id: 'black', name: 'Black', nameTh: 'ดำ', hint: 'ชุดนักเรียนปกติ', code: 'BK' },
   { id: 'white', name: 'White', nameTh: 'ขาว', hint: 'วันพละ และโรงเรียนที่ใช้รองเท้าขาว', code: 'WH' },
 ]
 
-// Only brown is on sale until black and white have product photos; the others stay defined for lookups.
-export const COLORS = ALL_COLORS.filter((c) => c.id === 'brown')
+export const COLORS = ALL_COLORS
 
 export const colorInfo = (id: ColorId) => ALL_COLORS.find((c) => c.id === id)!
 
@@ -54,7 +53,7 @@ export const GRADES: { id: string; label: string; age: string; range: [number, n
 ]
 
 export const SHIPPING_FEE = 50
-export const FREE_SHIPPING_FROM = 1500
+export const FREE_SHIPPING_FROM = 700
 
 export const STORES = ['สาขาสยาม (BTS สยาม ทางออก 4)', 'สาขาบางนา (เมกาบางนา ชั้น 2)', 'สาขางามวงศ์วาน (ตรงข้ามเดอะมอลล์)']
 

@@ -19,7 +19,7 @@ const test = async (name: string, fn: () => unknown) => {
   }
 }
 
-const line = (kind: 'new' | 'preowned', qty = 1, price = 890): CartLine => ({ key: `${kind}-${qty}-${price}`, kind, color: 'brown', size: 35, qty, unitPrice: price, preownedId: kind === 'preowned' ? 'PO-1001' : undefined })
+const line = (kind: 'new' | 'preowned', qty = 1, price = 390): CartLine => ({ key: `${kind}-${qty}-${price}`, kind, color: 'brown', size: 35, qty, unitPrice: price, preownedId: kind === 'preowned' ? 'PO-1001' : undefined })
 const ti = (id: string, pct: number): TradeIn => ({ id, serial: 'KN-BR35-' + id.padStart(6, '0'), color: 'brown', size: 35, answers: {}, conditionPct: pct, grade: gradeFor(pct), rate: rateFor(pct), photoCount: 0, createdAt: '' })
 
 await test('rate bands: 90–100 → 15%, 75–89 → 10%, <75 → 0', () => {
@@ -38,7 +38,7 @@ await test('any broken part caps the score below the 75% line', () => {
 await test('trade-in discounts only new pairs, one per pair, best rate on the priciest', () => {
   const a = allocateTradeIns([line('new', 1), line('preowned')], [ti('1', 80), ti('2', 95)])
   assert.equal(a[0].rate, 0.15)
-  assert.equal(a[0].amount, 134) // 890 × 15% rounded
+  assert.equal(a[0].amount, 59) // 390 × 15% = 58.5, rounded
   assert.equal(a[1].appliedTo, null) // second trade-in has no new pair left
   assert.equal(a[1].amount, 0)
 })
@@ -47,7 +47,7 @@ await test('rejected trade-in gives no discount', () => {
   assert.equal(totals([line('new')], [ti('1', 60)]).discount, 0)
 })
 
-await test('shipping is free for pickup and from ฿1,500', () => {
+await test('shipping is free for pickup and from ฿700', () => {
   assert.equal(totals([line('new')], [], 'delivery').shipping, 50)
   assert.equal(totals([line('new')], [], 'pickup').shipping, 0)
   assert.equal(totals([line('new', 2)], [], 'delivery').shipping, 0)
@@ -81,8 +81,8 @@ await test('order: trade-in applied once, then the serial cannot be reused', asy
     fulfilment: 'delivery',
     payment: 'promptpay',
   })
-  assert.equal(o.discount, 134)
-  assert.equal(o.total, 890 - 134 + 50)
+  assert.equal(o.discount, 59)
+  assert.equal(o.total, 390 - 59 + 50)
   assert.equal(o.serials.length, 1)
   assert.equal((await verifyPurchase(t.serial)).ok, false)
   assert.ok(await findOrder(o.id, '0812345678'))
