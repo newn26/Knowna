@@ -90,7 +90,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['คู่ใหม่', 'มือสอง', 'เทิร์นคู่เก่า', 'ป.1 – ป.6', 'EU 28 – 40', 'ผ้าใบน้ำตาล', 'ตรวจทุกคู่']
+  const words = ['คู่ใหม่', 'มือสอง', 'เทิร์นคู่เก่า', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ตรวจทุกคู่']
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
