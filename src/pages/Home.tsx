@@ -141,7 +141,7 @@ function Colors() {
                 </span>
               </div>
               <div className="mt-6 aspect-[4/3] overflow-hidden rounded-2xl bg-card">
-                <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} loading="lazy" className={`h-full w-full ${PHOTOS[c.id].fit} transition duration-700 group-hover:scale-105`} />
+                <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} loading="lazy" className="h-full w-full bg-white object-contain transition duration-700 group-hover:scale-105" />
               </div>
               <p className="mt-2 text-sm">
                 <b className="tabular">{baht(PRODUCT.price)}</b> <span className="text-sub">· EU 30–45</span>

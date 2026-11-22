@@ -26,24 +26,13 @@ function Gallery({ color }: { color: ColorId }) {
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
         {view === 'photo' ? (
-          <img key={color} src={photo.src} alt={photo.alt} className={`h-full w-full animate-swap ${photo.fit}`} />
+          <img key={color} src={photo.src} alt={photo.alt} className="h-full w-full animate-swap bg-white object-contain" />
         ) : (
           <div key={color + view} className="w-[88%] animate-swap">
             <Shoe color={color} view={view} className="w-full" />
           </div>
         )}
-        <span className={`absolute bottom-4 left-4 rounded-full px-2 py-0.5 text-xs ${view === 'photo' ? 'bg-card/85 text-ink' : 'text-sub'}`}>
-          {view === 'photo' ? (
-            <>
-              รูปจริงทรงใกล้เคียง ·{' '}
-              <a href={photo.source} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-                CC0
-              </a>
-            </>
-          ) : (
-            'ภาพประกอบสินค้า'
-          )}
-        </span>
+        <span className="absolute bottom-4 left-4 text-xs text-sub">{view === 'photo' ? 'ภาพตัวอย่างสินค้า สร้างด้วย AI' : 'ภาพประกอบสินค้า'}</span>
       </div>
       <div className="mt-3 grid grid-cols-5 gap-3">
         <button
@@ -52,7 +41,7 @@ function Gallery({ color }: { color: ColorId }) {
           aria-pressed={view === 'photo'}
           className={`aspect-square overflow-hidden rounded-2xl bg-stone ring-2 transition ${view === 'photo' ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
         >
-          <img src={photo.src} alt="" className={`h-full w-full ${photo.fit}`} />
+          <img src={photo.src} alt="" className="h-full w-full bg-white object-contain" />
         </button>
         {VIEWS.map((v) => (
           <button
