@@ -2,15 +2,17 @@ import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { ConditionBar, Container, LinkButton, Num, useReveal } from '../components/ui'
-import { GRADES, PRODUCT, SIZES } from '../lib/catalog'
-import { PHOTO } from '../lib/photos'
+import { ConditionBar, Container, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
+import { COLORS, GRADES, PRODUCT, SIZES } from '../lib/catalog'
+import { PHOTOS, USED, WORN } from '../lib/photos'
 import { baht, preownedPrice } from '../lib/pricing'
 import { CHECKLIST, gradeFor, rateFor } from '../lib/tradein'
+import type { ColorId } from '../lib/types'
 
 const display = { fontStretch: '78%' } as const
 
 function Hero() {
+  const [color, setColor] = useState<ColorId>('brown')
   return (
     <section className="relative overflow-hidden">
       <Container className="grid items-center gap-8 pb-12 pt-8 lg:grid-cols-[1fr_1.15fr] lg:pb-24 lg:pt-14">
@@ -63,8 +65,23 @@ function Hero() {
           <div className="absolute inset-x-[16%] top-1/2 -z-0 aspect-square -translate-y-1/2 rounded-full bg-stone lg:inset-x-14" />
           <div className="parallax relative">
             <div className="animate-rise [animation-delay:200ms]">
-              <img src={PHOTO.side.src} alt={PHOTO.side.alt} className="relative w-full animate-step" />
+              <div key={color} className="animate-swap">
+                <img src={PHOTOS[color].side.src} alt={PHOTOS[color].side.alt} className="relative w-full animate-step drop-shadow-[0_24px_24px_rgba(0,0,0,.18)]" />
+              </div>
             </div>
+          </div>
+          <div className="relative mt-4 flex items-center justify-center gap-3">
+            {COLORS.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setColor(c.id)}
+                aria-label={`ดูสี${c.nameTh}`}
+                aria-pressed={color === c.id}
+                className={`h-9 w-9 rounded-full ring-1 ring-inset ring-black/15 transition hover:scale-110 ${color === c.id ? 'outline outline-2 outline-offset-4 outline-ink' : ''}`}
+                style={{ background: SWATCH[c.id] }}
+              />
+            ))}
+            <span className="ml-2 w-24 text-sm font-medium">สี{COLORS.find((c) => c.id === color)!.nameTh}</span>
           </div>
         </div>
       </Container>
@@ -89,11 +106,12 @@ function Marquee() {
 }
 
 function Spotlight() {
+  const [color, setColor] = useState<ColorId>('brown')
   return (
     <section className="py-20 sm:py-28">
       <Container className="grid items-center gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
-        <Link to="/product" className="reveal group block overflow-hidden rounded-3xl bg-stone">
-          <img src={PHOTO.pair.src} alt={PHOTO.pair.alt} loading="lazy" className="aspect-[3/2] w-full object-cover transition duration-700 group-hover:scale-[1.03]" />
+        <Link to={`/product?color=${color}`} className="reveal group block overflow-hidden rounded-3xl bg-stone">
+          <img key={color} src={PHOTOS[color].pair.src} alt={PHOTOS[color].pair.alt} loading="lazy" className="aspect-[3/2] w-full animate-swap object-cover transition duration-700 group-hover:scale-[1.03]" />
         </Link>
         <div className="reveal">
           <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl" style={display}>
@@ -107,15 +125,29 @@ function Spotlight() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 flex items-baseline gap-3">
+          <div className="mt-8 flex flex-wrap gap-2">
+            {COLORS.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setColor(c.id)}
+                aria-pressed={color === c.id}
+                className={`flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-medium transition ${color === c.id ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink'}`}
+              >
+                <span className="h-3.5 w-3.5 rounded-full ring-1 ring-black/20" style={{ background: SWATCH[c.id] }} />
+                {c.nameTh}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-sm text-sub">{COLORS.find((c) => c.id === color)!.hint}</p>
+          <p className="mt-6 flex items-baseline gap-3">
             <b className="font-display text-4xl font-black tabular" style={display}>
               {baht(PRODUCT.price)}
             </b>
             <span className="text-sm text-sub">
-              EU {SIZES[0]}–{SIZES[SIZES.length - 1]} · สีน้ำตาล
+              EU {SIZES[0]}–{SIZES[SIZES.length - 1]}
             </span>
           </p>
-          <LinkButton to="/product" size="lg" className="mt-6">
+          <LinkButton to={`/product?color=${color}`} size="lg" className="mt-6">
             เลือกไซซ์ <ArrowRight size={18} />
           </LinkButton>
         </div>
@@ -137,7 +169,7 @@ function TwoStores() {
             </h3>
             <p className="mt-3 max-w-xs text-paper/70">ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ ใช้เทิร์นได้วันที่เท้าโต</p>
           </div>
-          <img src={PHOTO.side.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
+          <img src={PHOTOS.black.side.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink">
             {baht(PRODUCT.price)} · ช้อปเลย <ArrowRight size={16} />
           </span>
@@ -151,7 +183,7 @@ function TwoStores() {
             </h3>
             <p className="mt-3 max-w-xs text-sub">ทุกคู่ผ่านการตรวจ 5 จุด ซัก ฆ่าเชื้อ และตรวจซ้ำ บอกสภาพเป็นเปอร์เซ็นต์ พร้อมจุดที่มีรอยใช้งาน</p>
           </div>
-          <Shoe color="brown" wear={14} seed={4} className="absolute -bottom-6 -right-10 w-[78%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
+          <img src={USED.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
             เริ่ม {baht(preownedPrice(PRODUCT.price, 'B'))} · ดูทั้งหมด <ArrowRight size={16} />
           </span>
@@ -227,8 +259,9 @@ function TradeInStory() {
     <section ref={ref} aria-label="คู่เก่าไปไหนต่อ" className="relative bg-stone" style={{ height: `${CHAPTERS.length * 90}vh` }}>
       <div className="sticky top-16 h-[calc(100dvh-4rem)] overflow-hidden [perspective:1600px]">
         <div className="absolute inset-0 grid place-items-center" aria-hidden>
-          <div ref={shoe} className="w-[120vw] max-w-[1400px] will-change-transform sm:w-[84vw]">
-            <img src={PHOTO.side.src} alt="" className="w-full" />
+          <div ref={shoe} className="relative w-[120vw] max-w-[1400px] will-change-transform sm:w-[84vw]">
+            <img src={USED.src} alt="" className="w-full drop-shadow-[0_30px_30px_rgba(0,0,0,.2)]" />
+            <img src={PHOTOS.brown.side.src} alt="" className={`absolute inset-0 w-full transition-opacity duration-1000 ${at === 'next' ? 'opacity-100' : 'opacity-0'}`} />
           </div>
         </div>
 
@@ -361,8 +394,9 @@ function TradeInSection() {
               ['75–89%', 'ส่วนลด 10%', 'เกรด B'],
               ['ต่ำกว่า 75%', 'ไม่รับเทิร์น', 'ส่งคืนเจ้าของ'],
             ].map(([r, d, g], i) => (
-              <div key={r} className={`flex items-center justify-between rounded-2xl p-5 ${i === 2 ? 'border border-dashed border-line text-sub' : 'bg-card'}`}>
-                <div>
+              <div key={r} className={`flex items-center justify-between gap-4 rounded-2xl p-5 ${i === 2 ? 'border border-dashed border-line text-sub' : 'bg-card'}`}>
+                {i === 2 && <img src={WORN.src} alt={WORN.alt} className="w-28 shrink-0" />}
+                <div className="mr-auto">
                   <p className="font-display text-2xl font-black tabular" style={display}>
                     {r}
                   </p>

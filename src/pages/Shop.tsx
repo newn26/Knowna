@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PHOTO } from '../lib/photos'
+import { PHOTOS } from '../lib/photos'
 import { Container, PageHead, SWATCH, useReveal } from '../components/ui'
 import { getStock, listPreowned, stockOf } from '../lib/api'
 import { COLORS, PRODUCT, SIZES } from '../lib/catalog'
@@ -34,7 +34,7 @@ export default function Shop() {
               className={`flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition ${color === c ? 'bg-ink text-paper' : 'hover:bg-ink/5'}`}
             >
               {c !== 'all' && <span className="h-3.5 w-3.5 rounded-full ring-1 ring-black/20" style={{ background: SWATCH[c] }} />}
-              {c === 'all' ? 'ทุกสี' : COLORS.find((x) => x.id === c)!.name}
+              {c === 'all' ? 'ทุกสี' : COLORS.find((x) => x.id === c)!.nameTh}
             </button>
           ))}
           {COLORS.length > 1 && <span className="mx-1 hidden h-5 w-px bg-line sm:block" />}
@@ -73,7 +73,7 @@ export default function Shop() {
                         {sizeLeft === 0 ? `EU ${size} หมด` : sizeLeft <= 3 ? `EU ${size} เหลือ ${sizeLeft}` : `EU ${size} มีของ`}
                       </span>
                     )}
-                    <img src={PHOTO.pair.src} alt={PHOTO.pair.alt} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                    <img src={PHOTOS[c.id].pair.src} alt={PHOTOS[c.id].pair.alt} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
                     <div>

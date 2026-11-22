@@ -4,11 +4,15 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
 import { Button, ConditionBar, Container, GradeBadge, PageHead, Price, SWATCH, useReveal } from '../components/ui'
 import { getPreowned, listPreowned } from '../lib/api'
-import { COLORS, colorInfo } from '../lib/catalog'
+import { COLORS, PRODUCT, colorInfo } from '../lib/catalog'
 import { baht } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { CHECKLIST } from '../lib/tradein'
 import type { ColorId, PreownedItem } from '../lib/types'
+import { PHOTOS, USED } from '../lib/photos'
+
+// Sample photo for a listing: grade-B brown pairs show the used shot, the rest the clean cut-out of their colour.
+const look = (p: PreownedItem) => (p.color === 'brown' && p.grade === 'B' ? USED : PHOTOS[p.color].side)
 
 const GRADE_TEXT = { A: 'เหมือนใหม่', B: 'มีรอยใช้งานเล็กน้อย' }
 
@@ -39,7 +43,7 @@ function Card({ p, i }: { p: PreownedItem; i: number }) {
           <GradeBadge grade={p.grade} pct={p.conditionPct} />
         </div>
         {sold && <span className="absolute right-3 top-3 rounded-full bg-bad px-2.5 py-1 text-xs font-semibold text-paper">ขายแล้ว</span>}
-        <Shoe color={p.color} wear={100 - p.conditionPct} seed={p.wearSeed} photo={p.photos[0]} className="w-[86%] transition duration-700 group-hover:-translate-y-1.5 group-hover:-rotate-2" />
+        <img src={look(p).src} alt={look(p).alt} loading="lazy" className="w-[86%] drop-shadow-[0_14px_14px_rgba(0,0,0,.16)] transition duration-700 group-hover:-translate-y-1.5 group-hover:-rotate-2" />
         <span className="absolute bottom-3 right-3 font-display text-xs font-bold text-sub tabular">{p.id}</span>
       </div>
       <div className="mt-3 flex items-start justify-between gap-3">
@@ -118,7 +122,7 @@ export default function Preowned() {
           {COLORS.length > 1 && COLORS.map((c) => (
             <button key={c.id} onClick={() => set('color', c.id)} className={`${chip(color === c.id)} inline-flex items-center gap-2`}>
               <span className="h-3 w-3 rounded-full ring-1 ring-black/20" style={{ background: SWATCH[c.id] }} />
-              {c.name}
+              {c.nameTh}
             </button>
           ))}
           {COLORS.length > 1 && <span className="mx-1 h-5 w-px bg-line" />}
@@ -148,7 +152,7 @@ export default function Preowned() {
             <p className="font-semibold">ยังไม่มีคู่ที่ตรงตัวกรอง</p>
             <p className="mt-1 text-sm text-sub">ของเข้าใหม่ทุกวันจากการเทิร์น หรือเลือกคู่ใหม่ไปก่อน</p>
             <Link to={`/product?${color ? `color=${color}&` : ''}${size ? `size=${size}` : ''}`} className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">
-              ดูคู่ใหม่ {baht(890)} →
+              ดูคู่ใหม่ {baht(PRODUCT.price)} →
             </Link>
           </div>
         )}
@@ -248,10 +252,10 @@ export function PreownedDetail() {
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
             <div key={view} className="w-[88%] animate-fade">
-              <Shoe color={p.color} view={view} wear={100 - p.conditionPct} seed={p.wearSeed} photo={p.photos[VIEWS.indexOf(view)]} className="w-full" />
+              {view === 'side' ? <img src={look(p).src} alt={look(p).alt} className="w-full drop-shadow-[0_20px_20px_rgba(0,0,0,.16)]" /> : <Shoe color={p.color} view={view} wear={100 - p.conditionPct} seed={p.wearSeed} className="w-full" />}
             </div>
             <span className="absolute bottom-4 left-4 rounded-full bg-card px-3 py-1 text-xs text-sub">
-              {p.photos.length ? 'รูปถ่ายจริงของคู่นี้' : 'ภาพจำลองรอยใช้งานของคู่นี้ · รูปจริงจะแสดงเมื่อเชื่อมระบบหลังร้าน'}
+              {view === 'side' ? 'ภาพตัวอย่างสร้างด้วย AI' : 'ภาพจำลองรอยใช้งาน'} · รูปจริงของคู่นี้จะแสดงเมื่อเชื่อมระบบหลังร้าน
             </span>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-3">
@@ -373,15 +377,14 @@ export function PreownedDetail() {
 /** Drag to compare the pair as it came in (more wear, dull) with how it looks after cleaning and QC. */
 function BeforeAfter({ p }: { p: PreownedItem }) {
   const [x, setX] = useState(50)
-  const wear = 100 - p.conditionPct
   return (
     <div className="mt-6">
       <div className="relative aspect-[5/3] select-none overflow-hidden rounded-3xl bg-stone">
         <div className="absolute inset-0 grid place-items-center">
-          <Shoe color={p.color} wear={wear} seed={p.wearSeed} className="w-[82%]" />
+          <img src={look(p).src} alt="" className="w-[82%]" />
         </div>
         <div className="absolute inset-0 grid place-items-center bg-stone" style={{ clipPath: `inset(0 ${100 - x}% 0 0)` }}>
-          <Shoe color={p.color} wear={Math.min(30, wear + 14)} seed={p.wearSeed + 3} className="w-[82%] [filter:saturate(.5)_brightness(.82)_sepia(.25)]" />
+          <img src={p.color === 'brown' ? USED.src : PHOTOS[p.color].side.src} alt="" className="w-[82%] [filter:saturate(.55)_brightness(.8)_sepia(.35)]" />
         </div>
         <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-ink" style={{ left: `${x}%` }}>
           <span className="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-ink text-paper shadow-lg">

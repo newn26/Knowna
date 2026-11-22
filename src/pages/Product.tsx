@@ -4,32 +4,34 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
 import { Button, ColorPicker, ConditionBar, Container, GradeBadge, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, listPreowned, stockOf } from '../lib/api'
-import { COLORS, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
+import { COLORS, FREE_SHIPPING_FROM, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
 import { allocateTradeIns, newPairsIn } from '../lib/tradein'
 import { Breakdown } from './TradeIn'
 import type { ColorId, Kind, PreownedItem } from '../lib/types'
 import { SizeTable } from './SizeFinder'
-import { PHOTO } from '../lib/photos'
+import { PHOTOS } from '../lib/photos'
+import { baht } from '../lib/pricing'
 
 // Photos first; the drawn toe and heel views fill the angles not photographed yet.
-const VIEWS: { id: string; label: string; photo?: { src: string; alt: string }; shoe?: ShoeView }[] = [
-  { id: 'pair', label: 'ทั้งคู่', photo: PHOTO.pair },
-  { id: 'side', label: 'ด้านข้าง', photo: PHOTO.side },
+const viewsFor = (color: ColorId): { id: string; label: string; photo?: { src: string; alt: string }; shoe?: ShoeView }[] => [
+  { id: 'pair', label: 'ทั้งคู่', photo: PHOTOS[color].pair },
+  { id: 'side', label: 'ด้านข้าง', photo: PHOTOS[color].side },
   { id: 'toe', label: 'หัวรองเท้า', shoe: 'toe' },
   { id: 'heel', label: 'ส้น', shoe: 'heel' },
 ]
 
 function Gallery({ color }: { color: ColorId }) {
   const [id, setId] = useState('pair')
+  const VIEWS = viewsFor(color)
   const v = VIEWS.find((x) => x.id === id)!
   return (
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
         {v.photo ? (
-          <img key={id} src={v.photo.src} alt={v.photo.alt} className={`animate-swap ${id === 'side' ? 'w-[92%]' : 'h-full w-full object-cover'}`} />
+          <img key={color + id} src={v.photo.src} alt={v.photo.alt} className={`animate-swap ${id === 'side' ? 'w-[92%]' : 'h-full w-full object-cover'}`} />
         ) : (
-          <div key={id} className="w-[88%] animate-swap">
+          <div key={color + id} className="w-[88%] animate-swap">
             <Shoe color={color} view={v.shoe!} className="w-full" />
           </div>
         )}
@@ -296,7 +298,7 @@ export default function Product() {
 
             <ul className="grid gap-3 text-sm text-sub sm:grid-cols-3">
               <li className="flex items-center gap-2">
-                <Truck size={16} /> ส่งฟรีเมื่อครบ ฿1,500
+                <Truck size={16} /> ส่งฟรีเมื่อครบ {baht(FREE_SHIPPING_FROM)}
               </li>
               <li className="flex items-center gap-2">
                 <Ruler size={16} /> เปลี่ยนไซซ์ฟรี 14 วัน
