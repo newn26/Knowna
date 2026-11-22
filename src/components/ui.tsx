@@ -137,7 +137,7 @@ export function Field({ label, error, ...p }: InputHTMLAttributes<HTMLInputEleme
         {...p}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errId : undefined}
-        className={`h-12 w-full rounded-xl border bg-card px-4 text-[15px] outline-none transition placeholder:text-sub focus:border-ink ${error ? 'border-bad' : 'border-line'}`}
+        className={`h-12 w-full rounded-xl border bg-card px-4 text-[15px] outline-none transition placeholder:text-sub/45 focus:border-ink ${error ? 'border-bad' : 'border-line'}`}
       />
       {error && (
         <span id={errId} className="mt-1 block text-xs text-bad">

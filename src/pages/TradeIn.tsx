@@ -149,7 +149,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
               check(serial)
             }}
           >
-            <Field label="Product ID (พิมพ์อยู่ใต้ลิ้นรองเท้า)" value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="เช่น KW-BK38-240118" autoComplete="off" spellCheck={false} />
+            <Field label="Product ID (พิมพ์อยู่ใต้ลิ้นรองเท้า)" value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="KW-XXXX-XXXXXX" autoComplete="off" spellCheck={false} />
             <p className="mt-2 text-xs text-sub">
               ลองรหัสตัวอย่าง:{' '}
               {['KW-BR40-240623', 'KW-BK33-230512', 'KW-BK38-999999'].map((s) => (

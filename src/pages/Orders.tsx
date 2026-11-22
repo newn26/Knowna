@@ -42,8 +42,8 @@ export function Track() {
       <PageHead title="ติดตามพัสดุ" sub="ใช้เลขคำสั่งซื้อ (อยู่ในหน้ายืนยัน/อีเมล) กับเบอร์โทรที่ใช้สั่ง" />
       <Container className="grid gap-8 lg:grid-cols-2">
         <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-card p-6 sm:p-8">
-          <Field label="เลขคำสั่งซื้อ" value={id} onChange={(e) => setId(e.target.value)} placeholder="เช่น KW-250502-0107" spellCheck={false} />
-          <Field label="เบอร์โทร" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="เบอร์ที่ใช้ตอนสั่งซื้อ เช่น 081-234-5678" inputMode="tel" />
+          <Field label="เลขคำสั่งซื้อ" value={id} onChange={(e) => setId(e.target.value)} placeholder="KW-XXXXXX-XXXX" spellCheck={false} />
+          <Field label="เบอร์โทร" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08X-XXX-XXXX" inputMode="tel" />
           {error && (
             <p className="text-sm text-bad" role="alert">
               {error}
