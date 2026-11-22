@@ -241,8 +241,10 @@ function Toast() {
   const toast = useStore((s) => s.toast)
   if (!toast) return null
   return (
-    <div key={toast.id} className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 animate-rise rounded-full bg-ink px-5 py-3 text-sm font-medium text-paper shadow-xl" role="status">
-      {toast.text}
+    <div className="pointer-events-none fixed inset-x-4 bottom-6 z-[60] flex justify-center" role="status">
+      <p key={toast.id} className="animate-rise rounded-full bg-ink px-5 py-3 text-center text-sm font-medium text-paper shadow-xl">
+        {toast.text}
+      </p>
     </div>
   )
 }

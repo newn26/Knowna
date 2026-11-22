@@ -2,9 +2,14 @@ import { useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import Home from './pages/Home'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
+import { Account, OrderDetail, Track } from './pages/Orders'
+import Preowned, { PreownedDetail } from './pages/Preowned'
 import Product from './pages/Product'
 import Shop from './pages/Shop'
 import SizeFinder from './pages/SizeFinder'
+import TradeIn from './pages/TradeIn'
 
 function ScrollManager() {
   const { pathname, hash } = useLocation()
@@ -27,6 +32,14 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Product />} />
           <Route path="/size" element={<SizeFinder />} />
+          <Route path="/preowned" element={<Preowned />} />
+          <Route path="/preowned/:id" element={<PreownedDetail />} />
+          <Route path="/trade-in" element={<TradeIn />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/track" element={<Track />} />
+          <Route path="/order/:id" element={<OrderDetail />} />
+          <Route path="/account" element={<Account />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Layout>
