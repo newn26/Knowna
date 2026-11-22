@@ -88,7 +88,7 @@ function Header() {
             </span>
           </Link>
           <button className={`${icon} relative`} onClick={() => actions.openCart()} aria-label={`ตะกร้า ${count} ชิ้น`}>
-            <span key={count} className={`block ${count ? 'animate-bump' : ''}`}>
+            <span key={`bag-${count}`} className={`block ${count ? 'animate-bump' : ''}`}>
               <ShoppingBag size={19} />
             </span>
             {count > 0 && (
