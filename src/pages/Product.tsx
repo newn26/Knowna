@@ -37,7 +37,7 @@ function Gallery({ color }: { color: ColorId }) {
       <div className="mt-3 grid grid-cols-5 gap-3">
         <button
           onClick={() => setView('photo')}
-          aria-label="ดูรูปจริง"
+          aria-label="ดูรูปสินค้า"
           aria-pressed={view === 'photo'}
           className={`aspect-square overflow-hidden rounded-2xl bg-stone ring-2 transition ${view === 'photo' ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
         >
