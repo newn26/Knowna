@@ -10,6 +10,7 @@ import { allocateTradeIns, newPairsIn } from '../lib/tradein'
 import { Breakdown } from './TradeIn'
 import type { ColorId, Kind, PreownedItem } from '../lib/types'
 import { SizeTable } from './SizeFinder'
+import { PHOTOS } from '../lib/photos'
 
 const VIEWS: { id: ShoeView; label: string }[] = [
   { id: 'side', label: 'ด้านข้าง' },
@@ -19,16 +20,40 @@ const VIEWS: { id: ShoeView; label: string }[] = [
 ]
 
 function Gallery({ color }: { color: ColorId }) {
-  const [view, setView] = useState<ShoeView>('side')
+  const [view, setView] = useState<ShoeView | 'photo'>('photo')
+  const photo = PHOTOS[color]
   return (
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
-        <div key={color + view} className="w-[88%] animate-swap">
-          <Shoe color={color} view={view} className="w-full" />
-        </div>
-        <span className="absolute bottom-4 left-4 text-xs text-sub">ภาพประกอบสินค้า</span>
+        {view === 'photo' ? (
+          <img key={color} src={photo.src} alt={photo.alt} className={`h-full w-full animate-swap ${photo.fit}`} />
+        ) : (
+          <div key={color + view} className="w-[88%] animate-swap">
+            <Shoe color={color} view={view} className="w-full" />
+          </div>
+        )}
+        <span className={`absolute bottom-4 left-4 rounded-full px-2 py-0.5 text-xs ${view === 'photo' ? 'bg-card/85 text-ink' : 'text-sub'}`}>
+          {view === 'photo' ? (
+            <>
+              รูปจริงทรงใกล้เคียง ·{' '}
+              <a href={photo.source} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                CC0
+              </a>
+            </>
+          ) : (
+            'ภาพประกอบสินค้า'
+          )}
+        </span>
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-3">
+      <div className="mt-3 grid grid-cols-5 gap-3">
+        <button
+          onClick={() => setView('photo')}
+          aria-label="ดูรูปจริง"
+          aria-pressed={view === 'photo'}
+          className={`aspect-square overflow-hidden rounded-2xl bg-stone ring-2 transition ${view === 'photo' ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
+        >
+          <img src={photo.src} alt="" className={`h-full w-full ${photo.fit}`} />
+        </button>
         {VIEWS.map((v) => (
           <button
             key={v.id}
