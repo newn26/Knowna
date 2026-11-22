@@ -71,12 +71,12 @@ export type VerifyResult = { ok: true; unit: Unit } | { ok: false; reason: strin
 // POST /api/tradein/verify  { serial }
 export async function verifyPurchase(rawSerial: string, reservedSerials: string[] = []): Promise<VerifyResult> {
   await wait(700)
-  // QR tags encode "KAOWNA:<serial>"; accept either form, any case, stray spaces.
-  const serial = rawSerial.trim().toUpperCase().replace(/^KAOWNA:/, '')
-  if (!/^KW-(BK|WH|BR)\d{2}-\d{6}$/.test(serial))
-    return { ok: false, reason: 'รูปแบบ Product ID ไม่ถูกต้อง ตัวอย่าง KW-BK38-240118 (ดูได้ที่ใต้ลิ้นรองเท้า)' }
+  // QR tags encode "KNOWNA:<serial>"; accept either form, any case, stray spaces.
+  const serial = rawSerial.trim().toUpperCase().replace(/^KNOWNA:/, '')
+  if (!/^KN-(BK|WH|BR)\d{2}-\d{6}$/.test(serial))
+    return { ok: false, reason: 'รูปแบบ Product ID ไม่ถูกต้อง ตัวอย่าง KN-BK38-240118 (ดูได้ที่ใต้ลิ้นรองเท้า)' }
   const unit = load().units.find((u) => u.serial === serial)
-  if (!unit) return { ok: false, reason: 'ไม่พบรหัสนี้ในประวัติการขาย รับเทิร์นเฉพาะรองเท้าที่ซื้อจาก KAOWNA เท่านั้น' }
+  if (!unit) return { ok: false, reason: 'ไม่พบรหัสนี้ในประวัติการขาย รับเทิร์นเฉพาะรองเท้าที่ซื้อจาก KNOWNA เท่านั้น' }
   if (unit.tradedIn) return { ok: false, reason: 'คู่นี้ถูกเทิร์นไปแล้ว ใช้สิทธิ์ซ้ำไม่ได้' }
   if (reservedSerials.includes(serial)) return { ok: false, reason: 'คู่นี้อยู่ในตะกร้าของคุณแล้ว' }
   return { ok: true, unit: { ...unit } }
@@ -138,7 +138,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<Order> {
   const tradeIns = input.tradeIns.filter((x) => used.has(x.id))
 
   const now = new Date()
-  const id = `KW-${now.toISOString().slice(2, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 9000) + 1000)}`
+  const id = `KN-${now.toISOString().slice(2, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 9000) + 1000)}`
   const serials: string[] = []
   for (const l of input.lines) {
     if (l.kind === 'new') {

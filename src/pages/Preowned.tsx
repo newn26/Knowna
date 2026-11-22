@@ -163,7 +163,7 @@ export default function Preowned() {
             <h2 className="font-display text-4xl font-black uppercase leading-none sm:text-5xl" style={{ fontStretch: '80%' }}>
               ตรวจทุกคู่ ก่อนถึงมือคุณ
             </h2>
-            <p className="mt-4 max-w-md text-sub">ทุกคู่ในร้านนี้มาจากลูกค้าที่ซื้อจาก KAOWNA เท่านั้น เราจึงรู้ว่ารองเท้าผ่านอะไรมา และตรวจได้ตามมาตรฐานเดียวกัน</p>
+            <p className="mt-4 max-w-md text-sub">ทุกคู่ในร้านนี้มาจากลูกค้าที่ซื้อจาก KNOWNA เท่านั้น เราจึงรู้ว่ารองเท้าผ่านอะไรมา และตรวจได้ตามมาตรฐานเดียวกัน</p>
             <dl className="mt-8 space-y-3 text-sm">
               {[
                 ['เกรด A · 90–100%', 'เหมือนใหม่ แทบไม่มีรอย ดอกยางเต็ม'],

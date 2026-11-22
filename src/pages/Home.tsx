@@ -342,11 +342,11 @@ function TradeInStory() {
               ตรวจ {checkIdx + 1}/5 · {CHECKLIST[Math.max(0, checkIdx)].label}
             </Tag>
             <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(at === 'verify', '-translate-y-3')}`}>
-              <FakeQR value="KW-BK36-240117" size={44} />
+              <FakeQR value="KN-BK36-240117" size={44} />
               <div className="text-xs">
-                <p className="font-semibold tabular">KW-BK36-240117</p>
+                <p className="font-semibold tabular">KN-BK36-240117</p>
                 <p className="flex items-center gap-1 text-ok">
-                  <Check size={13} /> ซื้อจาก KAOWNA
+                  <Check size={13} /> ซื้อจาก KNOWNA
                 </p>
               </div>
             </div>
@@ -437,7 +437,7 @@ function TradeInSection() {
           <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.92] tracking-tight sm:text-7xl" style={display}>
             เท้าโต ไม่ต้องทิ้ง<span className="text-signal">.</span>
           </h2>
-          <p className="mt-4 text-lg text-sub">รองเท้าที่ซื้อจาก KAOWNA สภาพ 75% ขึ้นไป เปลี่ยนเป็นส่วนลดคู่ใหม่ได้ทันที ในรายการสั่งซื้อเดียวกัน</p>
+          <p className="mt-4 text-lg text-sub">รองเท้าที่ซื้อจาก KNOWNA สภาพ 75% ขึ้นไป เปลี่ยนเป็นส่วนลดคู่ใหม่ได้ทันที ในรายการสั่งซื้อเดียวกัน</p>
         </div>
         <ol className="mt-12 grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
           {FLOW.map(({ icon: Icon, t, d }, i) => (

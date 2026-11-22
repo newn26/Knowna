@@ -14,7 +14,7 @@ The student may have a say in the choice, but the parent decides and pays. Write
 
 ## Product Purpose
 
-KAOWNA is a single-model boys' school shoe brand with a built-in trade-in loop. Parents buy a new pair. When the child outgrows it, they trade the old pair in and get a discount on the next new pair in the same bill. The old pair is then cleaned, inspected and resold as pre-owned at a lower price.
+KNOWNA is a single-model boys' school shoe brand with a built-in trade-in loop. Parents buy a new pair. When the child outgrows it, they trade the old pair in and get a discount on the next new pair in the same bill. The old pair is then cleaned, inspected and resold as pre-owned at a lower price.
 
 This site is a course project and demo for an instructor, not a live business. Success means the demo clearly shows three flows working end to end:
 
@@ -39,7 +39,7 @@ The pre-owned store is supplied only by the brand's own trade-ins, each graded A
 
 - **Colours:** Black for normal school days; White for PE and schools that require white shoes; Brown for scout and girl-guide uniform days.
 - **Sizes:** EU 30–45, sold New or Pre-owned.
-- **Verifying a trade-in:** the brand checks it was bought from KAOWNA using Order History, a Product ID, or the QR code under the tongue.
+- **Verifying a trade-in:** the brand checks it was bought from KNOWNA using Order History, a Product ID, or the QR code under the tongue.
 - **Condition check:** a 5-point inspection (upper, sole, insole, stitching and shape, laces and eyelets) plus 3 required photos.
 - **Pre-owned process:** Inspection, then Cleaning & Sanitizing, then Quality Check, then listing in the Pre-owned Store.
 
@@ -53,9 +53,9 @@ The pre-owned store is supplied only by the brand's own trade-ins, each graded A
 
 ## Brand Commitments
 
-- **Name:** KAOWNA.
+- **Name:** KNOWNA.
 - **Tagline:** "STEP UP. PASS IT ON."
-- **Product name:** KAOWNA Classic.
+- **Product name:** KNOWNA Classic.
 - **Fixed rules:** the trade-in discount rules above are fixed product rules and must not be changed in copy.
 
 ## Evidence on Hand

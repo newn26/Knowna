@@ -271,7 +271,7 @@ export default function Product() {
                   <span className="flex items-center gap-2 font-semibold">
                     <Recycle size={16} className="text-signal" /> Trade-in Old Pair
                   </span>
-                  <span className="mt-1 block text-sm text-sub">มีคู่เก่าที่ซื้อจาก KAOWNA สภาพ 75% ขึ้นไป? ลดคู่นี้ทันที 10–15% ในบิลเดียวกัน</span>
+                  <span className="mt-1 block text-sm text-sub">มีคู่เก่าที่ซื้อจาก KNOWNA สภาพ 75% ขึ้นไป? ลดคู่นี้ทันที 10–15% ในบิลเดียวกัน</span>
                   {unmatchedTradeIns > 0 && <span className="mt-1 block text-sm text-signal">คุณมีคู่เก่าที่ประเมินแล้ว {unmatchedTradeIns} คู่ รอคู่ใหม่อยู่ในตะกร้า</span>}
                 </span>
               </label>

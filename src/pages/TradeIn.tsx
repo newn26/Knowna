@@ -38,7 +38,7 @@ function Stepper({ at }: { at: number }) {
 }
 
 type Method = 'history' | 'id' | 'qr'
-const DEMO_QR = 'KAOWNA:KW-BR40-240623'
+const DEMO_QR = 'KNOWNA:KN-BR40-240623'
 
 function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => void; reserved: string[]; initial: string }) {
   const user = useStore((s) => s.user)
@@ -83,7 +83,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
   return (
     <div>
       <h2 className="font-display text-3xl font-black uppercase" style={{ fontStretch: '80%' }}>
-        ยืนยันว่าซื้อจาก KAOWNA
+        ยืนยันว่าซื้อจาก KNOWNA
       </h2>
       <p className="mt-1 text-sub">รับเทิร์นเฉพาะคู่ที่ซื้อจากร้านเรา เลือกวิธีที่สะดวก</p>
       <div className="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-stone p-1" role="group" aria-label="วิธียืนยัน">
@@ -153,10 +153,10 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
               check(serial)
             }}
           >
-            <Field label="Product ID (พิมพ์อยู่ใต้ลิ้นรองเท้า)" value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="KW-XXXX-XXXXXX" autoComplete="off" spellCheck={false} />
+            <Field label="Product ID (พิมพ์อยู่ใต้ลิ้นรองเท้า)" value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="KN-XXXX-XXXXXX" autoComplete="off" spellCheck={false} />
             <p className="mt-2 text-xs text-sub">
               ลองรหัสตัวอย่าง:{' '}
-              {['KW-BR40-240623', 'KW-BK33-230512', 'KW-BK38-999999'].map((s) => (
+              {['KN-BR40-240623', 'KN-BK33-230512', 'KN-BK38-999999'].map((s) => (
                 <button key={s} type="button" onClick={() => setSerial(s)} className="mr-2 underline underline-offset-2 tabular hover:text-ink">
                   {s}
                 </button>
@@ -460,7 +460,7 @@ function Rules() {
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <ul className="space-y-3 text-sm">
           {[
-            'ต้องเป็นรองเท้าที่ซื้อจาก KAOWNA เท่านั้น ตรวจจาก Order History, Product ID หรือ QR Code',
+            'ต้องเป็นรองเท้าที่ซื้อจาก KNOWNA เท่านั้น ตรวจจาก Order History, Product ID หรือ QR Code',
             'สภาพต้อง 75% ขึ้นไป: 90–100% ลด 15%, 75–89% ลด 10%, ต่ำกว่า 75% ไม่รับ',
             'ส่วนลดใช้กับรองเท้าคู่ใหม่ในรายการสั่งซื้อเดียวกันทันที 1 คู่เก่า ต่อ 1 คู่ใหม่ ประเมินคู่เก่าก่อนเลือกคู่ใหม่ก็ได้',
             'ไม่แลกเป็นเงินสด ไม่มีคูปอง ไม่มี Wallet ไม่มีวันหมดอายุ เพราะใช้ทันทีในบิล',

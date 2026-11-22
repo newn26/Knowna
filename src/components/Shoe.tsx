@@ -191,7 +191,7 @@ export function ShoeFlat({ color, side, wear = 0, className = '', label }: { col
           <ellipse cx="116" cy="100" rx="60" ry="36" fill={p.lining} stroke={p.outline} strokeOpacity=".4" />
           <ellipse cx="118" cy="100" rx="51" ry="28" fill={p.lining} opacity=".75" />
           <text x="118" y="104" textAnchor="middle" fontSize="11" fontWeight="700" fill={p.stitch} opacity=".9">
-            KAOWNA
+            KNOWNA
           </text>
           <path d="M168 82 L262 86 C271 90 271 110 262 114 L168 118 Z" fill={p.tongue} stroke={p.outline} strokeOpacity=".3" />
           {eyes.map((x) => (
@@ -215,7 +215,7 @@ export function ShoeFlat({ color, side, wear = 0, className = '', label }: { col
             <path key={i} d={`M${134 + i * 14} 40 l 9 60 l -9 60`} stroke={p.edge} strokeWidth="4" fill="none" />
           ))}
           <text x="250" y="105" textAnchor="middle" fontSize="12" fontWeight="800" fill={p.edge} letterSpacing="2">
-            KAOWNA
+            KNOWNA
           </text>
           {/* worn patches under the ball of the foot and the heel */}
           <ellipse cx="300" cy="100" rx="40" ry="30" fill="#fff" opacity={Math.min(0.18, wear / 120)} />

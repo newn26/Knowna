@@ -127,7 +127,7 @@ export default function Cart() {
           {canTradeIn && (
             <Link to="/trade-in" className="mt-6 flex items-center justify-between rounded-2xl bg-ink p-5 text-paper transition hover:bg-ink/90">
               <span>
-                <b>มีคู่เก่าจาก KAOWNA?</b>
+                <b>มีคู่เก่าจาก KNOWNA?</b>
                 <span className="block text-sm text-paper/70">เทิร์นตอนนี้ ลดคู่ใหม่ในตะกร้าได้ 10–15%</span>
               </span>
               <span className="font-semibold">Trade-in →</span>

@@ -20,7 +20,7 @@ const NAV = [
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-display font-black uppercase tracking-[-0.06em] ${className}`} style={{ fontStretch: '115%' }}>
-      Kaowna<span className="text-signal">.</span>
+      Knowna<span className="text-signal">.</span>
     </span>
   )
 }
@@ -61,7 +61,7 @@ function Header() {
         <button className={`${icon} -ml-2 lg:hidden`} onClick={() => setMenu(!menu)} aria-label="เมนู" aria-expanded={menu}>
           {menu ? <X size={20} /> : <Menu size={20} />}
         </button>
-        <Link to="/" className="text-2xl" aria-label="KAOWNA หน้าแรก">
+        <Link to="/" className="text-2xl" aria-label="KNOWNA หน้าแรก">
           <Wordmark />
         </Link>
         <nav className="ml-6 hidden gap-1 lg:flex">
@@ -203,7 +203,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
             {canTradeIn && tradeIns.length === 0 && (
               <Link to="/trade-in" className="mb-3 flex items-center justify-between rounded-xl bg-stone px-4 py-3 text-sm transition hover:bg-line">
                 <span>
-                  มีคู่เก่าจาก KAOWNA? <b>เทิร์นลดเพิ่ม 10–15%</b>
+                  มีคู่เก่าจาก KNOWNA? <b>เทิร์นลดเพิ่ม 10–15%</b>
                 </span>
                 <span>→</span>
               </Link>
@@ -282,7 +282,7 @@ function Footer() {
           ))}
         </div>
         <div className="mt-16 flex flex-col gap-3 border-t border-paper/15 pt-6 text-xs text-paper/50 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 KAOWNA · เว็บสาธิต ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีการตัดเงินจริง</p>
+          <p>© 2026 KNOWNA · เว็บสาธิต ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น ไม่มีการตัดเงินจริง</p>
           <button
             className="self-start underline-offset-2 hover:text-paper hover:underline"
             onClick={() => {

@@ -42,7 +42,7 @@ export function Track() {
       <PageHead title="ติดตามพัสดุ" sub="ใช้เลขคำสั่งซื้อ (อยู่ในหน้ายืนยัน/อีเมล) กับเบอร์โทรที่ใช้สั่ง" />
       <Container className="grid gap-8 lg:grid-cols-2">
         <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-card p-6 sm:p-8">
-          <Field label="เลขคำสั่งซื้อ" value={id} onChange={(e) => setId(e.target.value)} placeholder="KW-XXXXXX-XXXX" spellCheck={false} />
+          <Field label="เลขคำสั่งซื้อ" value={id} onChange={(e) => setId(e.target.value)} placeholder="KN-XXXXXX-XXXX" spellCheck={false} />
           <Field label="เบอร์โทร" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08X-XXX-XXXX" inputMode="tel" />
           {error && (
             <p className="text-sm text-bad" role="alert">
@@ -56,7 +56,7 @@ export function Track() {
             type="button"
             className="text-xs text-sub underline underline-offset-2"
             onClick={() => {
-              setId('KW-250502-0107')
+              setId('KN-250502-0107')
               setPhone('0812345678')
             }}
           >

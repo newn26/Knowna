@@ -20,7 +20,7 @@ const test = async (name: string, fn: () => unknown) => {
 }
 
 const line = (kind: 'new' | 'preowned', qty = 1, price = 890): CartLine => ({ key: `${kind}-${qty}-${price}`, kind, color: 'black', size: 38, qty, unitPrice: price, preownedId: kind === 'preowned' ? 'PO-1001' : undefined })
-const ti = (id: string, pct: number): TradeIn => ({ id, serial: 'KW-BK38-' + id.padStart(6, '0'), color: 'black', size: 38, answers: {}, conditionPct: pct, grade: gradeFor(pct), rate: rateFor(pct), photoCount: 0, createdAt: '' })
+const ti = (id: string, pct: number): TradeIn => ({ id, serial: 'KN-BK38-' + id.padStart(6, '0'), color: 'black', size: 38, answers: {}, conditionPct: pct, grade: gradeFor(pct), rate: rateFor(pct), photoCount: 0, createdAt: '' })
 
 await test('rate bands: 90–100 → 15%, 75–89 → 10%, <75 → 0', () => {
   assert.equal(rateFor(100), 0.15)
@@ -62,10 +62,10 @@ await test('address: 77 provinces, Bangkok uses แขวง/เขต, others �
 resetDB()
 
 await test('verify: unknown, malformed and already-traded serials are refused', async () => {
-  assert.equal((await verifyPurchase('KW-BK38-999999')).ok, false)
+  assert.equal((await verifyPurchase('KN-BK38-999999')).ok, false)
   assert.equal((await verifyPurchase('hello')).ok, false)
   assert.equal((await verifyPurchase(makeSerial('black', 33, 230512))).ok, false)
-  assert.equal((await verifyPurchase('kaowna:' + makeSerial('black', 38, 240118).toLowerCase())).ok, true)
+  assert.equal((await verifyPurchase('knowna:' + makeSerial('black', 38, 240118).toLowerCase())).ok, true)
 })
 
 await test('order: trade-in applied once, then the serial cannot be reused', async () => {

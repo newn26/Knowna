@@ -5,7 +5,7 @@ import { preownedPrice } from './pricing'
 import { gradeFor } from './tradein'
 import type { ColorId, Order, PreownedItem, Unit, User } from './types'
 
-const KEY = 'kw.db.v1'
+const KEY = 'kw.db.v2'
 
 export interface DB {
   users: User[]
@@ -27,7 +27,7 @@ function rng(seed: number) {
 }
 
 const code = (c: ColorId) => COLORS.find((x) => x.id === c)!.code
-export const makeSerial = (color: ColorId, size: number, n: number) => `KW-${code(color)}${size}-${String(n).padStart(6, '0')}`
+export const makeSerial = (color: ColorId, size: number, n: number) => `KN-${code(color)}${size}-${String(n).padStart(6, '0')}`
 
 export const DEMO_USER: User = {
   id: 'u-demo',
@@ -74,10 +74,10 @@ function seed(): DB {
       timeScale: 'real',
     }
   }
-  orders.push(pastOrder('KW-240510-0031', '2024-05-10T10:12:00+07:00', [['black', 35, 240117], ['black', 38, 240118]], DEMO_USER.id))
-  orders.push(pastOrder('KW-250502-0107', '2025-05-02T14:40:00+07:00', [['white', 37, 250233]], DEMO_USER.id))
-  orders.push(pastOrder('KW-230512-0009', '2023-05-12T09:05:00+07:00', [['black', 33, 230512]], DEMO_USER.id))
-  orders.push(pastOrder('KW-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 40, 240623]], null))
+  orders.push(pastOrder('KN-240510-0031', '2024-05-10T10:12:00+07:00', [['black', 35, 240117], ['black', 38, 240118]], DEMO_USER.id))
+  orders.push(pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['white', 37, 250233]], DEMO_USER.id))
+  orders.push(pastOrder('KN-230512-0009', '2023-05-12T09:05:00+07:00', [['black', 33, 230512]], DEMO_USER.id))
+  orders.push(pastOrder('KN-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 40, 240623]], null))
   // This pair was already traded in once, so it must be rejected if someone tries again.
   units.find((u) => u.serial === makeSerial('black', 33, 230512))!.tradedIn = true
 

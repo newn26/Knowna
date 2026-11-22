@@ -1,10 +1,10 @@
 import type { AddressParts, ColorId, ColorInfo } from './types'
 
-export const BRAND = 'KAOWNA'
+export const BRAND = 'KNOWNA'
 
 export const PRODUCT = {
-  id: 'kw-classic-01',
-  model: 'KAOWNA Classic',
+  id: 'kn-classic-01',
+  model: 'KNOWNA Classic',
   nameTh: 'รองเท้านักเรียนชาย หนังผูกเชือก',
   price: 890,
   details: [

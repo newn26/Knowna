@@ -12,7 +12,7 @@ interface State {
   toast: { id: number; text: string } | null
 }
 
-const KEY = 'kw.client.v1'
+const KEY = 'kw.client.v2'
 
 function read(): State {
   const base: State = { cart: [], tradeIns: [], user: null, orders: [], cartOpen: false, toast: null }
