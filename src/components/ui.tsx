@@ -52,7 +52,7 @@ export function ColorPicker({ value, onChange }: { value: ColorId; onChange: (c:
           className={`group flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-4 text-sm transition ${value === c.id ? 'border-ink' : 'border-line hover:border-sub'}`}
         >
           <span className={`h-7 w-7 rounded-full ring-1 ring-inset ring-black/15 transition duration-300 group-hover:scale-110 ${value === c.id ? 'scale-110' : ''}`} style={{ background: SWATCH[c.id] }} />
-          <span className="font-medium">{c.name}</span>
+          <span className="font-medium">{c.nameTh}</span>
         </button>
       ))}
     </div>

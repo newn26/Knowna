@@ -10,7 +10,7 @@ import { actions, useStore } from '../lib/store'
 import { CHECKLIST, CONDITION_LEVELS, MIN_CONDITION, newPairsIn, scoreCondition } from '../lib/tradein'
 import type { CheckAnswer, TradeIn as TradeInT, Unit } from '../lib/types'
 
-const STEPS = ['Old Pair', 'Condition', 'Inspection', 'Discount', 'New Pair']
+const STEPS = ['คู่เก่า', 'สภาพ', 'ตรวจ', 'ส่วนลด', 'คู่ใหม่']
 
 function Stepper({ at }: { at: number }) {
   return (
@@ -76,7 +76,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
   }
 
   const tabs: { id: Method; label: string; icon: typeof History }[] = [
-    { id: 'history', label: 'Order History', icon: History },
+    { id: 'history', label: 'ประวัติการสั่งซื้อ', icon: History },
     { id: 'id', label: 'Product ID', icon: Keyboard },
     { id: 'qr', label: 'สแกน QR', icon: QrCode },
   ]
@@ -132,7 +132,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
                       </div>
                       <div className="flex-1 text-sm">
                         <p className="font-semibold">
-                          {colorInfo(u.color).name} · EU {u.size}
+                          สี{colorInfo(u.color).nameTh} · EU {u.size}
                         </p>
                         <p className="text-sub tabular">
                           {u.serial} · ออเดอร์ {u.orderId} · {new Date(u.soldAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
@@ -226,7 +226,7 @@ function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string
         สภาพคู่เก่า
       </h2>
       <p className="mt-1 text-sub">
-        ตอบตามจริง 5 ข้อ · {colorInfo(unit.color).name} EU {unit.size} · <span className="tabular">{unit.serial}</span>
+        ตอบตามจริง 5 ข้อ · สี{colorInfo(unit.color).nameTh} EU {unit.size} · <span className="tabular">{unit.serial}</span>
       </p>
       <div className="mt-6 space-y-5">
         {CHECKLIST.map((c) => (
@@ -456,11 +456,11 @@ function Result({ t, hasNewPair, onApply, onRetry }: { t: TradeInT; hasNewPair: 
 function Rules() {
   return (
     <section id="rules" className="mt-20 scroll-mt-24">
-      <h2 className="font-display text-2xl font-black uppercase">เงื่อนไข Trade-in</h2>
+      <h2 className="font-display text-2xl font-black uppercase">เงื่อนไขการเทิร์น</h2>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <ul className="space-y-3 text-sm">
           {[
-            'ต้องเป็นรองเท้าที่ซื้อจาก KNOWNA เท่านั้น ตรวจจาก Order History, Product ID หรือ QR Code',
+            'ต้องเป็นรองเท้าที่ซื้อจาก KNOWNA เท่านั้น ตรวจจากประวัติการสั่งซื้อ, Product ID หรือ QR Code',
             'สภาพต้อง 75% ขึ้นไป: 90–100% ลด 15%, 75–89% ลด 10%, ต่ำกว่า 75% ไม่รับ',
             'ส่วนลดใช้กับรองเท้าคู่ใหม่ในรายการสั่งซื้อเดียวกันทันที 1 คู่เก่า ต่อ 1 คู่ใหม่ ประเมินคู่เก่าก่อนเลือกคู่ใหม่ก็ได้',
             'ไม่แลกเป็นเงินสด ไม่มีคูปอง ไม่มี Wallet ไม่มีวันหมดอายุ เพราะใช้ทันทีในบิล',
@@ -476,7 +476,7 @@ function Rules() {
         <div className="rounded-3xl bg-stone p-6">
           <p className="font-semibold">คู่เก่าไปไหนต่อ</p>
           <ol className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-            {['Trade-in', 'Inspection', 'Cleaning & Sanitizing', 'Quality Check', 'Pre-owned Store'].map((s, i, a) => (
+            {['รับคู่เก่า', 'ตรวจ 5 จุด', 'ซักและฆ่าเชื้อ', 'ตรวจซ้ำ', 'ขึ้นร้านมือสอง'].map((s, i, a) => (
               <li key={s} className="flex items-center gap-2">
                 <span className="rounded-full bg-card px-3 py-1.5 font-medium">{s}</span>
                 {i < a.length - 1 && <span className="text-sub">→</span>}
@@ -577,7 +577,7 @@ export default function TradeIn() {
               onRetry={reset}
               onApply={() => {
                 actions.addTradeIn(result)
-                actions.toast(`ส่วนลด Trade-in ${result.rate * 100}% พร้อมใช้`)
+                actions.toast(`ส่วนลดเทิร์น ${result.rate * 100}% พร้อมใช้`)
                 // suggest one size up: the old pair was traded because the foot grew
                 navigate(free > 0 ? '/checkout' : `/product?color=${result.color}&size=${Math.min(45, result.size + 1)}`)
               }}
@@ -598,7 +598,7 @@ export default function TradeIn() {
                       <Shoe color={l.color} className="w-14" shadow={false} />
                     </div>
                     <span className="flex-1">
-                      {colorInfo(l.color).name} · EU {l.size} × {l.qty}
+                      สี{colorInfo(l.color).nameTh} · EU {l.size} × {l.qty}
                     </span>
                     <span className="tabular">{baht(PRODUCT.price * l.qty)}</span>
                   </li>
@@ -629,7 +629,7 @@ export default function TradeIn() {
                 <Check size={16} /> ยืนยันการซื้อแล้ว
               </p>
               <p className="mt-1 text-sub tabular">
-                {unit.serial} · {colorInfo(unit.color).name} EU {unit.size}
+                {unit.serial} · สี{colorInfo(unit.color).nameTh} EU {unit.size}
               </p>
               {step === 1 && (
                 <button onClick={reset} className="mt-2 text-xs underline">

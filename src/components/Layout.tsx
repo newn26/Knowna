@@ -10,10 +10,10 @@ import { Shoe } from './Shoe'
 import { buttonClass, Container, Num, useDialog } from './ui'
 
 const NAV = [
-  { to: '/shop', label: 'Shop New' },
-  { to: '/preowned', label: 'Pre-owned' },
-  { to: '/trade-in', label: 'Trade-in' },
-  { to: '/size', label: 'Size Finder' },
+  { to: '/shop', label: 'ซื้อคู่ใหม่' },
+  { to: '/preowned', label: 'มือสอง' },
+  { to: '/trade-in', label: 'เทิร์นคู่เก่า' },
+  { to: '/size', label: 'หาไซซ์' },
   { to: '/track', label: 'ติดตามพัสดุ' },
 ]
 
@@ -170,10 +170,10 @@ function CartSheet({ leaving }: { leaving: boolean }) {
                   </div>
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="font-semibold">
-                      {colorInfo(l.color).name} · EU {l.size}
+                      สี{colorInfo(l.color).nameTh} · EU {l.size}
                     </p>
                     <p className="text-sub">
-                      {l.kind === 'new' ? 'New' : `Pre-owned ${l.preownedId}`} · {l.qty} คู่
+                      {l.kind === 'new' ? 'คู่ใหม่' : `มือสอง ${l.preownedId}`} · {l.qty} คู่
                     </p>
                     <p className="mt-1 tabular">{baht(l.unitPrice * l.qty)}</p>
                   </div>
@@ -186,7 +186,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
           )}
           {tradeIns.length > 0 && (
             <div className="mb-4 rounded-2xl border border-signal/40 bg-signal/5 p-4 text-sm">
-              <p className="font-semibold text-signal">Trade-in ในออเดอร์นี้</p>
+              <p className="font-semibold text-signal">คู่เก่าที่เทิร์นในออเดอร์นี้</p>
               {t.allocation.map((a) => (
                 <p key={a.tradeInId} className="mt-1 flex justify-between tabular">
                   <span>
@@ -215,7 +215,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
               </div>
               {t.discount > 0 && (
                 <div className="flex justify-between text-signal">
-                  <dt>ส่วนลด Trade-in</dt>
+                  <dt>ส่วนลดเทิร์น</dt>
                   <dd>−{baht(t.discount)}</dd>
                 </div>
               )}
@@ -263,12 +263,12 @@ function Footer() {
             <p className="mt-4 max-w-xs text-sm text-paper/60">รองเท้านักเรียนชายคู่เดียวที่ตั้งใจทำให้ดีที่สุด ใส่จนโต แล้วเทิร์นต่อให้รุ่นน้อง</p>
           </div>
           {[
-            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/preowned', 'Pre-owned'], ['/size', 'หาไซซ์']]],
-            ['Trade-in', [['/trade-in', 'เทิร์นคู่เก่า'], ['/trade-in#rules', 'เงื่อนไข'], ['/#second-life', 'Second Life']]],
+            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/preowned', 'มือสอง'], ['/size', 'หาไซซ์']]],
+            ['เทิร์น', [['/trade-in', 'เทิร์นคู่เก่า'], ['/trade-in#rules', 'เงื่อนไข'], ['/#second-life', 'คู่เก่าไปไหนต่อ']]],
             ['ช่วยเหลือ', [['/track', 'ติดตามพัสดุ'], ['/account', 'ประวัติการสั่งซื้อ'], ['/size', 'วิธีวัดเท้า']]],
           ].map(([h, links]) => (
             <div key={h as string}>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-paper/50">{h as string}</p>
+              <p className="text-sm font-semibold text-paper/60">{h as string}</p>
               <ul className="mt-4 space-y-2 text-sm">
                 {(links as string[][]).map(([to, l]) => (
                   <li key={to}>

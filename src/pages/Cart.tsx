@@ -28,7 +28,7 @@ export function Summary({ lines, tradeIns, shipping, children }: { lines: CartLi
           .map((a) => (
             <div key={a.tradeInId} className="flex justify-between text-signal">
               <dt>
-                Trade-in {Math.round(a.rate * 100)}% <span className="text-xs">({a.serial})</span>
+                ส่วนลดเทิร์น {Math.round(a.rate * 100)}% <span className="text-xs">({a.serial})</span>
               </dt>
               <dd>−{baht(a.amount)}</dd>
             </div>
@@ -68,9 +68,9 @@ export default function Cart() {
       <>
         <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ หรือดูมือสองที่ผ่าน QC" />
         <Container className="flex gap-3">
-          <LinkButton to="/shop">Shop New</LinkButton>
+          <LinkButton to="/shop">ซื้อคู่ใหม่</LinkButton>
           <LinkButton to="/preowned" variant="outline">
-            Pre-owned
+            ดูมือสอง
           </LinkButton>
         </Container>
       </>
@@ -84,16 +84,16 @@ export default function Cart() {
           <ul className="divide-y divide-line border-y border-line">
             {cart.map((l) => (
               <li key={l.key} className="flex gap-4 py-5">
-                <Link to={l.kind === 'preowned' ? `/preowned/${l.preownedId}` : `/product?color=${l.color}&size=${l.size}`} aria-label={`ดู ${colorInfo(l.color).name} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
+                <Link to={l.kind === 'preowned' ? `/preowned/${l.preownedId}` : `/product?color=${l.color}&size=${l.size}`} aria-label={`ดู $สี{colorInfo(l.color).nameTh} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
                   <Shoe color={l.color} className="w-[88%]" shadow={false} wear={l.kind === 'preowned' ? 12 : 0} />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex justify-between gap-3">
                     <div>
                       <p className="font-semibold">
-                        {colorInfo(l.color).name} · EU {l.size}
+                        สี{colorInfo(l.color).nameTh} · EU {l.size}
                       </p>
-                      <p className="text-sm text-sub">{l.kind === 'new' ? 'New' : `Pre-owned · ${l.preownedId}`}</p>
+                      <p className="text-sm text-sub">{l.kind === 'new' ? 'คู่ใหม่' : `มือสอง · ${l.preownedId}`}</p>
                     </div>
                     <p className="font-semibold tabular">{baht(l.unitPrice * l.qty)}</p>
                   </div>
@@ -114,7 +114,7 @@ export default function Cart() {
                   <span className="flex items-center gap-3">
                     <Recycle size={18} className="text-signal" />
                     <span>
-                      <b>Trade-in</b> {colorInfo(t.color).name} EU {t.size} · <span className="tabular">{t.serial}</span> · สภาพ {t.conditionPct}% → ลด {t.rate * 100}%
+                      <b>เทิร์น</b> สี{colorInfo(t.color).nameTh} EU {t.size} · <span className="tabular">{t.serial}</span> · สภาพ {t.conditionPct}% → ลด {t.rate * 100}%
                     </span>
                   </span>
                   <button onClick={() => actions.removeTradeIn(t.id)} className="text-xs text-sub underline">
@@ -130,7 +130,7 @@ export default function Cart() {
                 <b>มีคู่เก่าจาก KNOWNA?</b>
                 <span className="block text-sm text-paper/70">เทิร์นตอนนี้ ลดคู่ใหม่ในตะกร้าได้ 10–15%</span>
               </span>
-              <span className="font-semibold">Trade-in →</span>
+              <span className="font-semibold">เทิร์นคู่เก่า →</span>
             </Link>
           )}
         </div>

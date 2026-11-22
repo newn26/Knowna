@@ -163,7 +163,7 @@ export default function Checkout() {
               {cart.map((l) => (
                 <li key={l.key} className="flex justify-between gap-3 py-3">
                   <span>
-                    {colorInfo(l.color).name} · EU {l.size} · {l.kind === 'new' ? 'New' : 'Pre-owned'} × {l.qty}
+                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'มือสอง'} × {l.qty}
                   </span>
                   <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
                 </li>

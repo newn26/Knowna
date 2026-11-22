@@ -152,7 +152,7 @@ export function OrderDetail() {
                 {r === 0 ? <p className="text-sm text-sub">รอรับคู่เก่าตอน{o.fulfilment === 'pickup' ? 'มารับที่สาขา' : 'ส่งคู่ใหม่'}</p> : <Timeline steps={ts} now={now} />}
                 {r === ts.length && (
                   <Link to="/preowned" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">
-                    คู่นี้ขึ้นร้าน Pre-owned แล้ว →
+                    คู่นี้ขึ้นร้านมือสองแล้ว →
                   </Link>
                 )}
               </section>
@@ -174,7 +174,7 @@ export function OrderDetail() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="font-medium">
-                          {colorInfo(l.color).name} · EU {l.size} · {l.kind === 'new' ? 'New' : 'Pre-owned'}
+                          สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'มือสอง'}
                         </p>
                         {serial && <p className="text-xs text-sub tabular">Product ID {serial}</p>}
                       </div>
@@ -191,7 +191,7 @@ export function OrderDetail() {
               </div>
               {o.discount > 0 && (
                 <div className="flex justify-between text-signal">
-                  <dt>ส่วนลด Trade-in</dt>
+                  <dt>ส่วนลดเทิร์น</dt>
                   <dd>−{baht(o.discount)}</dd>
                 </div>
               )}
@@ -294,7 +294,7 @@ export function Account() {
                 <div className="mt-3 flex items-start justify-between gap-2">
                   <div className="text-sm">
                     <p className="font-semibold">
-                      {colorInfo(u.color).name} · EU {u.size}
+                      สี{colorInfo(u.color).nameTh} · EU {u.size}
                     </p>
                     <p className="text-xs text-sub tabular">{u.serial}</p>
                   </div>
@@ -355,7 +355,7 @@ function OrderList({ orders }: { orders: Order[] | null }) {
               <span className="font-semibold tabular">{o.id}</span>
               <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
               <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} คู่</span>
-              {o.tradeIns.length > 0 && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">Trade-in</span>}
+              {o.tradeIns.length > 0 && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">เทิร์น</span>}
               <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
               <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
             </Link>

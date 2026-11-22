@@ -71,7 +71,7 @@ function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () =
       <div className="absolute inset-0 animate-fade bg-black/40" onClick={onClose} />
       <div className="relative max-h-[85dvh] w-full max-w-lg animate-rise overflow-y-auto rounded-t-3xl bg-paper p-6 sm:rounded-3xl">
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-display text-xl font-black uppercase">Size Guide</p>
+          <p className="font-display text-xl font-black uppercase">ตารางไซซ์</p>
           <button onClick={onClose} className="grid h-10 w-10 place-items-center rounded-full hover:bg-ink/5" aria-label="ปิด">
             <X size={20} />
           </button>
@@ -142,7 +142,7 @@ export default function Product() {
     }
     if (go === 'tradein') return navigate('/trade-in?from=product')
     if (go === 'checkout') return navigate('/checkout')
-    actions.toast(pending && kind === 'new' ? `เพิ่มแล้ว · หักส่วนลด Trade-in ${pending.rate * 100}% ให้แล้ว` : `เพิ่ม ${colorInfo(color).name} EU ${size} ลงตะกร้าแล้ว`)
+    actions.toast(pending && kind === 'new' ? `เพิ่มแล้ว · หักส่วนลดเทิร์น ${pending.rate * 100}% ให้แล้ว` : `เพิ่ม ${colorInfo(color).name} EU ${size} ลงตะกร้าแล้ว`)
     actions.openCart()
   }
 
@@ -183,7 +183,7 @@ export default function Product() {
                     onClick={() => (update('type', k), setPick(null), setTradeIn(false))}
                     className={`h-11 rounded-full text-sm font-semibold transition ${kind === k ? 'bg-card shadow-sm' : 'text-sub hover:text-ink'}`}
                   >
-                    {k === 'new' ? `New · ฿${PRODUCT.price}` : `Pre-owned · ${poHere.length} คู่`}
+                    {k === 'new' ? `คู่ใหม่ · ฿${PRODUCT.price}` : `มือสอง · ${poHere.length} คู่`}
                   </button>
                 ))}
               </div>
@@ -198,7 +198,7 @@ export default function Product() {
                   )}
                 </p>
                 <button onClick={() => setGuide(true)} className="inline-flex items-center gap-1.5 text-sm text-sub underline-offset-4 hover:text-ink hover:underline">
-                  <Ruler size={14} /> Size Guide
+                  <Ruler size={14} /> ตารางไซซ์
                 </button>
               </div>
               <SizeGrid
@@ -262,14 +262,14 @@ export default function Product() {
                 <input type="checkbox" checked={tradeIn} onChange={(e) => setTradeIn(e.target.checked)} className="mt-1 h-5 w-5 accent-[rgb(var(--signal))]" />
                 <span>
                   <span className="flex items-center gap-2 font-semibold">
-                    <Recycle size={16} className="text-signal" /> Trade-in Old Pair
+                    <Recycle size={16} className="text-signal" /> เทิร์นคู่เก่า
                   </span>
                   <span className="mt-1 block text-sm text-sub">มีคู่เก่าที่ซื้อจาก KNOWNA สภาพ 75% ขึ้นไป? ลดคู่นี้ทันที 10–15% ในบิลเดียวกัน</span>
                   {unmatchedTradeIns > 0 && <span className="mt-1 block text-sm text-signal">คุณมีคู่เก่าที่ประเมินแล้ว {unmatchedTradeIns} คู่ รอคู่ใหม่อยู่ในตะกร้า</span>}
                 </span>
               </label>
             ) : (
-              <p className="rounded-2xl bg-stone p-4 text-sm text-sub">ส่วนลด Trade-in ใช้กับรองเท้าใหม่เท่านั้น แต่คู่มือสองนี้มี Product ID เดิม เอามาเทิร์นต่อได้ในอนาคต</p>
+              <p className="rounded-2xl bg-stone p-4 text-sm text-sub">ส่วนลดเทิร์นใช้กับรองเท้าใหม่เท่านั้น แต่คู่มือสองนี้มี Product ID เดิม เอามาเทิร์นต่อได้ในอนาคต</p>
             )}
 
             {error && (
@@ -285,10 +285,10 @@ export default function Product() {
               ) : (
                 <>
                   <Button size="lg" variant="outline" onClick={() => add('cart')}>
-                    Add to Cart
+                    ใส่ตะกร้า
                   </Button>
                   <Button size="lg" onClick={() => add('checkout')}>
-                    Buy Now
+                    ซื้อเลย
                   </Button>
                 </>
               )}
@@ -324,8 +324,8 @@ export default function Product() {
                   ))}
                 </dl>
               </Accordion>
-              <Accordion title="Trade-in ทำงานยังไง">
-                ซื้อคู่ใหม่ แล้วยืนยันคู่เก่าด้วย Order History, Product ID หรือ QR ใต้ลิ้น ประเมินสภาพ 5 จุด ได้ 90–100% ลด 15%, 75–89% ลด 10% หักในบิลนี้ทันที ไม่แลกเงินสด{' '}
+              <Accordion title="การเทิร์นทำงานยังไง">
+                ซื้อคู่ใหม่ แล้วยืนยันคู่เก่าด้วยประวัติการสั่งซื้อ, Product ID หรือ QR ใต้ลิ้น ประเมินสภาพ 5 จุด ได้ 90–100% ลด 15%, 75–89% ลด 10% หักในบิลนี้ทันที ไม่แลกเงินสด{' '}
                 <Link to="/trade-in#rules" className="text-ink underline">
                   อ่านเงื่อนไขเต็ม
                 </Link>

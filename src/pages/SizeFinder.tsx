@@ -34,7 +34,7 @@ export function SizeTable({ highlight }: { highlight?: number | null }) {
 
 export default function SizeFinder() {
   const [params] = useSearchParams()
-  const [grade, setGrade] = useState(GRADES.find((g) => g.id === params.get('grade')) ?? GRADES[6])
+  const [grade, setGrade] = useState(GRADES.find((g) => g.id === params.get('grade')) ?? GRADES[2])
   const [cm, setCm] = useState(23.5)
   const [room, setRoom] = useState(true)
   const eu = sizeForFoot(cm + (room ? 0.5 : 0))

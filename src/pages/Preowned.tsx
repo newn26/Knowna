@@ -16,8 +16,8 @@ const date = (iso: string) => new Date(iso).toLocaleDateString('th-TH', { day: '
 
 function QCBadges({ compact = false }: { compact?: boolean }) {
   const items = [
-    { icon: Droplets, t: 'Cleaning & Sanitizing' },
-    { icon: BadgeCheck, t: 'Quality Checked' },
+    { icon: Droplets, t: 'ซักและฆ่าเชื้อแล้ว' },
+    { icon: BadgeCheck, t: 'ตรวจซ้ำแล้ว' },
   ]
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -45,7 +45,7 @@ function Card({ p, i }: { p: PreownedItem; i: number }) {
       <div className="mt-3 flex items-start justify-between gap-3">
         <div>
           <p className="font-semibold">
-            {colorInfo(p.color).name} · EU {p.size}
+            สี{colorInfo(p.color).nameTh} · EU {p.size}
           </p>
           <p className="text-xs text-sub">
             {GRADE_TEXT[p.grade]} · ขึ้นร้าน {date(p.listedAt)}
@@ -91,15 +91,15 @@ export default function Preowned() {
             Second step<span className="text-signal">.</span>
           </>
         }
-        sub="รองเท้าที่ลูกค้าเทิร์นกลับมา ผ่าน Inspection, ล้างและอบโอโซนฆ่าเชื้อ เปลี่ยนแผ่นรองและเชือกใหม่ แล้ว Quality Check อีกรอบ ทุกคู่บอกสภาพเป็นเปอร์เซ็นต์ตรง ๆ"
+        sub="รองเท้าที่ลูกค้าเทิร์นกลับมา ผ่านการตรวจ 5 จุด ล้างและอบโอโซนฆ่าเชื้อ เปลี่ยนแผ่นรองและเชือกใหม่ แล้ว Quality Check อีกรอบ ทุกคู่บอกสภาพเป็นเปอร์เซ็นต์ตรง ๆ"
       />
       <Container>
         <div className="grid gap-3 rounded-3xl bg-stone p-5 sm:grid-cols-4">
           {[
-            [Sparkles, 'Inspection 5 จุด', 'ผ้าใบ พื้น แผ่นรอง ตะเข็บ เชือก'],
-            [Droplets, 'Cleaning & Sanitizing', 'ล้าง ขัด อบโอโซน'],
-            [ShieldCheck, 'Quality Check', 'ช่างตรวจซ้ำก่อนขึ้นร้าน'],
-            [BadgeCheck, 'Grade A / B', 'A ≥ 90% · B 75–89%'],
+            [Sparkles, 'ตรวจ 5 จุด', 'ผ้าใบ พื้น แผ่นรอง ตะเข็บ เชือก'],
+            [Droplets, 'ซักและฆ่าเชื้อ', 'ซัก ตาก อบโอโซน'],
+            [ShieldCheck, 'ตรวจซ้ำ', 'ช่างอีกคนตรวจก่อนขึ้นร้าน'],
+            [BadgeCheck, 'เกรด A / B', 'A ≥ 90% · B 75–89%'],
           ].map(([Icon, t, d]) => {
             const I = Icon as typeof Sparkles
             return (
@@ -180,10 +180,10 @@ export default function Preowned() {
           <ol className="relative space-y-6 border-l border-line pl-8">
             {[
               ['ยืนยันที่มา', 'เช็ก Product ID ใต้ลิ้นกับประวัติการขาย รับเฉพาะคู่ที่ขายจากร้านเรา'],
-              ['Inspection 5 จุด', 'ผ้าใบด้านบน พื้น แผ่นรอง ตะเข็บและทรง เชือกและรูร้อย คิดคะแนนถ่วงน้ำหนักเป็น %'],
-              ['Cleaning', 'ซักคราบทั้งคู่ เปลี่ยนเชือกใหม่ทุกคู่'],
-              ['Sanitizing', 'อบโอโซนฆ่าเชื้อด้านใน และเปลี่ยนแผ่นรองใหม่'],
-              ['Quality Check', 'ช่างอีกคนตรวจซ้ำ ให้เกรด ถ่ายรูปจริงของคู่นั้น แล้วจึงขึ้นร้าน'],
+              ['ตรวจ 5 จุด', 'ผ้าใบด้านบน พื้น แผ่นรอง ตะเข็บและทรง เชือกและรูร้อย คิดคะแนนถ่วงน้ำหนักเป็น %'],
+              ['ซัก', 'ซักคราบทั้งคู่ เปลี่ยนเชือกใหม่ทุกคู่'],
+              ['ฆ่าเชื้อ', 'อบโอโซนฆ่าเชื้อด้านใน และเปลี่ยนแผ่นรองใหม่'],
+              ['ตรวจซ้ำ', 'ช่างอีกคนตรวจซ้ำ ให้เกรด ถ่ายรูปจริงของคู่นั้น แล้วจึงขึ้นร้าน'],
             ].map(([t, d], i) => (
               <li key={t} className="relative">
                 <span className="absolute -left-[45px] grid h-7 w-7 place-items-center rounded-full bg-ink text-xs font-bold text-paper">{i + 1}</span>
@@ -226,7 +226,7 @@ export function PreownedDetail() {
       <Container className="py-24 text-center">
         <p className="font-semibold">ไม่พบสินค้า {id}</p>
         <Link to="/preowned" className="mt-3 inline-block underline">
-          กลับไปร้าน Pre-owned
+          กลับไปร้านมือสอง
         </Link>
       </Container>
     )
@@ -242,7 +242,7 @@ export function PreownedDetail() {
   return (
     <Container className="pb-10 pt-6 sm:pt-10">
       <Link to="/preowned" className="inline-flex items-center gap-2 text-sm text-sub hover:text-ink">
-        <ArrowLeft size={16} /> Pre-owned Store
+        <ArrowLeft size={16} /> ร้านมือสอง
       </Link>
       <div className="mt-6 grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -276,9 +276,9 @@ export function PreownedDetail() {
             <span className="text-sm text-sub tabular">{p.id}</span>
           </div>
           <h1 className="mt-3 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl" style={{ fontStretch: '80%' }}>
-            Pre-owned
+            มือสอง
             <span className="block text-sub/70">
-              {colorInfo(p.color).name} · EU {p.size}
+              สี{colorInfo(p.color).nameTh} · EU {p.size}
             </span>
           </h1>
           <div className="mt-5 flex flex-wrap items-baseline gap-3">
@@ -288,10 +288,10 @@ export function PreownedDetail() {
 
           <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line text-sm sm:grid-cols-4">
             {[
-              ['Size', `EU ${p.size}`],
-              ['Color', colorInfo(p.color).name],
-              ['Condition', `${p.conditionPct}%`],
-              ['Grade', p.grade],
+              ['ไซซ์', `EU ${p.size}`],
+              ['สี', colorInfo(p.color).nameTh],
+              ['สภาพ', `${p.conditionPct}%`],
+              ['เกรด', p.grade],
             ].map(([k, v]) => (
               <div key={k} className="bg-card p-4">
                 <dt className="text-xs uppercase tracking-wider text-sub">{k}</dt>
@@ -321,10 +321,10 @@ export function PreownedDetail() {
             ) : (
               <>
                 <Button size="lg" variant="outline" onClick={() => add()}>
-                  Add to Cart
+                  ใส่ตะกร้า
                 </Button>
                 <Button size="lg" onClick={() => add(true)}>
-                  Buy Now
+                  ซื้อเลย
                 </Button>
               </>
             )}
