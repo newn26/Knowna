@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
+import { PHOTOS } from '../lib/photos'
 import { Container, PageHead, SWATCH, useReveal } from '../components/ui'
 import { getStock, listPreowned, stockOf } from '../lib/api'
 import { COLORS, PRODUCT, SIZES } from '../lib/catalog'
@@ -66,14 +66,14 @@ export default function Shop() {
             return (
               <article key={c.id} className="reveal group" style={{ transitionDelay: `${i * 70}ms` }}>
                 <Link to={`/product?color=${c.id}${size ? `&size=${size}` : ''}`} className="block">
-                  <div className="relative grid aspect-[4/3.4] place-items-center overflow-hidden rounded-3xl bg-stone">
+                  <div className="relative grid aspect-[4/3.4] place-items-center overflow-hidden rounded-3xl bg-white">
                     <span className="absolute left-4 top-4 rounded-full bg-card px-3 py-1 text-xs font-semibold">New</span>
                     {sizeLeft !== null && (
                       <span className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-semibold ${sizeLeft === 0 ? 'bg-bad/10 text-bad' : sizeLeft <= 3 ? 'bg-signal text-paper' : 'bg-card'}`}>
                         {sizeLeft === 0 ? `EU ${size} หมด` : sizeLeft <= 3 ? `EU ${size} เหลือ ${sizeLeft}` : `EU ${size} มีของ`}
                       </span>
                     )}
-                    <Shoe color={c.id} className="w-[88%] transition duration-700 group-hover:-translate-y-2 group-hover:-rotate-3" />
+                    <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} className="h-full w-full object-contain transition duration-700 group-hover:scale-105" />
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
                     <div>
