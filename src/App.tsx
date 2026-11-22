@@ -10,6 +10,7 @@ import Product from './pages/Product'
 import Shop from './pages/Shop'
 import SizeFinder from './pages/SizeFinder'
 import TradeIn from './pages/TradeIn'
+import NotFound from './pages/NotFound'
 
 function ScrollManager() {
   const { pathname, hash } = useLocation()
@@ -40,6 +41,7 @@ export default function App() {
       <Layout>
         <PageFade>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Product />} />
           <Route path="/size" element={<SizeFinder />} />
@@ -51,7 +53,7 @@ export default function App() {
           <Route path="/track" element={<Track />} />
           <Route path="/order/:id" element={<OrderDetail />} />
           <Route path="/account" element={<Account />} />
-          <Route path="*" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </PageFade>
       </Layout>
