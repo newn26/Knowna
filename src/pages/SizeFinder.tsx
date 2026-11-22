@@ -84,7 +84,7 @@ export default function SizeFinder() {
               {cm.toFixed(1)} <span className="text-lg text-paper/60">ซม.</span>
             </p>
           </div>
-          <input id="cm" type="range" min={17.5} max={29} step={0.1} value={cm} onChange={(e) => setCm(+e.target.value)} className="mt-3 w-full accent-[rgb(var(--signal))]" />
+          <input id="cm" type="range" min={17.5} max={29} step={0.1} value={cm} onChange={(e) => setCm(+e.target.value)} className="mt-3 h-8 w-full accent-[rgb(var(--signal))]" />
           <label className="mt-4 flex cursor-pointer items-center gap-3 text-sm">
             <input type="checkbox" checked={room} onChange={(e) => setRoom(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--signal))]" />
             เผื่อโต +0.5 ซม. (แนะนำสำหรับเด็กประถม)

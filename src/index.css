@@ -3,14 +3,16 @@
 @tailwind utilities;
 
 /* Theme tokens: RGB triplets so Tailwind opacity modifiers work (bg-ink/10). */
-:root {
+/* .fixed-tone keeps the light-theme tokens, so dark bands (footer, marquee) stay dark in dark mode */
+:root,
+.dark .fixed-tone {
   --paper: 246 244 240;
   --card: 255 255 255;
   --ink: 17 17 17;
   --sub: 104 100 94;
   --line: 224 220 213;
   --stone: 236 233 227;
-  --signal: 214 79 38;
+  --signal: 180 62 24;
   --ok: 38 120 82;
   --bad: 190 48 48;
   color-scheme: light;
@@ -26,6 +28,7 @@
   --signal: 240 112 70;
   --ok: 92 186 140;
   --bad: 236 104 104;
+  --rim-a: 0.55; /* light edge on the shoe illustration so dark shoes read on dark surfaces */
   color-scheme: dark;
 }
 
@@ -70,16 +73,26 @@ body {
   scrollbar-width: none;
 }
 
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: stop looping and travelling motion, keep fades and spinners so state changes still show */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
+  .animate-marquee,
+  .animate-step,
+  .animate-ping,
+  .animate-scan {
+    animation: none !important;
+  }
+  .animate-rise,
+  .animate-sheet {
+    animation-name: fade !important;
   }
   .reveal {
     opacity: 1;

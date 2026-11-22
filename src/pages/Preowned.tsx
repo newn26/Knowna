@@ -36,7 +36,7 @@ function Card({ p }: { p: PreownedItem }) {
         <div className="absolute left-3 top-3">
           <GradeBadge grade={p.grade} pct={p.conditionPct} />
         </div>
-        {sold && <span className="absolute right-3 top-3 rounded-full bg-bad px-2.5 py-1 text-xs font-semibold text-white">ขายแล้ว</span>}
+        {sold && <span className="absolute right-3 top-3 rounded-full bg-bad px-2.5 py-1 text-xs font-semibold text-paper">ขายแล้ว</span>}
         <Shoe color={p.color} wear={100 - p.conditionPct} seed={p.wearSeed} photo={p.photos[0]} className="w-[86%] transition duration-700 group-hover:-translate-y-1.5 group-hover:-rotate-2" />
         <span className="absolute bottom-3 right-3 font-display text-xs font-bold text-sub tabular">{p.id}</span>
       </div>

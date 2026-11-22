@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../lib/catalog'
 import { baht } from '../lib/pricing'
@@ -11,7 +11,7 @@ type Variant = 'solid' | 'outline' | 'signal' | 'ghost'
 const btn: Record<Variant, string> = {
   solid: 'bg-ink text-paper hover:bg-ink/85',
   outline: 'border border-ink/80 text-ink hover:bg-ink hover:text-paper',
-  signal: 'bg-signal text-white hover:brightness-110',
+  signal: 'bg-signal text-paper hover:brightness-110',
   ghost: 'text-ink hover:bg-ink/5',
 }
 
@@ -43,12 +43,11 @@ export const SWATCH: Record<ColorId, string> = { black: '#1d1d1d', white: '#f5f3
 
 export function ColorPicker({ value, onChange }: { value: ColorId; onChange: (c: ColorId) => void }) {
   return (
-    <div className="flex gap-3" role="radiogroup" aria-label="สี">
+    <div className="flex gap-3" role="group" aria-label="สี">
       {COLORS.map((c) => (
         <button
           key={c.id}
-          role="radio"
-          aria-checked={value === c.id}
+          aria-pressed={value === c.id}
           onClick={() => onChange(c.id)}
           className={`group flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-4 text-sm transition ${value === c.id ? 'border-ink' : 'border-line hover:border-sub'}`}
         >
@@ -74,7 +73,7 @@ export function SizeGrid({
   highlight?: [number, number] | null
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2 sm:grid-cols-8" role="radiogroup" aria-label="ไซซ์">
+    <div className="grid grid-cols-4 gap-2 sm:grid-cols-8" role="group" aria-label="ไซซ์">
       {sizes.map((s) => {
         const left = stockOf ? stockOf(s) : 99
         const out = left <= 0
@@ -82,8 +81,7 @@ export function SizeGrid({
         return (
           <button
             key={s}
-            role="radio"
-            aria-checked={value === s}
+            aria-pressed={value === s}
             disabled={out}
             onClick={() => onChange(s)}
             className={`relative h-12 rounded-xl border text-sm font-semibold tabular transition ${
@@ -91,7 +89,7 @@ export function SizeGrid({
             } ${out ? 'cursor-not-allowed text-sub/50 line-through' : ''}`}
           >
             {s}
-            {!out && left <= 3 && <span title={`เหลือ ${left} คู่`} aria-label={`เหลือ ${left} คู่`} className="absolute -top-1.5 right-1 rounded-full bg-signal px-1.5 text-[10px] font-bold leading-4 text-white">{left}</span>}
+            {!out && left <= 3 && <span title={`เหลือ ${left} คู่`} aria-label={`เหลือ ${left} คู่`} className="absolute -top-1.5 right-1 rounded-full bg-signal px-1.5 text-[10px] font-bold leading-4 text-paper">{left}</span>}
           </button>
         )
       })}
@@ -131,14 +129,21 @@ export function ConditionBar({ pct }: { pct: number }) {
 }
 
 export function Field({ label, error, ...p }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
+  const errId = useId()
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-medium">{label}</span>
       <input
         {...p}
-        className={`h-12 w-full rounded-xl border bg-card px-4 text-[15px] outline-none transition placeholder:text-sub/60 focus:border-ink ${error ? 'border-bad' : 'border-line'}`}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errId : undefined}
+        className={`h-12 w-full rounded-xl border bg-card px-4 text-[15px] outline-none transition placeholder:text-sub focus:border-ink ${error ? 'border-bad' : 'border-line'}`}
       />
-      {error && <span className="mt-1 block text-xs text-bad">{error}</span>}
+      {error && (
+        <span id={errId} className="mt-1 block text-xs text-bad">
+          {error}
+        </span>
+      )}
     </label>
   )
 }
@@ -215,7 +220,7 @@ export function useReveal<T extends HTMLElement>() {
   useEffect(() => {
     const root = ref.current
     if (!root) return
-    const els = root.querySelectorAll('.reveal')
+    const els = root.querySelectorAll('.reveal:not(.in)')
     if (!('IntersectionObserver' in window)) {
       els.forEach((e) => e.classList.add('in'))
       return
@@ -254,3 +259,39 @@ export function PageHead({ title, sub }: { title: ReactNode; sub?: ReactNode }) 
 export const Spinner = ({ className = '' }: { className?: string }) => (
   <span className={`inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent ${className}`} aria-hidden />
 )
+
+/** Modal behaviour: focus moves in, Tab stays inside, Esc closes, focus returns to the opener. */
+export function useDialog<T extends HTMLElement>(onClose: () => void) {
+  const ref = useRef<T>(null)
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null
+    const focusables = () =>
+      [...ref.current!.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])')]
+    focusables()[0]?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return close.current()
+      if (e.key !== 'Tab') return
+      const f = focusables()
+      if (!f.length) return
+      const first = f[0]
+      const last = f[f.length - 1]
+      if (!ref.current!.contains(document.activeElement) || (e.shiftKey && document.activeElement === first)) {
+        e.preventDefault()
+        ;(e.shiftKey ? last : first).focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+      opener?.focus()
+    }
+  }, [])
+  return ref
+}

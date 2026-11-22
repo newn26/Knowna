@@ -76,7 +76,7 @@ export default function Cart() {
           <ul className="divide-y divide-line border-y border-line">
             {cart.map((l) => (
               <li key={l.key} className="flex gap-4 py-5">
-                <Link to={l.kind === 'preowned' ? `/preowned/${l.preownedId}` : `/product?color=${l.color}&size=${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
+                <Link to={l.kind === 'preowned' ? `/preowned/${l.preownedId}` : `/product?color=${l.color}&size=${l.size}`} aria-label={`ดู ${colorInfo(l.color).name} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
                   <Shoe color={l.color} className="w-[88%]" shadow={false} wear={l.kind === 'preowned' ? 12 : 0} />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">

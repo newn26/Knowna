@@ -7,7 +7,7 @@ import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { newPairsIn } from '../lib/tradein'
 import { Shoe } from './Shoe'
-import { buttonClass, Container } from './ui'
+import { buttonClass, Container, useDialog } from './ui'
 
 const NAV = [
   { to: '/shop', label: 'Shop New' },
@@ -122,26 +122,20 @@ function Header() {
 
 function CartDrawer() {
   const open = useStore((s) => s.cartOpen)
+  const { pathname } = useLocation()
+  useEffect(() => actions.openCart(false), [pathname])
+  return open ? <CartSheet /> : null
+}
+
+function CartSheet() {
   const cart = useStore((s) => s.cart)
   const tradeIns = useStore((s) => s.tradeIns)
   const navigate = useNavigate()
-  const { pathname } = useLocation()
-  useEffect(() => actions.openCart(false), [pathname])
-  useEffect(() => {
-    if (!open) return
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && actions.openCart(false)
-    document.addEventListener('keydown', esc)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', esc)
-      document.body.style.overflow = ''
-    }
-  }, [open])
-  if (!open) return null
+  const ref = useDialog<HTMLDivElement>(() => actions.openCart(false))
   const t = totals(cart, tradeIns)
   const canTradeIn = newPairsIn(cart) > tradeIns.filter((x) => x.rate > 0).length
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="ตะกร้าสินค้า">
+    <div ref={ref} className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="ตะกร้าสินค้า">
       <div className="absolute inset-0 animate-fade bg-black/40" onClick={() => actions.openCart(false)} />
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-md animate-sheet flex-col bg-paper shadow-2xl">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
@@ -251,7 +245,7 @@ function Toast() {
 
 function Footer() {
   return (
-    <footer className="mt-24 bg-ink text-paper">
+    <footer className="fixed-tone mt-24 bg-ink text-paper">
       <Container className="py-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>

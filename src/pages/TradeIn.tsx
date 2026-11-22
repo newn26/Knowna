@@ -14,12 +14,16 @@ const STEPS = ['Choose New Shoes', 'Verify Purchase', 'Shoe Condition', 'Inspect
 
 function Stepper({ at }: { at: number }) {
   return (
-    <ol className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <>
+      <p className="sr-only" aria-live="polite">
+        ขั้นที่ {at + 1} จาก {STEPS.length}: {STEPS[at]}
+      </p>
+      <ol className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0">
       {STEPS.map((s, i) => (
         <li key={s} className="flex shrink-0 items-center gap-2">
           <span
             className={`grid h-7 w-7 place-items-center rounded-full text-xs font-bold transition ${
-              i < at ? 'bg-ink text-paper' : i === at ? 'bg-signal text-white ring-4 ring-signal/20' : 'bg-stone text-sub'
+              i < at ? 'bg-ink text-paper' : i === at ? 'bg-signal text-paper ring-4 ring-signal/20' : 'bg-stone text-sub'
             }`}
           >
             {i < at ? <Check size={14} /> : i + 1}
@@ -28,7 +32,8 @@ function Stepper({ at }: { at: number }) {
           {i < STEPS.length - 1 && <span className="mx-1 h-px w-6 bg-line" />}
         </li>
       ))}
-    </ol>
+      </ol>
+    </>
   )
 }
 
@@ -77,12 +82,11 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
         ยืนยันว่าซื้อจาก KAOWNA
       </h2>
       <p className="mt-1 text-sub">รับเทิร์นเฉพาะคู่ที่ซื้อจากร้านเรา เลือกวิธีที่สะดวก</p>
-      <div className="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-stone p-1" role="tablist">
+      <div className="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-stone p-1" role="group" aria-label="วิธียืนยัน">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
-            role="tab"
-            aria-selected={method === id}
+            aria-pressed={method === id}
             onClick={() => (setMethod(id), setError(''))}
             className={`flex h-12 items-center justify-center gap-2 rounded-xl text-sm font-medium transition ${method === id ? 'bg-card shadow-sm' : 'text-sub hover:text-ink'}`}
           >
@@ -222,7 +226,7 @@ function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string
                   aria-pressed={answers[c.id] === i}
                   onClick={() => setAnswers((a) => ({ ...a, [c.id]: i as CheckAnswer }))}
                   className={`h-11 rounded-xl border px-2 text-sm transition ${
-                    answers[c.id] === i ? (i === 3 ? 'border-bad bg-bad text-white' : 'border-ink bg-ink text-paper') : 'border-line hover:border-ink'
+                    answers[c.id] === i ? (i === 3 ? 'border-bad bg-bad text-paper' : 'border-ink bg-ink text-paper') : 'border-line hover:border-ink'
                   }`}
                 >
                   {l.label}

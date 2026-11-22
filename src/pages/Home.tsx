@@ -81,7 +81,7 @@ function Hero() {
 function Marquee() {
   const words = ['New', 'Pre-owned', 'Trade-in', 'ป.1 – ม.6', 'EU 30 – 45', 'Black · White · Brown', 'Quality Checked']
   return (
-    <div className="overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
+    <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
         {[...words, ...words, ...words, ...words].map((w, i) => (
           <span key={i} className="flex items-center gap-10">
@@ -143,7 +143,7 @@ function TwoStores() {
   return (
     <section className="pb-20 sm:pb-28">
       <Container className="grid gap-4 lg:grid-cols-2">
-        <Link to="/shop" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-paper sm:p-10">
+        <Link to="/shop" className="fixed-tone reveal group relative flex min-h-[420px] [--rim-a:0.55] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-paper sm:p-10">
           <div>
             <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
               คู่ใหม่
@@ -237,7 +237,7 @@ function TradeInSection() {
               max={100}
               value={pct}
               onChange={(e) => setPct(+e.target.value)}
-              className="mt-8 w-full accent-[rgb(var(--ink))]"
+              className="mt-8 h-8 w-full accent-[rgb(var(--ink))]"
               aria-label="สภาพรองเท้า (%)"
             />
             <div className="mt-2">
@@ -330,7 +330,7 @@ const LOOP = ['Trade-in', 'Inspection', 'Cleaning & Sanitizing', 'Quality Check'
 
 function SecondLife() {
   return (
-    <section id="second-life" className="overflow-hidden bg-ink py-20 text-paper sm:py-28">
+    <section id="second-life" className="fixed-tone overflow-hidden bg-ink py-20 text-paper sm:py-28">
       <Container>
         <div className="reveal grid gap-10 lg:grid-cols-2">
           <div>

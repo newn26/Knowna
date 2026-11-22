@@ -1,7 +1,12 @@
 // Product illustration. Stands in for photography until real photos exist:
 // pass `photo` to show a real image instead. Pre-owned pairs pass `wear` (0–25)
 // and `seed` so each listing shows its own creases and scuffs.
+import { useId } from 'react'
 import type { ColorId } from '../lib/types'
+
+const SOLE = 'M30 146 L30 166 Q30 174 40 174 L352 174 C380 174 395 166 399 154 L400 146 Z'
+const UPPER = 'M36 145 C30 118 31 92 44 66 C74 62 104 72 126 85 L156 80 C168 61 193 52 214 57 C240 71 272 92 308 104 C352 114 386 124 397 139 L399 145 Z'
+const TONGUE = 'M150 84 C160 62 186 48 214 52 C223 55 228 61 228 67 C202 66 178 74 160 88 Z'
 
 const PALETTE: Record<ColorId, Record<string, string>> = {
   black: { upper: '#1d1d1d', hi: '#4a4a4a', counter: '#151515', tongue: '#262626', sole: '#0c0c0c', edge: '#2c2c2c', lace: '#0f0f0f', stitch: '#6b6b6b', eyelet: '#9a9a9a', lining: '#4a3a2e', outline: '#000000' },
@@ -44,8 +49,14 @@ function Body({ color, wear = 0, seed = 1, id }: { color: ColorId; wear?: number
           <stop offset="1" stopColor={p.sole} />
         </linearGradient>
       </defs>
+      {/* rim light: off (--rim-a: 0) on light surfaces, on in dark mode and on dark cards */}
+      <g transform="translate(0 -1.5)" fill="none" stroke="#d8d3cb" strokeWidth="3" style={{ strokeOpacity: 'var(--rim-a, 0)' }}>
+        <path d={SOLE} />
+        <path d={UPPER} />
+        <path d={TONGUE} />
+      </g>
       {/* outsole */}
-      <path d="M30 146 L30 166 Q30 174 40 174 L352 174 C380 174 395 166 399 154 L400 146 Z" fill={`url(#${id}-sole)`} stroke={p.outline} strokeOpacity=".35" />
+      <path d={SOLE} fill={`url(#${id}-sole)`} stroke={p.outline} strokeOpacity=".35" />
       {Array.from({ length: 22 }, (_, i) => (
         <line key={i} x1={46 + i * 15} y1="168" x2={46 + i * 15} y2="173" stroke={p.outline} strokeOpacity=".25" strokeWidth="2" />
       ))}
@@ -59,14 +70,14 @@ function Body({ color, wear = 0, seed = 1, id }: { color: ColorId; wear?: number
       <path d="M46 68 C76 61 106 70 128 85 C102 80 74 74 46 74 Z" fill={p.lining} />
       {/* upper */}
       <path
-        d="M36 145 C30 118 31 92 44 66 C74 62 104 72 126 85 L156 80 C168 61 193 52 214 57 C240 71 272 92 308 104 C352 114 386 124 397 139 L399 145 Z"
+        d={UPPER}
         fill={`url(#${id}-up)`}
         stroke={p.outline}
         strokeOpacity=".45"
         strokeWidth="1.2"
       />
       {/* tongue */}
-      <path d="M150 84 C160 62 186 48 214 52 C223 55 228 61 228 67 C202 66 178 74 160 88 Z" fill={p.tongue} stroke={p.outline} strokeOpacity=".35" />
+      <path d={TONGUE} fill={p.tongue} stroke={p.outline} strokeOpacity=".35" />
       {/* heel counter */}
       <path d="M36 145 C31 120 32 94 44 67 C60 66 76 71 90 78 C94 102 96 124 101 145 Z" fill={p.counter} opacity=".9" />
       <path d="M90 78 C94 102 96 124 101 145" stroke={p.stitch} strokeWidth="1.1" strokeDasharray="3.5 3" fill="none" />
@@ -127,9 +138,10 @@ export function Shoe({
   shadow?: boolean
   label?: string
 }) {
+  // unique per instance: the same colour/view can appear twice on a page (e.g. cart drawer + page)
+  const id = 'shoe' + useId().replace(/:/g, '')
   const alt = label ?? `รองเท้านักเรียนสี${color === 'black' ? 'ดำ' : color === 'white' ? 'ขาว' : 'น้ำตาล'}`
   if (photo) return <img src={photo} alt={alt} className={`h-full w-full object-cover ${className}`} loading="lazy" />
-  const id = `shoe-${color}-${view}-${seed}`
   return (
     <svg viewBox={VIEWBOX[view]} className={className} role="img" aria-label={alt}>
       {shadow && <ellipse cx={view === 'pair' ? 250 : 215} cy={view === 'pair' ? 196 : 179} rx={view === 'pair' ? 210 : 185} ry="7" fill="#000" opacity=".14" />}

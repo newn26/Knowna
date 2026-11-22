@@ -69,7 +69,7 @@ export default function Shop() {
                   <div className="relative grid aspect-[4/3.4] place-items-center overflow-hidden rounded-3xl bg-stone">
                     <span className="absolute left-4 top-4 rounded-full bg-card px-3 py-1 text-xs font-semibold">New</span>
                     {sizeLeft !== null && (
-                      <span className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-semibold ${sizeLeft === 0 ? 'bg-bad/10 text-bad' : sizeLeft <= 3 ? 'bg-signal text-white' : 'bg-card'}`}>
+                      <span className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-semibold ${sizeLeft === 0 ? 'bg-bad/10 text-bad' : sizeLeft <= 3 ? 'bg-signal text-paper' : 'bg-card'}`}>
                         {sizeLeft === 0 ? `EU ${size} หมด` : sizeLeft <= 3 ? `EU ${size} เหลือ ${sizeLeft}` : `EU ${size} มีของ`}
                       </span>
                     )}

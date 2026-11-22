@@ -2,7 +2,7 @@ import { ChevronDown, Recycle, Ruler, ShieldCheck, Truck, X } from 'lucide-react
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
-import { Button, ColorPicker, ConditionBar, Container, GradeBadge, Price, Qty, SizeGrid } from '../components/ui'
+import { Button, ColorPicker, ConditionBar, Container, GradeBadge, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, listPreowned, stockOf } from '../lib/api'
 import { COLORS, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
@@ -57,13 +57,9 @@ function Accordion({ title, children, open = false }: { title: string; children:
 }
 
 function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () => void }) {
-  useEffect(() => {
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', esc)
-    return () => document.removeEventListener('keydown', esc)
-  }, [onClose])
+  const ref = useDialog<HTMLDivElement>(onClose)
   return (
-    <div className="fixed inset-0 z-50 grid place-items-end sm:place-items-center" role="dialog" aria-modal aria-label="ตารางไซซ์">
+    <div ref={ref} className="fixed inset-0 z-50 grid place-items-end sm:place-items-center" role="dialog" aria-modal aria-label="ตารางไซซ์">
       <div className="absolute inset-0 animate-fade bg-black/40" onClick={onClose} />
       <div className="relative max-h-[85dvh] w-full max-w-lg animate-rise overflow-y-auto rounded-t-3xl bg-paper p-6 sm:rounded-3xl">
         <div className="mb-4 flex items-center justify-between">
