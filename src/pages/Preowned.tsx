@@ -10,6 +10,8 @@ import { actions, useStore } from '../lib/store'
 import { CHECKLIST } from '../lib/tradein'
 import type { ColorId, PreownedItem } from '../lib/types'
 
+const GRADE_TEXT = { A: 'เหมือนใหม่', B: 'มีรอยใช้งานเล็กน้อย' }
+
 const date = (iso: string) => new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
 
 function QCBadges({ compact = false }: { compact?: boolean }) {
@@ -45,7 +47,9 @@ function Card({ p, i }: { p: PreownedItem; i: number }) {
           <p className="font-semibold">
             {colorInfo(p.color).name} · EU {p.size}
           </p>
-          <p className="text-xs text-sub">ขึ้นร้าน {date(p.listedAt)}</p>
+          <p className="text-xs text-sub">
+            {GRADE_TEXT[p.grade]} · ขึ้นร้าน {date(p.listedAt)}
+          </p>
         </div>
         <Price value={p.price} was={p.originalPrice} className="text-sm" />
       </div>
@@ -153,6 +157,42 @@ export default function Preowned() {
             ? Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton aspect-[4/3.2] rounded-3xl" />)
             : shown.map((p, i) => <Card key={p.id} p={p} i={i} />)}
         </div>
+
+        <section id="inspection" className="reveal mt-24 grid scroll-mt-24 gap-10 lg:grid-cols-[1fr_1.3fr]">
+          <div>
+            <h2 className="font-display text-4xl font-black uppercase leading-none sm:text-5xl" style={{ fontStretch: '80%' }}>
+              ตรวจทุกคู่ ก่อนถึงมือคุณ
+            </h2>
+            <p className="mt-4 max-w-md text-sub">ทุกคู่ในร้านนี้มาจากลูกค้าที่ซื้อจาก KAOWNA เท่านั้น เราจึงรู้ว่ารองเท้าผ่านอะไรมา และตรวจได้ตามมาตรฐานเดียวกัน</p>
+            <dl className="mt-8 space-y-3 text-sm">
+              {[
+                ['เกรด A · 90–100%', 'เหมือนใหม่ แทบไม่มีรอย ดอกยางเต็ม'],
+                ['เกรด B · 75–89%', 'มีรอยใช้งานเล็กน้อย ทรงและพื้นยังดี'],
+                ['ต่ำกว่า 75%', 'ร้านไม่รับเข้า จึงไม่มีขายในร้านนี้'],
+              ].map(([g, d]) => (
+                <div key={g} className="flex gap-4 rounded-2xl bg-stone p-4">
+                  <dt className="w-32 shrink-0 font-semibold">{g}</dt>
+                  <dd className="text-sub">{d}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <ol className="relative space-y-6 border-l border-line pl-8">
+            {[
+              ['ยืนยันที่มา', 'เช็ก Product ID ใต้ลิ้นกับประวัติการขาย รับเฉพาะคู่ที่ขายจากร้านเรา'],
+              ['Inspection 5 จุด', 'หนังด้านบน พื้น แผ่นรอง ตะเข็บและทรง เชือกและรูร้อย คิดคะแนนถ่วงน้ำหนักเป็น %'],
+              ['Cleaning', 'ล้างคราบ ขัดเงาหนัง เปลี่ยนเชือกใหม่ทุกคู่'],
+              ['Sanitizing', 'อบโอโซนฆ่าเชื้อด้านใน และเปลี่ยนแผ่นรองใหม่'],
+              ['Quality Check', 'ช่างอีกคนตรวจซ้ำ ให้เกรด ถ่ายรูปจริงของคู่นั้น แล้วจึงขึ้นร้าน'],
+            ].map(([t, d], i) => (
+              <li key={t} className="relative">
+                <span className="absolute -left-[45px] grid h-7 w-7 place-items-center rounded-full bg-ink text-xs font-bold text-paper">{i + 1}</span>
+                <p className="font-semibold">{t}</p>
+                <p className="mt-1 text-sm text-sub">{d}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
       </Container>
     </div>
   )
@@ -263,7 +303,12 @@ export function PreownedDetail() {
           </dl>
           <div className="mt-4">
             <ConditionBar pct={p.conditionPct} />
-            <p className="mt-1.5 text-xs text-sub">เส้นสีส้ม = เกณฑ์ขั้นต่ำ 75% ที่ร้านรับขาย</p>
+            <p className="mt-1.5 text-xs text-sub">
+              เกรด {p.grade} = {GRADE_TEXT[p.grade]} · เส้นสีส้มคือเกณฑ์ขั้นต่ำ 75% ที่ร้านรับเข้า ·{' '}
+              <Link to="/preowned#inspection" className="underline underline-offset-2">
+                ตรวจยังไง
+              </Link>
+            </p>
           </div>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">

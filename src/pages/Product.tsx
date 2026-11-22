@@ -6,7 +6,8 @@ import { Button, ColorPicker, ConditionBar, Container, GradeBadge, Price, Qty, S
 import { getStock, listPreowned, stockOf } from '../lib/api'
 import { COLORS, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
-import { newPairsIn } from '../lib/tradein'
+import { allocateTradeIns, newPairsIn } from '../lib/tradein'
+import { Breakdown } from './TradeIn'
 import type { ColorId, Kind, PreownedItem } from '../lib/types'
 import { SizeTable } from './SizeFinder'
 
@@ -118,6 +119,8 @@ export default function Product() {
   const poMatches = poHere.filter((p) => p.size === size)
   const chosenPO = poMatches.find((p) => p.id === pick) ?? null
   const unmatchedTradeIns = tradeIns.filter((t) => t.rate > 0).length - newPairsIn(cart)
+  const pendingId = allocateTradeIns(cart, tradeIns).find((a) => !a.appliedTo)?.tradeInId
+  const pending = tradeIns.find((t) => t.id === pendingId)
 
   const add = (go: 'cart' | 'checkout' | 'tradein') => {
     if (!size) return setError('เลือกไซซ์ก่อน')
@@ -132,7 +135,7 @@ export default function Product() {
     }
     if (go === 'tradein') return navigate('/trade-in?from=product')
     if (go === 'checkout') return navigate('/checkout')
-    actions.toast(`เพิ่ม ${colorInfo(color).name} EU ${size} ลงตะกร้าแล้ว`)
+    actions.toast(pending && kind === 'new' ? `เพิ่มแล้ว · หักส่วนลด Trade-in ${pending.rate * 100}% ให้แล้ว` : `เพิ่ม ${colorInfo(color).name} EU ${size} ลงตะกร้าแล้ว`)
     actions.openCart()
   }
 
@@ -240,7 +243,14 @@ export default function Product() {
               </div>
             )}
 
-            {kind === 'new' ? (
+            {kind === 'new' && pending ? (
+              <div className="rounded-2xl border border-signal/50 bg-signal/5 p-4">
+                <p className="mb-3 flex items-center gap-2 font-semibold">
+                  <Recycle size={16} className="text-signal" /> คู่เก่า {pending.serial} รอใช้ส่วนลดกับคู่นี้
+                </p>
+                <Breakdown t={pending} />
+              </div>
+            ) : kind === 'new' ? (
               <label className={`flex cursor-pointer gap-4 rounded-2xl border p-4 transition ${tradeIn ? 'border-signal bg-signal/5' : 'border-line hover:border-sub'}`}>
                 <input type="checkbox" checked={tradeIn} onChange={(e) => setTradeIn(e.target.checked)} className="mt-1 h-5 w-5 accent-[rgb(var(--signal))]" />
                 <span>

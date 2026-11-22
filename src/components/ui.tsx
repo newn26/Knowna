@@ -16,7 +16,7 @@ const btn: Record<Variant, string> = {
 }
 
 export const buttonClass = (v: Variant = 'solid', size: 'md' | 'lg' | 'sm' = 'md') =>
-  `inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.97] disabled:pointer-events-none disabled:opacity-40 ${
+  `group inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.97] disabled:pointer-events-none disabled:opacity-40 ${
     size === 'lg' ? 'h-14 px-8 text-base' : size === 'sm' ? 'h-9 px-4 text-sm' : 'h-12 px-6 text-[15px]'
   } ${btn[v]}`
 

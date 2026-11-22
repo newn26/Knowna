@@ -100,7 +100,7 @@ export function OrderDetail() {
   return (
     <Container className="pb-10 pt-8 sm:pt-12">
       {isNew && (
-        <div className="mb-8 flex animate-rise items-start gap-4 rounded-3xl bg-ink p-6 text-paper">
+        <div className="fixed-tone mb-8 flex animate-rise items-start gap-4 rounded-3xl bg-ink p-6 text-paper">
           <CheckCircle2 className="shrink-0 text-signal" size={28} />
           <div>
             <p className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
@@ -109,6 +109,14 @@ export function OrderDetail() {
             <p className="text-sm text-paper/70">
               เก็บเลข <b className="text-paper tabular">{o.id}</b> ไว้ติดตามพัสดุ (เดโม: สถานะจะขยับเองทุกครึ่งนาที)
             </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <LinkButton to="/account" size="sm" className="!bg-paper !text-ink">
+                ดูประวัติการสั่งซื้อ
+              </LinkButton>
+              <LinkButton to="/shop" size="sm" variant="ghost" className="!text-paper hover:!bg-paper/10">
+                ช้อปต่อ
+              </LinkButton>
+            </div>
           </div>
         </div>
       )}
@@ -214,7 +222,13 @@ export function OrderDetail() {
 
 export function Account() {
   const user = useStore((s) => s.user)
+  const localIds = useStore((s) => s.orders)
   const [orders, setOrders] = useState<Order[] | null>(null)
+  const [local, setLocal] = useState<Order[] | null>(null)
+  useEffect(() => {
+    if (user) return
+    Promise.all(localIds.map(getOrder)).then((list) => setLocal(list.filter((o): o is Order => !!o)))
+  }, [user, localIds])
   const [units, setUnits] = useState<Unit[]>([])
   const [busy, setBusy] = useState(false)
   useEffect(() => {
@@ -250,6 +264,12 @@ export function Account() {
               ติดตามพัสดุ
             </LinkButton>
           </div>
+        </Container>
+        <Container className="mt-14">
+          <h2 className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
+            คำสั่งซื้อจากเครื่องนี้
+          </h2>
+          <OrderList orders={local} />
         </Container>
       </>
     )
@@ -296,33 +316,52 @@ export function Account() {
           <h2 className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
             ประวัติการสั่งซื้อ
           </h2>
-          {orders === null ? (
-            <p className="mt-4 text-sub">กำลังโหลด…</p>
-          ) : (
-            <ul className="mt-4 divide-y divide-line border-y border-line">
-              {orders.map((o) => {
-                const s = orderSteps(o)
-                const done = reached(s) === s.length
-                return (
-                  <li key={o.id}>
-                    <Link to={`/order/${o.id}`} className="flex flex-wrap items-center gap-x-6 gap-y-1 py-4 transition hover:bg-stone/60 sm:px-3">
-                      <span className="font-semibold tabular">{o.id}</span>
-                      <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
-                      <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} คู่</span>
-                      {o.tradeIns.length > 0 && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">Trade-in</span>}
-                      <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
-                      <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
+          <OrderList orders={orders} />
         </section>
         <Button variant="ghost" className="mt-8" onClick={() => actions.logout()}>
           <LogOut size={16} /> ออกจากระบบ
         </Button>
       </Container>
     </>
+  )
+}
+
+function OrderList({ orders }: { orders: Order[] | null }) {
+  if (orders === null)
+    return (
+      <div className="mt-4 space-y-2" aria-busy>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="skeleton h-14 rounded-xl" />
+        ))}
+      </div>
+    )
+  if (!orders.length)
+    return (
+      <div className="mt-4 rounded-3xl border border-dashed border-line p-8 text-center">
+        <p className="font-semibold">ยังไม่มีคำสั่งซื้อ</p>
+        <Link to="/shop" className="mt-2 inline-block text-sm font-semibold underline underline-offset-4">
+          เลือกรองเท้าคู่แรก
+        </Link>
+      </div>
+    )
+  return (
+    <ul className="mt-4 divide-y divide-line border-y border-line">
+      {orders.map((o) => {
+        const s = orderSteps(o)
+        const done = reached(s) === s.length
+        return (
+          <li key={o.id}>
+            <Link to={`/order/${o.id}`} className="flex flex-wrap items-center gap-x-6 gap-y-1 py-4 transition hover:bg-stone/60 sm:px-3">
+              <span className="font-semibold tabular">{o.id}</span>
+              <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
+              <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} คู่</span>
+              {o.tradeIns.length > 0 && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">Trade-in</span>}
+              <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
+              <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
   )
 }

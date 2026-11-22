@@ -7,6 +7,7 @@ interface State {
   cart: CartLine[]
   tradeIns: TradeIn[]
   user: User | null
+  orders: string[] // ids placed from this browser, so guests also get an order history
   cartOpen: boolean
   toast: { id: number; text: string } | null
 }
@@ -14,7 +15,7 @@ interface State {
 const KEY = 'kw.client.v1'
 
 function read(): State {
-  const base: State = { cart: [], tradeIns: [], user: null, cartOpen: false, toast: null }
+  const base: State = { cart: [], tradeIns: [], user: null, orders: [], cartOpen: false, toast: null }
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) return { ...base, ...JSON.parse(raw), cartOpen: false, toast: null }
@@ -30,8 +31,8 @@ const listeners = new Set<() => void>()
 function set(patch: Partial<State>) {
   state = { ...state, ...patch }
   try {
-    const { cart, tradeIns, user } = state
-    localStorage.setItem(KEY, JSON.stringify({ cart, tradeIns, user }))
+    const { cart, tradeIns, user, orders } = state
+    localStorage.setItem(KEY, JSON.stringify({ cart, tradeIns, user, orders }))
   } catch {
     /* ignore */
   }
@@ -72,12 +73,16 @@ export const actions = {
   setQty(key: string, qty: number) {
     set({ cart: qty <= 0 ? state.cart.filter((l) => l.key !== key) : state.cart.map((l) => (l.key === key ? { ...l, qty } : l)) })
   },
-  removeLine: (key: string) => set({ cart: state.cart.filter((l) => l.key !== key) }),
+  removeLine(key: string) {
+    set({ cart: state.cart.filter((l) => l.key !== key) })
+    actions.toast('ลบออกจากตะกร้าแล้ว')
+  },
 
   addTradeIn: (t: TradeIn) => set({ tradeIns: [...state.tradeIns.filter((x) => x.serial !== t.serial), t] }),
   removeTradeIn: (id: string) => set({ tradeIns: state.tradeIns.filter((t) => t.id !== id) }),
 
   clearCart: () => set({ cart: [], tradeIns: [] }),
+  rememberOrder: (id: string) => set({ orders: [id, ...state.orders.filter((x) => x !== id)] }),
   login: (user: User) => set({ user }),
   logout: () => set({ user: null }),
 }

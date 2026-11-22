@@ -1,4 +1,4 @@
-import { Camera, Check, History, ImagePlus, Keyboard, QrCode, Recycle, ScanLine, X } from 'lucide-react'
+import { ArrowRight, Camera, Check, History, ImagePlus, Keyboard, QrCode, Recycle, ScanLine, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
@@ -10,7 +10,7 @@ import { actions, useStore } from '../lib/store'
 import { CHECKLIST, CONDITION_LEVELS, MIN_CONDITION, newPairsIn, scoreCondition } from '../lib/tradein'
 import type { CheckAnswer, TradeIn as TradeInT, Unit } from '../lib/types'
 
-const STEPS = ['Choose New Shoes', 'Verify Purchase', 'Shoe Condition', 'Inspection', 'Discount']
+const STEPS = ['Old Pair', 'Condition', 'Inspection', 'Discount', 'New Pair']
 
 function Stepper({ at }: { at: number }) {
   return (
@@ -52,6 +52,10 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
   useEffect(() => {
     if (user) listMyUnits(user.id).then(setUnits)
   }, [user])
+  useEffect(() => {
+    if (initial) check(initial) // came from "เทิร์นคู่นี้" in Account: skip retyping the ID
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const check = async (value: string) => {
     setBusy(true)
@@ -131,7 +135,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
                           {colorInfo(u.color).name} · EU {u.size}
                         </p>
                         <p className="text-sub tabular">
-                          {u.serial} · ซื้อ {new Date(u.soldAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
+                          {u.serial} · ออเดอร์ {u.orderId} · {new Date(u.soldAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })}
                         </p>
                       </div>
                       <span className="text-xs font-semibold">{u.tradedIn ? 'เทิร์นแล้ว' : inCart ? 'อยู่ในตะกร้า' : 'เลือก →'}</span>
@@ -311,12 +315,42 @@ function Inspecting({ unit }: { unit: Unit }) {
   )
 }
 
-function Result({ t, onApply, onRetry }: { t: TradeInT; onApply: () => void; onRetry: () => void }) {
+/** Original price → trade-in value → discount → final price, for one new pair. */
+export function Breakdown({ t, dark = false }: { t: TradeInT; dark?: boolean }) {
+  const off = Math.round(PRODUCT.price * t.rate)
+  const muted = dark ? 'text-paper/60' : 'text-sub'
+  return (
+    <dl className="space-y-2 text-sm tabular">
+      <div className="flex justify-between">
+        <dt className={muted}>ราคาคู่ใหม่</dt>
+        <dd>{baht(PRODUCT.price)}</dd>
+      </div>
+      <div className="flex justify-between">
+        <dt className={muted}>มูลค่าเทิร์น</dt>
+        <dd>
+          {t.rate * 100}% · สภาพ {t.conditionPct}% เกรด {t.grade}
+        </dd>
+      </div>
+      <div className="flex justify-between text-signal">
+        <dt>ส่วนลด</dt>
+        <dd>
+          −<Num from={0} value={off} format={baht} />
+        </dd>
+      </div>
+      <div className={`flex justify-between border-t pt-2 text-base font-semibold ${dark ? 'border-paper/15' : 'border-line'}`}>
+        <dt>ราคาสุทธิ</dt>
+        <dd>
+          <Num from={PRODUCT.price} value={PRODUCT.price - off} format={baht} />
+        </dd>
+      </div>
+    </dl>
+  )
+}
+
+function Result({ t, hasNewPair, onApply, onRetry }: { t: TradeInT; hasNewPair: boolean; onApply: () => void; onRetry: () => void }) {
   const cart = useStore((s) => s.cart)
   const tradeIns = useStore((s) => s.tradeIns)
-  const before = totals(cart, tradeIns)
   const after = totals(cart, [...tradeIns, t])
-  const gain = after.discount - before.discount
   const ok = t.rate > 0
   return (
     <div>
@@ -325,36 +359,25 @@ function Result({ t, onApply, onRetry }: { t: TradeInT; onApply: () => void; onR
         <p className="font-display text-8xl font-black tabular leading-none" style={{ fontStretch: '75%' }}>
           {t.conditionPct}%
         </p>
-        <span className={`rounded-full px-4 py-2 text-sm font-bold ${ok ? 'bg-ink text-paper' : 'bg-bad/10 text-bad'}`}>{ok ? `เกรด ${t.grade}` : 'ไม่ผ่านเกณฑ์'}</span>
+        <span className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${ok ? 'bg-ink text-paper' : 'bg-bad/10 text-bad'}`}>{ok ? `เกรด ${t.grade}` : 'ไม่ผ่านเกณฑ์'}</span>
       </div>
       <div className="mt-4">
         <ConditionBar pct={t.conditionPct} />
       </div>
       {ok ? (
         <>
-          <div className="mt-8 rounded-3xl bg-ink p-6 text-paper">
-            <p className="text-sm text-paper/60">ส่วนลดสำหรับคู่ใหม่ในบิลนี้</p>
-            <p className="font-display text-5xl font-black tabular" style={{ fontStretch: '78%' }}>
-              −<Num from={0} value={gain} format={baht} /> <span className="text-2xl text-signal">({t.rate * 100}%)</span>
+          <div className="fixed-tone mt-8 rounded-3xl bg-ink p-6 text-paper">
+            <p className="mb-4 font-display text-5xl font-black text-signal" style={{ fontStretch: '78%' }}>
+              −{t.rate * 100}%
             </p>
-            <dl className="mt-5 space-y-1 border-t border-paper/15 pt-4 text-sm tabular">
-              <div className="flex justify-between">
-                <dt className="text-paper/60">ยอดสินค้า</dt>
-                <dd>{baht(after.subtotal)}</dd>
-              </div>
-              <div className="flex justify-between text-signal">
-                <dt>ส่วนลด Trade-in รวม</dt>
-                <dd>−{baht(after.discount)}</dd>
-              </div>
-              <div className="flex justify-between text-base font-semibold">
-                <dt>เหลือจ่าย (ก่อนค่าส่ง)</dt>
-                <dd>{baht(after.subtotal - after.discount)}</dd>
-              </div>
-            </dl>
+            <Breakdown t={t} dark />
+            {hasNewPair && cart.length > 1 && <p className="mt-3 text-xs text-paper/60">ยอดทั้งตะกร้าหลังหัก {baht(after.subtotal - after.discount)} (ก่อนค่าส่ง)</p>}
           </div>
-          <p className="mt-4 text-xs text-sub">ไรเดอร์หรือพนักงานหน้าร้านจะตรวจคู่เก่าซ้ำตอนรับ ถ้าสภาพไม่ตรงกับที่แจ้ง ส่วนลดจะปรับตามจริง · ไม่แลกเงินสด</p>
+          <p className="mt-4 text-xs text-sub">
+            {hasNewPair ? 'หักจากคู่ใหม่ในตะกร้าทันที' : 'ส่วนลดจะรออยู่ในตะกร้า แล้วหักทันทีเมื่อคุณเลือกคู่ใหม่ ถ้าชำระเงินโดยไม่มีคู่ใหม่ ส่วนลดนี้จะหายไป'} · ตรวจซ้ำตอนรับคู่เก่า ถ้าสภาพไม่ตรง ส่วนลดจะปรับตามจริง · ไม่แลกเงินสด
+          </p>
           <Button size="lg" variant="signal" className="mt-6 w-full" onClick={onApply}>
-            Apply Discount & ไปชำระเงิน
+            {hasNewPair ? 'ใช้ส่วนลด แล้วไปชำระเงิน' : 'ใช้ส่วนลด แล้วเลือกคู่ใหม่'} <ArrowRight size={18} />
           </Button>
         </>
       ) : (
@@ -384,7 +407,7 @@ function Rules() {
           {[
             'ต้องเป็นรองเท้าที่ซื้อจาก KAOWNA เท่านั้น ตรวจจาก Order History, Product ID หรือ QR Code',
             'สภาพต้อง 75% ขึ้นไป: 90–100% ลด 15%, 75–89% ลด 10%, ต่ำกว่า 75% ไม่รับ',
-            'ส่วนลดใช้กับรองเท้าคู่ใหม่ในรายการสั่งซื้อเดียวกันทันที 1 คู่เก่า ต่อ 1 คู่ใหม่',
+            'ส่วนลดใช้กับรองเท้าคู่ใหม่ในรายการสั่งซื้อเดียวกันทันที 1 คู่เก่า ต่อ 1 คู่ใหม่ ประเมินคู่เก่าก่อนเลือกคู่ใหม่ก็ได้',
             'ไม่แลกเป็นเงินสด ไม่มีคูปอง ไม่มี Wallet ไม่มีวันหมดอายุ เพราะใช้ทันทีในบิล',
             'ใช้กับรองเท้ามือสองไม่ได้ แต่คู่มือสองที่ซื้อไปยังเทิร์นต่อได้ในอนาคต',
             'ตรวจซ้ำตอนรับคู่เก่า ถ้าสภาพไม่ตรงกับที่แจ้ง ส่วนลดจะปรับตามจริง',
@@ -427,7 +450,9 @@ export default function TradeIn() {
   const accepted = tradeIns.filter((t) => t.rate > 0).length
   const free = newPairs - accepted
   const reserved = useMemo(() => tradeIns.map((t) => t.serial), [tradeIns])
-  const step = free <= 0 && !result ? 0 : !unit ? 1 : !inspecting && !result ? 2 : inspecting ? 3 : 4
+  // one pending (unmatched) trade-in is allowed, so customers can assess the old pair before picking the new one
+  const blocked = accepted >= Math.max(newPairs, 1) && !result
+  const step = blocked ? 4 : !unit ? 0 : !inspecting && !result ? 1 : inspecting ? 2 : 3
   const panel = useRef<HTMLDivElement>(null)
   const lastStep = useRef(step)
   useEffect(() => {
@@ -466,15 +491,15 @@ export default function TradeIn() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
         <div ref={panel} className="scroll-mt-24 rounded-3xl border border-line bg-card p-5 sm:p-8">
-          {step === 0 && (
+          {blocked && (
             <div className="text-center sm:py-6">
               <Recycle size={32} className="mx-auto text-signal" />
               <h2 className="mt-4 font-display text-3xl font-black uppercase" style={{ fontStretch: '80%' }}>
-                {newPairs === 0 ? 'เลือกคู่ใหม่ก่อน' : 'คู่ใหม่ทุกคู่ได้ส่วนลดแล้ว'}
+                {newPairs === 0 ? 'เลือกคู่ใหม่เพื่อใช้ส่วนลด' : 'คู่ใหม่ทุกคู่ได้ส่วนลดแล้ว'}
               </h2>
               <p className="mx-auto mt-2 max-w-md text-sub">
                 {newPairs === 0
-                  ? 'ส่วนลด Trade-in ต้องใช้กับการซื้อรองเท้าคู่ใหม่ในบิลเดียวกัน เลือกสีและไซซ์ก่อน แล้วกด Trade-in Old Pair'
+                  ? 'คู่เก่าผ่านการประเมินแล้ว ส่วนลดรออยู่ในตะกร้า เลือกสีและไซซ์ของคู่ใหม่ ระบบจะหักให้ทันที'
                   : 'หนึ่งคู่เก่าลดได้หนึ่งคู่ใหม่ ถ้าจะเทิร์นเพิ่ม ให้เพิ่มคู่ใหม่ในตะกร้า'}
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -487,17 +512,19 @@ export default function TradeIn() {
               </div>
             </div>
           )}
-          {step === 1 && <Verify onVerified={setUnit} reserved={reserved} initial={params.get('serial') ?? ''} />}
-          {step === 2 && unit && <Condition unit={unit} onSubmit={submit} />}
-          {step === 3 && unit && <Inspecting unit={unit} />}
-          {step === 4 && result && (
+          {step === 0 && <Verify onVerified={setUnit} reserved={reserved} initial={params.get('serial') ?? ''} />}
+          {step === 1 && unit && <Condition unit={unit} onSubmit={submit} />}
+          {step === 2 && unit && <Inspecting unit={unit} />}
+          {step === 3 && result && (
             <Result
               t={result}
+              hasNewPair={free > 0}
               onRetry={reset}
               onApply={() => {
                 actions.addTradeIn(result)
-                actions.toast(`ใช้ส่วนลด Trade-in ${result.rate * 100}% แล้ว`)
-                navigate('/checkout')
+                actions.toast(`ส่วนลด Trade-in ${result.rate * 100}% พร้อมใช้`)
+                // suggest one size up: the old pair was traded because the foot grew
+                navigate(free > 0 ? '/checkout' : `/product?color=${result.color}&size=${Math.min(45, result.size + 1)}`)
               }}
             />
           )}
@@ -526,7 +553,7 @@ export default function TradeIn() {
           </div>
           {tradeIns.length > 0 && (
             <div className="rounded-3xl border border-signal/40 p-5">
-              <p className="text-sm font-semibold text-signal">คู่เก่าที่ใช้แล้ว</p>
+              <p className="text-sm font-semibold text-signal">คู่เก่าในบิลนี้</p>
               <ul className="mt-2 space-y-2 text-sm">
                 {tradeIns.map((t) => (
                   <li key={t.id} className="flex items-center justify-between gap-2">
@@ -541,7 +568,7 @@ export default function TradeIn() {
               </ul>
             </div>
           )}
-          {unit && step > 1 && (
+          {unit && step > 0 && step < 4 && (
             <div className="rounded-3xl border border-line p-5 text-sm">
               <p className="flex items-center gap-2 font-semibold text-ok">
                 <Check size={16} /> ยืนยันการซื้อแล้ว
@@ -549,7 +576,7 @@ export default function TradeIn() {
               <p className="mt-1 text-sub tabular">
                 {unit.serial} · {colorInfo(unit.color).name} EU {unit.size}
               </p>
-              {step === 2 && (
+              {step === 1 && (
                 <button onClick={reset} className="mt-2 text-xs underline">
                   เปลี่ยนคู่
                 </button>

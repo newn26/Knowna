@@ -75,6 +75,7 @@ export default function Checkout() {
         payment,
       })
       actions.clearCart()
+      actions.rememberOrder(order.id)
       navigate(`/order/${order.id}?new=1`)
     } catch (x) {
       setApiError(x instanceof ApiError ? x.message : 'สั่งซื้อไม่สำเร็จ ลองใหม่อีกครั้ง')

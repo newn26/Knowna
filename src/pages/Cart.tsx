@@ -1,7 +1,9 @@
 import { Recycle, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
 import { Container, LinkButton, Num, PageHead, Qty } from '../components/ui'
+import { getStock, stockOf } from '../lib/api'
 import { colorInfo } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
@@ -56,6 +58,10 @@ export default function Cart() {
   const cart = useStore((s) => s.cart)
   const tradeIns = useStore((s) => s.tradeIns)
   const canTradeIn = newPairsIn(cart) > tradeIns.filter((t) => t.rate > 0).length
+  const [stock, setStock] = useState<Record<string, number> | null>(null)
+  useEffect(() => {
+    getStock().then(setStock)
+  }, [])
 
   if (!cart.length)
     return (
@@ -92,7 +98,7 @@ export default function Cart() {
                     <p className="font-semibold tabular">{baht(l.unitPrice * l.qty)}</p>
                   </div>
                   <div className="mt-auto flex items-center justify-between pt-3">
-                    {l.kind === 'new' ? <Qty value={l.qty} onChange={(n) => actions.setQty(l.key, n)} /> : <span className="text-sm text-sub">1 คู่ (มีชิ้นเดียว)</span>}
+                    {l.kind === 'new' ? <Qty value={l.qty} onChange={(n) => actions.setQty(l.key, n)} max={stock ? Math.min(10, stockOf(stock, l.color, l.size)) : l.qty} /> : <span className="text-sm text-sub">1 คู่ (มีชิ้นเดียว)</span>}
                     <button onClick={() => actions.removeLine(l.key)} className="grid h-10 w-10 place-items-center rounded-full text-sub hover:bg-ink/5 hover:text-ink" aria-label="ลบ">
                       <Trash2 size={18} />
                     </button>
