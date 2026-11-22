@@ -342,9 +342,9 @@ function TradeInStory() {
               ตรวจ {checkIdx + 1}/5 · {CHECKLIST[Math.max(0, checkIdx)].label}
             </Tag>
             <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(at === 'verify', '-translate-y-3')}`}>
-              <FakeQR value="KN-BK36-240117" size={44} />
+              <FakeQR value="KN-BR33-240117" size={44} />
               <div className="text-xs">
-                <p className="font-semibold tabular">KN-BK36-240117</p>
+                <p className="font-semibold tabular">KN-BR33-240117</p>
                 <p className="flex items-center gap-1 text-ok">
                   <Check size={13} /> ซื้อจาก KNOWNA
                 </p>

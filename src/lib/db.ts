@@ -46,7 +46,7 @@ function seed(): DB {
       // a few sold-out and low-stock sizes so those states can be demoed
       stock[stockKey(c.id, s)] = roll < 0.06 ? 0 : roll < 0.18 ? 1 + Math.floor(r() * 3) : 6 + Math.floor(r() * 30)
     }
-  stock[stockKey('black', 38)] = 24
+  stock[stockKey('brown', 34)] = 24
 
   const units: Unit[] = []
   const orders: Order[] = []
@@ -74,18 +74,18 @@ function seed(): DB {
       timeScale: 'real',
     }
   }
-  orders.push(pastOrder('KN-240510-0031', '2024-05-10T10:12:00+07:00', [['black', 35, 240117], ['black', 38, 240118]], DEMO_USER.id))
-  orders.push(pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['white', 37, 250233]], DEMO_USER.id))
-  orders.push(pastOrder('KN-230512-0009', '2023-05-12T09:05:00+07:00', [['black', 33, 230512]], DEMO_USER.id))
-  orders.push(pastOrder('KN-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 40, 240623]], null))
+  orders.push(pastOrder('KN-240510-0031', '2024-05-10T10:12:00+07:00', [['brown', 33, 240117], ['brown', 35, 240118]], DEMO_USER.id))
+  orders.push(pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['brown', 36, 250233]], DEMO_USER.id))
+  orders.push(pastOrder('KN-230512-0009', '2023-05-12T09:05:00+07:00', [['brown', 31, 230512]], DEMO_USER.id))
+  orders.push(pastOrder('KN-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 38, 240623]], null))
   // This pair was already traded in once, so it must be rejected if someone tries again.
-  units.find((u) => u.serial === makeSerial('black', 33, 230512))!.tradedIn = true
+  units.find((u) => u.serial === makeSerial('brown', 31, 230512))!.tradedIn = true
 
   const inspectors = ['ช่างต้น', 'ช่างแบงค์', 'ช่างฝน']
-  const notesPool = ['รอยย่นหน้าเท้าเล็กน้อย', 'ดอกยางเหลือมากกว่า 80%', 'เปลี่ยนเชือกใหม่แล้ว', 'ขัดเงาใหม่ทั้งคู่', 'แผ่นรองใหม่', 'รอยถลอกจุดเล็กที่ส้น']
+  const notesPool = ['รอยย่นหน้าเท้าเล็กน้อย', 'ดอกยางเหลือมากกว่า 80%', 'เปลี่ยนเชือกใหม่แล้ว', 'ซักและตากใหม่ทั้งคู่', 'แผ่นรองใหม่', 'รอยถลอกจุดเล็กที่ส้น']
   const preowned: PreownedItem[] = Array.from({ length: 14 }, (_, i) => {
-    const color = (['black', 'black', 'white', 'brown'] as ColorId[])[Math.floor(r() * 4)]
-    const size = 31 + Math.floor(r() * 14)
+    const color: ColorId = 'brown'
+    const size = 28 + Math.floor(r() * 13)
     const conditionPct = 76 + Math.floor(r() * 23)
     const grade = gradeFor(conditionPct) as 'A' | 'B'
     const day = 1 + Math.floor(r() * 20)

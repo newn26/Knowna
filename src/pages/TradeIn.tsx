@@ -38,7 +38,7 @@ function Stepper({ at }: { at: number }) {
 }
 
 type Method = 'history' | 'id' | 'qr'
-const DEMO_QR = 'KNOWNA:KN-BR40-240623'
+const DEMO_QR = 'KNOWNA:KN-BR38-240623'
 
 function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => void; reserved: string[]; initial: string }) {
   const user = useStore((s) => s.user)
@@ -156,7 +156,7 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
             <Field label="Product ID (พิมพ์อยู่ใต้ลิ้นรองเท้า)" value={serial} onChange={(e) => setSerial(e.target.value)} placeholder="KN-XXXX-XXXXXX" autoComplete="off" spellCheck={false} />
             <p className="mt-2 text-xs text-sub">
               ลองรหัสตัวอย่าง:{' '}
-              {['KN-BR40-240623', 'KN-BK33-230512', 'KN-BK38-999999'].map((s) => (
+              {['KN-BR38-240623', 'KN-BR31-230512', 'KN-BR35-999999'].map((s) => (
                 <button key={s} type="button" onClick={() => setSerial(s)} className="mr-2 underline underline-offset-2 tabular hover:text-ink">
                   {s}
                 </button>

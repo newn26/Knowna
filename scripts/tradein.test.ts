@@ -19,8 +19,8 @@ const test = async (name: string, fn: () => unknown) => {
   }
 }
 
-const line = (kind: 'new' | 'preowned', qty = 1, price = 890): CartLine => ({ key: `${kind}-${qty}-${price}`, kind, color: 'black', size: 38, qty, unitPrice: price, preownedId: kind === 'preowned' ? 'PO-1001' : undefined })
-const ti = (id: string, pct: number): TradeIn => ({ id, serial: 'KN-BK38-' + id.padStart(6, '0'), color: 'black', size: 38, answers: {}, conditionPct: pct, grade: gradeFor(pct), rate: rateFor(pct), photoCount: 0, createdAt: '' })
+const line = (kind: 'new' | 'preowned', qty = 1, price = 890): CartLine => ({ key: `${kind}-${qty}-${price}`, kind, color: 'brown', size: 35, qty, unitPrice: price, preownedId: kind === 'preowned' ? 'PO-1001' : undefined })
+const ti = (id: string, pct: number): TradeIn => ({ id, serial: 'KN-BR35-' + id.padStart(6, '0'), color: 'brown', size: 35, answers: {}, conditionPct: pct, grade: gradeFor(pct), rate: rateFor(pct), photoCount: 0, createdAt: '' })
 
 await test('rate bands: 90–100 → 15%, 75–89 → 10%, <75 → 0', () => {
   assert.equal(rateFor(100), 0.15)
@@ -62,21 +62,21 @@ await test('address: 77 provinces, Bangkok uses แขวง/เขต, others �
 resetDB()
 
 await test('verify: unknown, malformed and already-traded serials are refused', async () => {
-  assert.equal((await verifyPurchase('KN-BK38-999999')).ok, false)
+  assert.equal((await verifyPurchase('KN-BR35-999999')).ok, false)
   assert.equal((await verifyPurchase('hello')).ok, false)
-  assert.equal((await verifyPurchase(makeSerial('black', 33, 230512))).ok, false)
-  assert.equal((await verifyPurchase('knowna:' + makeSerial('black', 38, 240118).toLowerCase())).ok, true)
+  assert.equal((await verifyPurchase(makeSerial('brown', 31, 230512))).ok, false)
+  assert.equal((await verifyPurchase('knowna:' + makeSerial('brown', 35, 240118).toLowerCase())).ok, true)
 })
 
 await test('order: trade-in applied once, then the serial cannot be reused', async () => {
-  const v = await verifyPurchase(makeSerial('black', 38, 240118))
+  const v = await verifyPurchase(makeSerial('brown', 35, 240118))
   assert.ok(v.ok)
   const t = await inspect(v.unit, { upper: 0, sole: 0, insole: 0, stitch: 1, laces: 0 }, 2)
   assert.equal(t.rate, 0.15)
   const o = await placeOrder({
     userId: 'u-demo',
     customer: { name: 'ทดสอบ', phone: '081-234-5678', email: '', address: 'x' },
-    lines: [{ ...line('new'), color: 'black', size: 39 }],
+    lines: [{ ...line('new'), color: 'brown', size: 37 }],
     tradeIns: [t],
     fulfilment: 'delivery',
     payment: 'promptpay',

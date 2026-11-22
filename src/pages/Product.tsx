@@ -95,7 +95,7 @@ function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () =
 export default function Product() {
   const [params, setParams] = useSearchParams()
   const navigate = useNavigate()
-  const color = (COLORS.find((c) => c.id === params.get('color'))?.id ?? 'black') as ColorId
+  const color = (COLORS.find((c) => c.id === params.get('color'))?.id ?? COLORS[0].id) as ColorId
   const kind: Kind = params.get('type') === 'preowned' ? 'preowned' : 'new'
   const sizeParam = Number(params.get('size'))
   const [size, setSize] = useState<number | null>(SIZES.includes(sizeParam) ? sizeParam : null)

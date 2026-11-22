@@ -155,7 +155,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
         <div className="flex-1 overflow-y-auto px-5">
           {cart.length === 0 ? (
             <div className="py-16 text-center">
-              <Shoe color="black" className="mx-auto w-48 opacity-30" shadow={false} />
+              <Shoe color="brown" className="mx-auto w-48 opacity-30" shadow={false} />
               <p className="mt-4 text-sub">ยังไม่มีรองเท้าในตะกร้า</p>
               <Link to="/shop" className={`${buttonClass('solid', 'sm')} mt-5`}>
                 เลือกรองเท้า
