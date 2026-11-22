@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { placeOrder, verifyPurchase, inspect, findOrder } from '../src/lib/api'
 import { resetDB, makeSerial } from '../src/lib/db'
 import { totals } from '../src/lib/pricing'
+import { PROVINCES, formatAddress } from '../src/lib/catalog'
 import { allocateTradeIns, gradeFor, rateFor, scoreCondition } from '../src/lib/tradein'
 import type { CartLine, TradeIn } from '../src/lib/types'
 
@@ -50,6 +51,12 @@ await test('shipping is free for pickup and from ฿1,500', () => {
   assert.equal(totals([line('new')], [], 'delivery').shipping, 50)
   assert.equal(totals([line('new')], [], 'pickup').shipping, 0)
   assert.equal(totals([line('new', 2)], [], 'delivery').shipping, 0)
+})
+
+await test('address: 77 provinces, Bangkok uses แขวง/เขต, others ต./อ./จ.', () => {
+  assert.equal(new Set(PROVINCES).size, 77)
+  assert.equal(formatAddress({ line: '1 ถ.พระราม 1', subdistrict: 'วังใหม่', district: 'ปทุมวัน', province: 'กรุงเทพมหานคร', zip: '10330' }), '1 ถ.พระราม 1 แขวงวังใหม่ เขตปทุมวัน กรุงเทพมหานคร 10330')
+  assert.equal(formatAddress({ line: '5', subdistrict: 'สุเทพ', district: 'เมืองเชียงใหม่', province: 'เชียงใหม่', zip: '50200' }), '5 ต.สุเทพ อ.เมืองเชียงใหม่ จ.เชียงใหม่ 50200')
 })
 
 resetDB()

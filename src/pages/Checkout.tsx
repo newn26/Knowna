@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Container, Field, LinkButton, PageHead, Spinner } from '../components/ui'
 import { ApiError, placeOrder } from '../lib/api'
-import { FREE_SHIPPING_FROM, STORES, colorInfo } from '../lib/catalog'
+import { FREE_SHIPPING_FROM, PROVINCES, STORES, colorInfo, formatAddress, isBangkok } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import type { Fulfilment, Payment } from '../lib/types'
@@ -26,7 +26,17 @@ export default function Checkout() {
   const tradeIns = useStore((s) => s.tradeIns)
   const user = useStore((s) => s.user)
   const navigate = useNavigate()
-  const [form, setForm] = useState({ name: user?.name ?? '', phone: user?.phone ?? '', email: user?.email ?? '', address: user?.address ?? '' })
+  const a = user?.addressParts
+  const [form, setForm] = useState({
+    name: user?.name ?? '',
+    phone: user?.phone ?? '',
+    email: user?.email ?? '',
+    line: a?.line ?? '',
+    subdistrict: a?.subdistrict ?? '',
+    district: a?.district ?? '',
+    province: a?.province ?? '',
+    zip: a?.zip ?? '',
+  })
   const [fulfilment, setFulfilment] = useState<Fulfilment>('delivery')
   const [store, setStore] = useState(STORES[0])
   const [payment, setPayment] = useState<Payment>('promptpay')
@@ -45,7 +55,8 @@ export default function Checkout() {
     )
 
   const t = totals(cart, tradeIns, fulfilment)
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value })
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, [k]: e.target.value })
+  const bkk = isBangkok(form.province)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,7 +64,13 @@ export default function Checkout() {
     if (!form.name.trim()) err.name = 'กรอกชื่อผู้รับ'
     if (!/^0\d{8,9}$/.test(form.phone.replace(/\D/g, ''))) err.phone = 'เบอร์โทร 9–10 หลัก ขึ้นต้นด้วย 0'
     if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) err.email = 'อีเมลไม่ถูกต้อง'
-    if (fulfilment === 'delivery' && form.address.trim().length < 10) err.address = 'กรอกที่อยู่ให้ครบ'
+    if (fulfilment === 'delivery') {
+      if (!form.line.trim()) err.line = 'กรอกบ้านเลขที่ และซอย/ถนน'
+      if (!form.subdistrict.trim()) err.subdistrict = `กรอก${bkk ? 'แขวง' : 'ตำบล'}`
+      if (!form.district.trim()) err.district = `กรอก${bkk ? 'เขต' : 'อำเภอ'}`
+      if (!form.province) err.province = 'เลือกจังหวัด'
+      if (!/^\d{5}$/.test(form.zip)) err.zip = 'รหัสไปรษณีย์ 5 หลัก'
+    }
     setErrors(err)
     if (Object.keys(err).length) return
     setBusy(true)
@@ -61,7 +78,7 @@ export default function Checkout() {
     try {
       const order = await placeOrder({
         userId: user?.id ?? null,
-        customer: { ...form, address: fulfilment === 'pickup' ? store : form.address },
+        customer: { name: form.name, phone: form.phone, email: form.email, address: fulfilment === 'pickup' ? store : formatAddress(form) },
         lines: cart,
         tradeIns,
         fulfilment,
@@ -84,10 +101,10 @@ export default function Checkout() {
             <section>
               <h2 className="font-semibold">1 · ข้อมูลผู้สั่งซื้อ</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <Field label="ชื่อ-นามสกุล" value={form.name} onChange={set('name')} error={errors.name} autoComplete="name" />
-                <Field label="เบอร์โทร (ใช้ติดตามพัสดุ)" value={form.phone} onChange={set('phone')} error={errors.phone} inputMode="tel" autoComplete="tel" />
+                <Field label="ชื่อ-นามสกุล" value={form.name} onChange={set('name')} error={errors.name} autoComplete="name" placeholder="เช่น สมชาย ใจดี" />
+                <Field label="เบอร์โทร (ใช้ติดตามพัสดุ)" value={form.phone} onChange={set('phone')} error={errors.phone} inputMode="tel" autoComplete="tel" placeholder="เช่น 081-234-5678" />
                 <div className="sm:col-span-2">
-                  <Field label="อีเมล (ไม่บังคับ)" value={form.email} onChange={set('email')} error={errors.email} type="email" autoComplete="email" />
+                  <Field label="อีเมล (ไม่บังคับ)" value={form.email} onChange={set('email')} error={errors.email} type="email" autoComplete="email" placeholder="เช่น somchai@gmail.com" />
                 </div>
               </div>
             </section>
@@ -100,7 +117,30 @@ export default function Checkout() {
               </div>
               <div className="mt-4">
                 {fulfilment === 'delivery' ? (
-                  <Field label="ที่อยู่จัดส่ง" value={form.address} onChange={set('address')} error={errors.address} autoComplete="street-address" />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <Field label="บ้านเลขที่ หมู่ ซอย ถนน" value={form.line} onChange={set('line')} error={errors.line} autoComplete="address-line1" placeholder="เช่น 99/12 หมู่ 3 ซ.ลาดพร้าว 71 ถ.ลาดพร้าว" />
+                    </div>
+                    <label className="block">
+                      <span className="mb-1.5 block text-sm font-medium">จังหวัด</span>
+                      <select
+                        value={form.province}
+                        onChange={set('province')}
+                        autoComplete="address-level1"
+                        aria-invalid={errors.province ? true : undefined}
+                        className={`h-12 w-full rounded-xl border bg-card px-4 text-[15px] ${form.province ? '' : 'text-sub'} ${errors.province ? 'border-bad' : 'border-line'}`}
+                      >
+                        <option value="">เลือกจังหวัด</option>
+                        {PROVINCES.map((p) => (
+                          <option key={p}>{p}</option>
+                        ))}
+                      </select>
+                      {errors.province && <span className="mt-1 block text-xs text-bad">{errors.province}</span>}
+                    </label>
+                    <Field label={bkk ? 'เขต' : 'อำเภอ'} value={form.district} onChange={set('district')} error={errors.district} autoComplete="address-level2" placeholder={bkk ? 'เช่น ลาดพร้าว' : 'เช่น เมืองเชียงใหม่'} />
+                    <Field label={bkk ? 'แขวง' : 'ตำบล'} value={form.subdistrict} onChange={set('subdistrict')} error={errors.subdistrict} autoComplete="address-level3" placeholder={bkk ? 'เช่น จอมพล' : 'เช่น สุเทพ'} />
+                    <Field label="รหัสไปรษณีย์" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value.replace(/\D/g, '').slice(0, 5) })} error={errors.zip} inputMode="numeric" autoComplete="postal-code" placeholder="เช่น 10230" />
+                  </div>
                 ) : (
                   <label className="block">
                     <span className="mb-1.5 block text-sm font-medium">เลือกสาขา</span>

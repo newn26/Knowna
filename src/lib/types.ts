@@ -95,10 +95,19 @@ export interface Order {
   timeScale: 'demo' | 'real'
 }
 
+export interface AddressParts {
+  line: string // house no., moo, soi, road
+  subdistrict: string // ตำบล / แขวง
+  district: string // อำเภอ / เขต
+  province: string
+  zip: string
+}
+
 export interface User {
   id: string
   name: string
   phone: string
   email: string
   address: string
+  addressParts?: AddressParts // prefills the checkout form
 }

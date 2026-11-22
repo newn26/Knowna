@@ -1,4 +1,4 @@
-import type { ColorId, ColorInfo } from './types'
+import type { AddressParts, ColorId, ColorInfo } from './types'
 
 export const BRAND = 'KAOWNA'
 
@@ -61,3 +61,14 @@ export const SHIPPING_FEE = 50
 export const FREE_SHIPPING_FROM = 1500
 
 export const STORES = ['สาขาสยาม (BTS สยาม ทางออก 4)', 'สาขาบางนา (เมกาบางนา ชั้น 2)', 'สาขางามวงศ์วาน (ตรงข้ามเดอะมอลล์)']
+
+// shortcut: plain text for subdistrict/district; a real build would autocomplete from a Thai postcode dataset
+export const PROVINCES = 'กรุงเทพมหานคร กระบี่ กาญจนบุรี กาฬสินธุ์ กำแพงเพชร ขอนแก่น จันทบุรี ฉะเชิงเทรา ชลบุรี ชัยนาท ชัยภูมิ ชุมพร เชียงราย เชียงใหม่ ตรัง ตราด ตาก นครนายก นครปฐม นครพนม นครราชสีมา นครศรีธรรมราช นครสวรรค์ นนทบุรี นราธิวาส น่าน บึงกาฬ บุรีรัมย์ ปทุมธานี ประจวบคีรีขันธ์ ปราจีนบุรี ปัตตานี พระนครศรีอยุธยา พะเยา พังงา พัทลุง พิจิตร พิษณุโลก เพชรบุรี เพชรบูรณ์ แพร่ ภูเก็ต มหาสารคาม มุกดาหาร แม่ฮ่องสอน ยโสธร ยะลา ร้อยเอ็ด ระนอง ระยอง ราชบุรี ลพบุรี ลำปาง ลำพูน เลย ศรีสะเกษ สกลนคร สงขลา สตูล สมุทรปราการ สมุทรสงคราม สมุทรสาคร สระแก้ว สระบุรี สิงห์บุรี สุโขทัย สุพรรณบุรี สุราษฎร์ธานี สุรินทร์ หนองคาย หนองบัวลำภู อ่างทอง อำนาจเจริญ อุดรธานี อุตรดิตถ์ อุทัยธานี อุบลราชธานี'.split(' ')
+
+export const isBangkok = (province: string) => province === 'กรุงเทพมหานคร'
+
+/** One-line Thai address for labels and couriers: แขวง/เขต in Bangkok, ต./อ. elsewhere. */
+export function formatAddress(a: AddressParts) {
+  const bkk = isBangkok(a.province)
+  return `${a.line.trim()} ${bkk ? 'แขวง' : 'ต.'}${a.subdistrict.trim()} ${bkk ? 'เขต' : 'อ.'}${a.district.trim()} ${bkk ? '' : 'จ.'}${a.province} ${a.zip}`
+}
