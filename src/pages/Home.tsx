@@ -1,4 +1,5 @@
 import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
+import { PHOTOS } from '../lib/photos'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shoe, ShoeFlat } from '../components/Shoe'
@@ -139,7 +140,9 @@ function Colors() {
                   <ArrowRight size={16} />
                 </span>
               </div>
-              <Shoe color={c.id} className="mt-6 w-full transition duration-700 group-hover:-rotate-3 group-hover:scale-105" />
+              <div className="mt-6 aspect-[4/3] overflow-hidden rounded-2xl bg-card">
+                <img src={PHOTOS[c.id].src} alt={PHOTOS[c.id].alt} loading="lazy" className={`h-full w-full ${PHOTOS[c.id].fit} transition duration-700 group-hover:scale-105`} />
+              </div>
               <p className="mt-2 text-sm">
                 <b className="tabular">{baht(PRODUCT.price)}</b> <span className="text-sub">· EU 30–45</span>
               </p>
