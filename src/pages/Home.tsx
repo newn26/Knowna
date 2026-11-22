@@ -1,11 +1,11 @@
-import { ArrowRight, BadgeCheck, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { ConditionBar, Container, LinkButton, SWATCH, useReveal } from '../components/ui'
+import { ConditionBar, Container, FakeQR, GradeBadge, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
 import { COLORS, GRADES, PRODUCT } from '../lib/catalog'
 import { baht, preownedPrice } from '../lib/pricing'
-import { gradeFor, rateFor } from '../lib/tradein'
+import { CHECKLIST, gradeFor, rateFor } from '../lib/tradein'
 import type { ColorId } from '../lib/types'
 
 const display = { fontStretch: '78%' } as const
@@ -54,8 +54,12 @@ function Hero() {
 
         <div className="relative">
           <div className="absolute inset-x-6 top-1/2 -z-0 aspect-square -translate-y-1/2 rounded-full bg-stone sm:inset-x-14" />
-          <div key={color} className="relative animate-fade">
-            <Shoe color={color} view="pair" className="relative w-full animate-step drop-shadow-xl" />
+          <div className="parallax relative">
+            <div className="animate-rise [animation-delay:200ms]">
+              <div key={color} className="animate-swap">
+                <Shoe color={color} view="pair" className="relative w-full animate-step drop-shadow-xl" />
+              </div>
+            </div>
           </div>
           <div className="relative mt-4 flex items-center justify-center gap-3">
             {COLORS.map((c) => (
@@ -183,6 +187,127 @@ const FLOW = [
   { icon: BadgeCheck, t: 'หักส่วนลดในบิลนี้', d: 'ไม่ต้องรอ ไม่มีคูปอง ไรเดอร์รับคู่เก่าตอนส่งคู่ใหม่' },
 ]
 
+const STORY = [
+  { t: 'Old Shoes', h: 'คู่เดิม เท้าโตแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แต่คับเกินไปสำหรับเทอมหน้า' },
+  { t: 'Trade-in', h: 'ยืนยันว่าซื้อจากเรา', d: 'สแกน QR ใต้ลิ้น ระบบเจอในประวัติการขายทันที' },
+  { t: 'Inspection', h: 'ตรวจสภาพ 5 จุด', d: 'หนัง พื้น แผ่นรอง ตะเข็บ เชือก ได้ 94% เกรด A' },
+  { t: 'Discount', h: 'ลดทันที 10–15%', d: 'หักจากคู่ใหม่ในบิลเดียวกัน ไม่ต้องรอคูปอง ไม่มีวันหมดอายุ' },
+  { t: 'New Pair', h: 'คู่ใหม่ ไซซ์ใหม่', d: 'ไรเดอร์ส่งคู่ใหม่ แล้วรับคู่เก่ากลับไปในรอบเดียว' },
+  { t: 'Pre-owned', h: 'คู่เก่าได้ชีวิตใหม่', d: 'ล้าง ฆ่าเชื้อ QC แล้วขึ้นร้าน Pre-owned ให้รุ่นน้องในราคาเบาใจ' },
+]
+
+/** Sticky, scroll-driven walk through one pair's trade-in. Scroll position picks the step; CSS transitions do the motion. */
+function TradeInStory() {
+  const ref = useRef<HTMLElement>(null)
+  const [step, setStep] = useState(0)
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const r = ref.current!.getBoundingClientRect()
+        const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)))
+        setStep(Math.min(STORY.length - 1, Math.floor(p * STORY.length)))
+      })
+    }
+    update()
+    addEventListener('scroll', update, { passive: true })
+    addEventListener('resize', update)
+    return () => {
+      cancelAnimationFrame(raf)
+      removeEventListener('scroll', update)
+      removeEventListener('resize', update)
+    }
+  }, [])
+  const move = 'transition-[transform,opacity] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none'
+  const show = (on: boolean, off = 'translate-y-3') => (on ? 'opacity-100 translate-y-0' : `pointer-events-none opacity-0 ${off}`)
+  const oldPair = ['', '-translate-x-[14%] scale-90', '-translate-x-[14%] scale-90', '-translate-x-[14%] scale-[.85] opacity-30', '-translate-x-[130%] scale-90 opacity-0', 'scale-95'][step]
+  const discount = Math.round(PRODUCT.price * 0.15)
+  return (
+    <section ref={ref} aria-label="เส้นทางของรองเท้าหนึ่งคู่" className="relative" style={{ height: `${STORY.length * 75}vh` }}>
+      <div className="sticky top-16 flex h-[calc(100dvh-4rem)] items-center overflow-hidden">
+        <Container className="grid items-center gap-6 lg:grid-cols-[1fr_1.25fr] lg:gap-16">
+          <div>
+            <p className="font-display text-sm font-bold text-signal tabular">
+              {String(step + 1).padStart(2, '0')} / {String(STORY.length).padStart(2, '0')} · {STORY[step].t}
+            </p>
+            <div className="mt-3 grid">
+              {STORY.map((s, i) => (
+                <div key={s.t} className={`[grid-area:1/1] ${move} ${show(step === i)}`} aria-hidden={step !== i}>
+                  <h2 className="font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl" style={display}>
+                    {s.h}
+                  </h2>
+                  <p className="mt-3 max-w-sm text-sub sm:text-lg">{s.d}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex gap-1.5" aria-hidden>
+              {STORY.map((s, i) => (
+                <span key={s.t} className="h-1 flex-1 overflow-hidden rounded-full bg-line">
+                  <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${i <= step ? 'scale-x-100' : 'scale-x-0'}`} />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative aspect-[4/3] max-h-[50dvh] w-full overflow-hidden rounded-3xl bg-stone lg:max-h-none" aria-hidden>
+            <div className="absolute inset-0 grid place-items-center">
+              <div className={`w-[78%] ${move} ${oldPair}`}>
+                <Shoe color="black" wear={step === 5 ? 3 : 22} seed={11} className="w-full" />
+              </div>
+            </div>
+            <div className="absolute inset-0 grid place-items-center">
+              <div className={`w-[78%] ${move} ${step === 4 ? '' : 'translate-x-[130%] opacity-0'}`}>
+                <Shoe color="black" className="w-full" />
+              </div>
+            </div>
+
+            <span className={`absolute left-4 top-4 rounded-full bg-card px-3 py-1.5 text-xs font-semibold ${move} ${show(step === 0, '-translate-y-3')}`}>EU 36 · ใส่มา 1 ปี</span>
+            <div className={`absolute right-4 top-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-lg ${move} ${show(step === 1 || step === 2, '-translate-y-3')}`}>
+              <FakeQR value="KW-BK36-240117" size={44} />
+              <div className="text-xs">
+                <p className="font-semibold tabular">KW-BK36-240117</p>
+                <p className="flex items-center gap-1 text-ok">
+                  <Check size={13} /> ซื้อจาก KAOWNA
+                </p>
+              </div>
+            </div>
+            {step === 2 && <span className="absolute inset-0 animate-scan bg-gradient-to-b from-transparent via-signal/20 to-transparent" />}
+            <ul className="absolute inset-x-4 bottom-4 flex flex-wrap gap-1.5">
+              {CHECKLIST.map((c, i) => (
+                <li
+                  key={c.id}
+                  className={`flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-xs font-medium ${move} ${show(step === 2, 'translate-y-2')}`}
+                  style={{ transitionDelay: step === 2 ? `${i * 90}ms` : '0ms' }}
+                >
+                  <Check size={12} className="text-ok" /> {c.label}
+                </li>
+              ))}
+            </ul>
+            <div className={`absolute inset-0 grid place-items-center ${move} ${step === 3 ? 'scale-100 opacity-100' : 'pointer-events-none scale-90 opacity-0'}`}>
+              <div className="text-center">
+                <p className="font-display text-7xl font-black text-signal sm:text-8xl" style={display}>
+                  −15%
+                </p>
+                <p className="mt-1 font-semibold">
+                  −<Num value={step >= 3 ? discount : 0} format={baht} /> จากคู่ใหม่ {baht(PRODUCT.price)}
+                </p>
+              </div>
+            </div>
+            <span className={`absolute left-4 top-4 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-paper ${move} ${show(step === 4, '-translate-y-3')}`}>New · EU 38</span>
+            <div className={`absolute left-4 top-4 ${move} ${show(step === 5, '-translate-y-3')}`}>
+              <GradeBadge grade="A" pct={94} />
+            </div>
+            <span className={`absolute bottom-4 right-4 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-paper ${move} ${show(step === 5, 'translate-y-2')}`}>
+              Pre-owned {baht(preownedPrice(PRODUCT.price, 'A'))}
+            </span>
+          </div>
+        </Container>
+      </div>
+    </section>
+  )
+}
+
 function TradeInSection() {
   const [pct, setPct] = useState(92)
   const rate = rateFor(pct)
@@ -227,7 +352,13 @@ function TradeInSection() {
               <div className="text-right">
                 <p className="text-sm text-sub">{rate ? `เกรด ${grade} · ลด ${rate * 100}%` : 'ต่ำกว่าเกณฑ์'}</p>
                 <p className={`font-display text-4xl font-black tabular transition-colors ${rate ? 'text-signal' : 'text-sub'}`} style={display}>
-                  {rate ? `−${baht(Math.round(PRODUCT.price * rate))}` : 'ไม่รับเทิร์น'}
+                  {rate ? (
+                    <>
+                      −<Num value={Math.round(PRODUCT.price * rate)} format={baht} />
+                    </>
+                  ) : (
+                    'ไม่รับเทิร์น'
+                  )}
                 </p>
               </div>
             </div>
@@ -249,7 +380,9 @@ function TradeInSection() {
               <span>100%</span>
             </div>
             <p className="mt-6 text-sm">
-              คู่ใหม่ {baht(PRODUCT.price)} → จ่ายจริง <b className="tabular">{baht(PRODUCT.price - Math.round(PRODUCT.price * rate))}</b>
+              คู่ใหม่ {baht(PRODUCT.price)} → จ่ายจริง <b>
+                <Num value={PRODUCT.price - Math.round(PRODUCT.price * rate)} format={baht} />
+              </b>
             </p>
           </div>
           <div className="reveal grid gap-3 text-sm">
@@ -389,6 +522,7 @@ export default function Home() {
       <Marquee />
       <Colors />
       <TwoStores />
+      <TradeInStory />
       <TradeInSection />
       <SizeTeaser />
       <SecondLife />

@@ -2,7 +2,7 @@ import { Camera, Check, History, ImagePlus, Keyboard, QrCode, Recycle, ScanLine,
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { Button, ConditionBar, Container, Field, LinkButton, Spinner } from '../components/ui'
+import { Button, ConditionBar, Container, Field, LinkButton, Num, Spinner } from '../components/ui'
 import { inspect, listMyUnits, loginDemo, verifyPurchase } from '../lib/api'
 import { PRODUCT, colorInfo } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
@@ -335,7 +335,7 @@ function Result({ t, onApply, onRetry }: { t: TradeInT; onApply: () => void; onR
           <div className="mt-8 rounded-3xl bg-ink p-6 text-paper">
             <p className="text-sm text-paper/60">ส่วนลดสำหรับคู่ใหม่ในบิลนี้</p>
             <p className="font-display text-5xl font-black tabular" style={{ fontStretch: '78%' }}>
-              −{baht(gain)} <span className="text-2xl text-signal">({t.rate * 100}%)</span>
+              −<Num from={0} value={gain} format={baht} /> <span className="text-2xl text-signal">({t.rate * 100}%)</span>
             </p>
             <dl className="mt-5 space-y-1 border-t border-paper/15 pt-4 text-sm tabular">
               <div className="flex justify-between">

@@ -34,6 +34,62 @@
 
 html {
   scroll-behavior: smooth;
+  interpolate-size: allow-keywords; /* lets <details> animate to height:auto where supported */
+}
+
+/* Smooth accordion (Chromium 131+); other browsers open instantly */
+details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition: block-size 400ms cubic-bezier(0.16, 1, 0.3, 1), content-visibility 400ms allow-discrete;
+}
+details[open]::details-content {
+  block-size: auto;
+}
+
+/* Loading placeholder: a light sweep across the stone surface */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--stone));
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--card) / 0.7), transparent);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Scroll-driven effects run on the compositor; browsers without scroll timelines just show the static layout */
+@supports (animation-timeline: view()) {
+  .parallax {
+    animation: parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+  .footer-reveal {
+    animation: footer-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+}
+@keyframes parallax {
+  to {
+    transform: translateY(-70px);
+  }
+}
+@keyframes footer-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
 }
 
 body {
@@ -87,11 +143,17 @@ body {
   .animate-marquee,
   .animate-step,
   .animate-ping,
-  .animate-scan {
+  .animate-scan,
+  .animate-bump,
+  .parallax,
+  .footer-reveal,
+  .skeleton::after {
     animation: none !important;
   }
   .animate-rise,
-  .animate-sheet {
+  .animate-sheet,
+  .animate-page,
+  .animate-swap {
     animation-name: fade !important;
   }
   .reveal {

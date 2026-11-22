@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgeCheck, Droplets, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, BadgeCheck, Droplets, ShieldCheck, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
@@ -28,10 +28,10 @@ function QCBadges({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function Card({ p }: { p: PreownedItem }) {
+function Card({ p, i }: { p: PreownedItem; i: number }) {
   const sold = p.status === 'sold'
   return (
-    <Link to={`/preowned/${p.id}`} className={`reveal group block ${sold ? 'pointer-events-none opacity-50' : ''}`}>
+    <Link to={`/preowned/${p.id}`} className={`reveal group block ${sold ? 'pointer-events-none grayscale' : ''}`} style={{ transitionDelay: `${(i % 4) * 80}ms` }}>
       <div className="relative grid aspect-[4/3.2] place-items-center overflow-hidden rounded-3xl bg-stone">
         <div className="absolute left-3 top-3">
           <GradeBadge grade={p.grade} pct={p.conditionPct} />
@@ -150,8 +150,8 @@ export default function Preowned() {
         )}
         <div className="mt-8 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {items === null
-            ? Array.from({ length: 8 }, (_, i) => <div key={i} className="aspect-[4/3.2] animate-pulse rounded-3xl bg-stone" />)
-            : shown.map((p) => <Card key={p.id} p={p} />)}
+            ? Array.from({ length: 8 }, (_, i) => <div key={i} className="skeleton aspect-[4/3.2] rounded-3xl" />)
+            : shown.map((p, i) => <Card key={p.id} p={p} i={i} />)}
         </div>
       </Container>
     </div>
@@ -170,7 +170,17 @@ export function PreownedDetail() {
     getPreowned(id).then(setP)
   }, [id])
 
-  if (p === undefined) return <Container className="py-24 text-center text-sub">กำลังโหลด…</Container>
+  if (p === undefined)
+    return (
+      <Container className="grid gap-10 pt-16 lg:grid-cols-[1.15fr_1fr]" aria-busy>
+        <div className="skeleton aspect-[5/4] rounded-3xl" />
+        <div className="space-y-4">
+          <div className="skeleton h-12 w-2/3 rounded-xl" />
+          <div className="skeleton h-6 w-1/3 rounded-xl" />
+          <div className="skeleton h-28 rounded-2xl" />
+        </div>
+      </Container>
+    )
   if (p === null)
     return (
       <Container className="py-24 text-center">
@@ -217,6 +227,7 @@ export function PreownedDetail() {
               </button>
             ))}
           </div>
+          <BeforeAfter p={p} />
         </div>
 
         <div>
@@ -311,5 +322,40 @@ export function PreownedDetail() {
         </div>
       </div>
     </Container>
+  )
+}
+
+/** Drag to compare the pair as it came in (more wear, dull) with how it looks after cleaning and QC. */
+function BeforeAfter({ p }: { p: PreownedItem }) {
+  const [x, setX] = useState(50)
+  const wear = 100 - p.conditionPct
+  return (
+    <div className="mt-6">
+      <div className="relative aspect-[5/3] select-none overflow-hidden rounded-3xl bg-stone">
+        <div className="absolute inset-0 grid place-items-center">
+          <Shoe color={p.color} wear={wear} seed={p.wearSeed} className="w-[82%]" />
+        </div>
+        <div className="absolute inset-0 grid place-items-center bg-stone" style={{ clipPath: `inset(0 ${100 - x}% 0 0)` }}>
+          <Shoe color={p.color} wear={Math.min(30, wear + 14)} seed={p.wearSeed + 3} className="w-[82%] [filter:saturate(.5)_brightness(.82)_sepia(.25)]" />
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 w-0.5 bg-ink" style={{ left: `${x}%` }}>
+          <span className="absolute left-1/2 top-1/2 grid h-10 w-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-ink text-paper shadow-lg">
+            <ArrowLeftRight size={16} />
+          </span>
+        </div>
+        <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-card px-2.5 py-1 text-xs font-semibold">ตอนรับเข้า</span>
+        <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-paper">หลัง QC</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={x}
+          onChange={(e) => setX(+e.target.value)}
+          aria-label="เลื่อนเทียบสภาพตอนรับเข้ากับหลัง QC"
+          className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0 [touch-action:pan-y]"
+        />
+      </div>
+      <p className="mt-2 text-xs text-sub">ลากเพื่อเทียบสภาพตอนร้านรับเข้า กับหลังล้าง ฆ่าเชื้อ และ QC (ภาพจำลอง)</p>
+    </div>
   )
 }

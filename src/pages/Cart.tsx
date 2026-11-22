@@ -1,7 +1,7 @@
 import { Recycle, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { Container, LinkButton, PageHead, Qty } from '../components/ui'
+import { Container, LinkButton, Num, PageHead, Qty } from '../components/ui'
 import { colorInfo } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
@@ -37,7 +37,9 @@ export function Summary({ lines, tradeIns, shipping, children }: { lines: CartLi
         </div>
         <div className="flex justify-between border-t border-line pt-3 text-lg font-semibold">
           <dt>ยอดชำระ</dt>
-          <dd>{baht(t.subtotal - t.discount + ship)}</dd>
+          <dd>
+            <Num value={t.subtotal - t.discount + ship} format={baht} />
+          </dd>
         </div>
       </dl>
       {unused.length > 0 && (

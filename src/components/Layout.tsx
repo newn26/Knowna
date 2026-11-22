@@ -7,7 +7,7 @@ import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { newPairsIn } from '../lib/tradein'
 import { Shoe } from './Shoe'
-import { buttonClass, Container, useDialog } from './ui'
+import { buttonClass, Container, Num, useDialog } from './ui'
 
 const NAV = [
   { to: '/shop', label: 'Shop New' },
@@ -70,7 +70,7 @@ function Header() {
               key={n.to}
               to={n.to}
               className={({ isActive }) =>
-                `relative rounded-full px-3.5 py-2 text-sm font-medium transition hover:text-ink ${isActive ? 'text-ink' : 'text-sub'} ${n.to === '/trade-in' ? 'after:absolute after:right-1.5 after:top-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-signal' : ''}`
+                `relative rounded-full px-3.5 py-2 text-sm font-medium transition hover:text-ink before:absolute before:inset-x-3.5 before:bottom-1 before:h-px before:origin-left before:bg-current before:transition-transform before:duration-300 hover:before:scale-x-100 ${isActive ? 'text-ink before:scale-x-100' : 'text-sub before:scale-x-0'} ${n.to === '/trade-in' ? 'after:absolute after:right-1.5 after:top-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-signal' : ''}`
               }
             >
               {n.label}
@@ -88,7 +88,9 @@ function Header() {
             </span>
           </Link>
           <button className={`${icon} relative`} onClick={() => actions.openCart()} aria-label={`ตะกร้า ${count} ชิ้น`}>
-            <ShoppingBag size={19} />
+            <span key={count} className={`block ${count ? 'animate-bump' : ''}`}>
+              <ShoppingBag size={19} />
+            </span>
             {count > 0 && (
               <span key={count} className="absolute right-0.5 top-0.5 grid h-[18px] min-w-[18px] animate-rise place-items-center rounded-full bg-ink px-1 text-[10px] font-bold text-paper">
                 {count}
@@ -124,10 +126,16 @@ function CartDrawer() {
   const open = useStore((s) => s.cartOpen)
   const { pathname } = useLocation()
   useEffect(() => actions.openCart(false), [pathname])
-  return open ? <CartSheet /> : null
+  const [shown, setShown] = useState(open)
+  useEffect(() => {
+    if (open) return setShown(true)
+    const t = setTimeout(() => setShown(false), 300) // keep mounted while the close animation plays
+    return () => clearTimeout(t)
+  }, [open])
+  return shown ? <CartSheet leaving={!open} /> : null
 }
 
-function CartSheet() {
+function CartSheet({ leaving }: { leaving: boolean }) {
   const cart = useStore((s) => s.cart)
   const tradeIns = useStore((s) => s.tradeIns)
   const navigate = useNavigate()
@@ -136,8 +144,8 @@ function CartSheet() {
   const canTradeIn = newPairsIn(cart) > tradeIns.filter((x) => x.rate > 0).length
   return (
     <div ref={ref} className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="ตะกร้าสินค้า">
-      <div className="absolute inset-0 animate-fade bg-black/40" onClick={() => actions.openCart(false)} />
-      <aside className="absolute right-0 top-0 flex h-full w-full max-w-md animate-sheet flex-col bg-paper shadow-2xl">
+      <div className={`absolute inset-0 animate-fade bg-black/40 transition-opacity duration-300 ${leaving ? 'opacity-0' : ''}`} onClick={() => actions.openCart(false)} />
+      <aside className={`absolute right-0 top-0 flex h-full w-full max-w-md animate-sheet flex-col bg-paper shadow-2xl transition-transform duration-300 ease-in ${leaving ? 'translate-x-full' : ''}`}>
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <p className="font-display text-lg font-black uppercase">ตะกร้า ({cart.reduce((n, l) => n + l.qty, 0)})</p>
           <button className="grid h-10 w-10 place-items-center rounded-full hover:bg-ink/5" onClick={() => actions.openCart(false)} aria-label="ปิด">
@@ -213,7 +221,9 @@ function CartSheet() {
               )}
               <div className="flex justify-between pt-1 text-base font-semibold">
                 <dt>รวม (ก่อนค่าส่ง)</dt>
-                <dd>{baht(t.subtotal - t.discount)}</dd>
+                <dd>
+                  <Num value={t.subtotal - t.discount} format={baht} />
+                </dd>
               </div>
             </dl>
             <div className="mt-4 grid grid-cols-2 gap-2">
@@ -246,7 +256,7 @@ function Toast() {
 function Footer() {
   return (
     <footer className="fixed-tone mt-24 bg-ink text-paper">
-      <Container className="py-16">
+      <Container className="footer-reveal py-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Wordmark className="text-4xl" />

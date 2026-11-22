@@ -23,11 +23,22 @@ function ScrollManager() {
   return null
 }
 
+// Re-keying on the path replays a short fade-up for every page change (query-only changes keep the page).
+function PageFade({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation()
+  return (
+    <div key={pathname} className="animate-page">
+      {children}
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <HashRouter>
       <ScrollManager />
       <Layout>
+        <PageFade>
         <Routes>
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Product />} />
@@ -42,6 +53,7 @@ export default function App() {
           <Route path="/account" element={<Account />} />
           <Route path="*" element={<Home />} />
         </Routes>
+        </PageFade>
       </Layout>
     </HashRouter>
   )

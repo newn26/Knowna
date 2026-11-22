@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../lib/catalog'
 import { baht } from '../lib/pricing'
@@ -16,7 +16,7 @@ const btn: Record<Variant, string> = {
 }
 
 export const buttonClass = (v: Variant = 'solid', size: 'md' | 'lg' | 'sm' = 'md') =>
-  `inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 active:scale-[.97] disabled:pointer-events-none disabled:opacity-40 ${
+  `inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[.97] disabled:pointer-events-none disabled:opacity-40 ${
     size === 'lg' ? 'h-14 px-8 text-base' : size === 'sm' ? 'h-9 px-4 text-sm' : 'h-12 px-6 text-[15px]'
   } ${btn[v]}`
 
@@ -51,7 +51,7 @@ export function ColorPicker({ value, onChange }: { value: ColorId; onChange: (c:
           onClick={() => onChange(c.id)}
           className={`group flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-4 text-sm transition ${value === c.id ? 'border-ink' : 'border-line hover:border-sub'}`}
         >
-          <span className="h-7 w-7 rounded-full ring-1 ring-inset ring-black/15 transition group-hover:scale-110" style={{ background: SWATCH[c.id] }} />
+          <span className={`h-7 w-7 rounded-full ring-1 ring-inset ring-black/15 transition duration-300 group-hover:scale-110 ${value === c.id ? 'scale-110' : ''}`} style={{ background: SWATCH[c.id] }} />
           <span className="font-medium">{c.name}</span>
         </button>
       ))}
@@ -85,7 +85,7 @@ export function SizeGrid({
             disabled={out}
             onClick={() => onChange(s)}
             className={`relative h-12 rounded-xl border text-sm font-semibold tabular transition ${
-              value === s ? 'border-ink bg-ink text-paper' : inRange ? 'border-ink/50 bg-stone' : 'border-line hover:border-ink'
+              value === s ? 'scale-[1.04] border-ink bg-ink text-paper' : inRange ? 'border-ink/50 bg-stone' : 'border-line hover:border-ink'
             } ${out ? 'cursor-not-allowed text-sub/50 line-through' : ''}`}
           >
             {s}
@@ -294,4 +294,29 @@ export function useDialog<T extends HTMLElement>(onClose: () => void) {
     }
   }, [])
   return ref
+}
+
+/** Number that counts to its new value (ease-out, ~450ms). Jumps straight there under reduced motion. */
+export function Num({ value, from, format = String }: { value: number; from?: number; format?: (n: number) => string }) {
+  const [shown, setShown] = useState(from ?? value)
+  const last = useRef(from ?? value)
+  useEffect(() => {
+    const start = last.current
+    if (start === value || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      last.current = value
+      return setShown(value)
+    }
+    const t0 = performance.now()
+    let raf = 0
+    const tick = (t: number) => {
+      const k = Math.min(1, (t - t0) / 450)
+      const v = Math.round(start + (value - start) * (1 - (1 - k) ** 3))
+      last.current = v
+      setShown(v)
+      if (k < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <span className="tabular">{format(shown)}</span>
 }

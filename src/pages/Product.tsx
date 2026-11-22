@@ -22,7 +22,7 @@ function Gallery({ color }: { color: ColorId }) {
   return (
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
-        <div key={color + view} className="w-[88%] animate-fade">
+        <div key={color + view} className="w-[88%] animate-swap">
           <Shoe color={color} view={view} className="w-full" />
         </div>
         <span className="absolute bottom-4 left-4 text-xs text-sub">ภาพประกอบสินค้า</span>
