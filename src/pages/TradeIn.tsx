@@ -201,13 +201,25 @@ function Verify({ onVerified, reserved, initial }: { onVerified: (u: Unit) => vo
   )
 }
 
+// Required photo angles. 'demo' marks a sample photo so the demo can be clicked through without a camera.
+const SHOTS = [
+  { id: 'side', label: 'ด้านข้าง', view: 'side' },
+  { id: 'toe', label: 'หัวรองเท้า', view: 'toe' },
+  { id: 'heel', label: 'ส้นและพื้น', view: 'heel' },
+] as const
+type ShotId = (typeof SHOTS)[number]['id']
+
 function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string, CheckAnswer>, photos: number) => void }) {
   const [answers, setAnswers] = useState<Record<string, CheckAnswer>>({})
-  const [photos, setPhotos] = useState<string[]>([])
+  const [photos, setPhotos] = useState<Partial<Record<ShotId, string>>>({})
   const fileRef = useRef<HTMLInputElement>(null)
+  const target = useRef<ShotId>('side')
+  const urls = useRef<string[]>([])
+  useEffect(() => () => urls.current.forEach((u) => URL.revokeObjectURL(u)), []) // free blob URLs on leave only
   const done = CHECKLIST.every((c) => answers[c.id] !== undefined)
+  const missing = SHOTS.filter((x) => !photos[x.id])
   const pct = scoreCondition(answers)
-  useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p)), [photos])
+  const setPhoto = (id: ShotId, v?: string) => setPhotos((ph) => ({ ...ph, [id]: v }))
   return (
     <div>
       <h2 className="font-display text-3xl font-black uppercase" style={{ fontStretch: '80%' }}>
@@ -242,32 +254,70 @@ function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string
       </div>
 
       <div className="mt-6">
-        <p className="text-sm font-semibold">
-          รูปถ่าย <span className="font-normal text-sub">· ไม่บังคับ แต่ช่วยให้ตรวจไวขึ้น (ด้านข้าง หัว พื้น)</span>
-        </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {photos.map((src, i) => (
-            <div key={src} className="relative h-20 w-20 overflow-hidden rounded-xl">
-              <img src={src} alt={`รูปที่ ${i + 1}`} className="h-full w-full object-cover" />
-              <button onClick={() => setPhotos(photos.filter((p) => p !== src))} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-white" aria-label="ลบรูป">
-                <X size={12} />
-              </button>
-            </div>
-          ))}
-          {photos.length < 4 && (
-            <button onClick={() => fileRef.current?.click()} className="grid h-20 w-20 place-items-center rounded-xl border border-dashed border-line text-sub transition hover:border-ink hover:text-ink" aria-label="เพิ่มรูป">
-              <ImagePlus size={22} />
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-sm font-semibold">
+            รูปถ่าย 3 มุม <span className="font-normal text-sub">· จำเป็น ใช้ตรวจสภาพจริง</span>
+          </p>
+          {missing.length > 0 && (
+            <button type="button" onClick={() => missing.forEach((x) => setPhoto(x.id, 'demo'))} className="text-sm font-medium underline underline-offset-4 hover:text-signal">
+              ใช้รูปตัวอย่าง (เดโม)
             </button>
           )}
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 sm:gap-3">
+          {SHOTS.map((x) => {
+            const src = photos[x.id]
+            return (
+              <div key={x.id}>
+                {src ? (
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-stone">
+                    {src === 'demo' ? (
+                      <div className="grid h-full place-items-center p-2">
+                        <Shoe color={unit.color} view={x.view} wear={10} seed={5} className="w-full" shadow={false} label={`รูปตัวอย่าง ${x.label}`} />
+                      </div>
+                    ) : (
+                      <img src={src} alt={`รูป${x.label}`} className="h-full w-full object-cover" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setPhoto(x.id)}
+                      className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white"
+                      aria-label={`ลบรูป${x.label}`}
+                    >
+                      <X size={14} />
+                    </button>
+                    {src === 'demo' && <span className="absolute bottom-1 left-1 rounded-full bg-card px-1.5 text-[10px] font-semibold">ตัวอย่าง</span>}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      target.current = x.id
+                      fileRef.current?.click()
+                    }}
+                    className="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-line text-sub transition hover:border-ink hover:text-ink"
+                    aria-label={`ถ่ายหรือเลือกรูป${x.label}`}
+                  >
+                    <ImagePlus size={22} />
+                  </button>
+                )}
+                <p className="mt-1.5 text-center text-xs text-sub">{x.label}</p>
+              </div>
+            )
+          })}
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
-            multiple
+            capture="environment"
             hidden
             onChange={(e) => {
-              const files = Array.from(e.target.files ?? []).slice(0, 4 - photos.length)
-              setPhotos([...photos, ...files.map((f) => URL.createObjectURL(f))])
+              const f = e.target.files?.[0]
+              if (f) {
+                const u = URL.createObjectURL(f)
+                urls.current.push(u)
+                setPhoto(target.current, u)
+              }
               e.target.value = ''
             }}
           />
@@ -285,9 +335,14 @@ function Condition({ unit, onSubmit }: { unit: Unit; onSubmit: (a: Record<string
           <ConditionBar pct={pct} />
         </div>
       </div>
-      <Button size="lg" className="mt-5 w-full" disabled={!done} onClick={() => onSubmit(answers, photos.length)}>
+      <Button size="lg" className="mt-5 w-full" disabled={!done || missing.length > 0} onClick={() => onSubmit(answers, SHOTS.length)}>
         ส่งตรวจสภาพ
       </Button>
+      {(!done || missing.length > 0) && (
+        <p className="mt-2 text-center text-xs text-sub" aria-live="polite">
+          {[!done && `ตอบสภาพให้ครบ ${CHECKLIST.length} ข้อ`, missing.length > 0 && `แนบรูปอีก ${missing.length} มุม (${missing.map((x) => x.label).join(', ')})`].filter(Boolean).join(' · ')}
+        </p>
+      )}
     </div>
   )
 }
