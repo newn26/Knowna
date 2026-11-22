@@ -2,7 +2,7 @@
 // data, so moving to a real backend means replacing each body with a fetch() call
 // (suggested REST route in the comment above each function) and deleting db.ts.
 import { PRODUCT, colorInfo } from './catalog'
-import { load, makeSerial, save, stockKey } from './db'
+import { load, makeSerial, resetDB, save, stockKey } from './db'
 import { preownedPrice, totals } from './pricing'
 import { reached, tradeInSteps } from './status'
 import { gradeFor, rateFor, scoreCondition } from './tradein'
@@ -210,4 +210,7 @@ export async function loginDemo(): Promise<User> {
   return { ...load().users[0] }
 }
 
-export const stockOf = (stock: Record<string, number>, color: ColorId, size: number) => stock[stockKey(color, size)] ?? 0
+// Demo only: wipe local data back to the seed.
+export const resetDemo = () => resetDB()
+
+export const stockOf =(stock: Record<string, number>, color: ColorId, size: number) => stock[stockKey(color, size)] ?? 0
