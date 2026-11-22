@@ -58,7 +58,7 @@ export default function Cart() {
   if (!cart.length)
     return (
       <>
-        <PageHead eyebrow="Cart" title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ หรือดูมือสองที่ผ่าน QC" />
+        <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ หรือดูมือสองที่ผ่าน QC" />
         <Container className="flex gap-3">
           <LinkButton to="/shop">Shop New</LinkButton>
           <LinkButton to="/preowned" variant="outline">
@@ -70,7 +70,7 @@ export default function Cart() {
 
   return (
     <>
-      <PageHead eyebrow="Cart" title="ตะกร้า" />
+      <PageHead title="ตะกร้า" />
       <Container className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <div>
           <ul className="divide-y divide-line border-y border-line">

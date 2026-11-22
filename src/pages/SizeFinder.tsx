@@ -1,7 +1,7 @@
 import { Footprints, Ruler } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Container, Eyebrow, LinkButton, PageHead } from '../components/ui'
+import { Container, LinkButton, PageHead } from '../components/ui'
 import { GRADES, SIZES, footLengthFor, sizeForFoot } from '../lib/catalog'
 
 const gradesFor = (eu: number) => GRADES.filter((g) => eu >= g.range[0] && eu <= g.range[1]).map((g) => g.label)
@@ -40,7 +40,7 @@ export default function SizeFinder() {
   const eu = sizeForFoot(cm + (room ? 0.5 : 0))
   return (
     <>
-      <PageHead eyebrow="Size Guide / Size Finder" title="หาไซซ์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้ไซซ์ไม่ตรง เปลี่ยนได้ฟรีภายใน 14 วัน" />
+      <PageHead title="หาไซซ์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้ไซซ์ไม่ตรง เปลี่ยนได้ฟรีภายใน 14 วัน" />
       <Container className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-3xl border border-line bg-card p-6 sm:p-8">
           <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function SizeFinder() {
         </section>
       </Container>
       <Container className="mt-16">
-        <Eyebrow>ตารางไซซ์เต็ม</Eyebrow>
+        <h2 className="font-display text-2xl font-black uppercase">ตารางไซซ์เต็ม</h2>
         <div className="mt-6">
           <SizeTable highlight={eu} />
         </div>

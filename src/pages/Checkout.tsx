@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Container, Field, LinkButton, PageHead, Spinner } from '../components/ui'
 import { ApiError, placeOrder } from '../lib/api'
-import { FREE_SHIPPING_FROM, STORES } from '../lib/catalog'
-import { totals } from '../lib/pricing'
+import { FREE_SHIPPING_FROM, STORES, colorInfo } from '../lib/catalog'
+import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import type { Fulfilment, Payment } from '../lib/types'
 import { Summary } from './Cart'
@@ -37,7 +37,7 @@ export default function Checkout() {
   if (!cart.length)
     return (
       <>
-        <PageHead eyebrow="Checkout" title="ยังไม่มีสินค้า" />
+        <PageHead title="ยังไม่มีสินค้า" />
         <Container>
           <LinkButton to="/shop">เลือกรองเท้า</LinkButton>
         </Container>
@@ -77,7 +77,7 @@ export default function Checkout() {
 
   return (
     <>
-      <PageHead eyebrow="Checkout" title="ชำระเงิน" />
+      <PageHead title="ชำระเงิน" />
       <Container>
         <form onSubmit={submit} noValidate className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div className="space-y-10">
@@ -126,6 +126,16 @@ export default function Checkout() {
           </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">
+            <ul className="mb-3 divide-y divide-line rounded-3xl border border-line px-5 text-sm">
+              {cart.map((l) => (
+                <li key={l.key} className="flex justify-between gap-3 py-3">
+                  <span>
+                    {colorInfo(l.color).name} · EU {l.size} · {l.kind === 'new' ? 'New' : 'Pre-owned'} × {l.qty}
+                  </span>
+                  <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
+                </li>
+              ))}
+            </ul>
             <Summary lines={cart} tradeIns={tradeIns} shipping={t.shipping}>
               {apiError && (
                 <p className="mt-4 rounded-xl bg-bad/10 p-3 text-sm text-bad" role="alert">

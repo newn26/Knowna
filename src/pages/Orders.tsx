@@ -39,7 +39,7 @@ export function Track() {
   }
   return (
     <>
-      <PageHead eyebrow="Order Tracking" title="ติดตามพัสดุ" sub="ใช้เลขคำสั่งซื้อ (อยู่ในหน้ายืนยัน/อีเมล) กับเบอร์โทรที่ใช้สั่ง" />
+      <PageHead title="ติดตามพัสดุ" sub="ใช้เลขคำสั่งซื้อ (อยู่ในหน้ายืนยัน/อีเมล) กับเบอร์โทรที่ใช้สั่ง" />
       <Container className="grid gap-8 lg:grid-cols-2">
         <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-card p-6 sm:p-8">
           <Field label="เลขคำสั่งซื้อ" value={id} onChange={(e) => setId(e.target.value)} placeholder="KW-250502-0107" spellCheck={false} />
@@ -226,7 +226,7 @@ export function Account() {
   if (!user)
     return (
       <>
-        <PageHead eyebrow="Account" title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ Product ID ของทุกคู่ และเทิร์นได้ในคลิกเดียว" />
+        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ Product ID ของทุกคู่ และเทิร์นได้ในคลิกเดียว" />
         <Container className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-line bg-card p-6 sm:p-8">
             <p className="font-semibold">เข้าสู่ระบบ (เดโม)</p>
@@ -256,7 +256,7 @@ export function Account() {
 
   return (
     <>
-      <PageHead eyebrow="Account / Order History" title={`สวัสดี ${user.name}`} sub={`${user.phone} · ${user.email}`} />
+      <PageHead title={`สวัสดี ${user.name}`} sub={`${user.phone} · ${user.email}`} />
       <Container>
         <section>
           <div className="flex items-center justify-between">

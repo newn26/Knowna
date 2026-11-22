@@ -2,7 +2,7 @@ import { ArrowRight, BadgeCheck, Recycle, ScanLine, ShieldCheck, Sparkles } from
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { ConditionBar, Container, Eyebrow, LinkButton, SWATCH, useReveal } from '../components/ui'
+import { ConditionBar, Container, LinkButton, SWATCH, useReveal } from '../components/ui'
 import { COLORS, GRADES, PRODUCT } from '../lib/catalog'
 import { baht, preownedPrice } from '../lib/pricing'
 import { gradeFor, rateFor } from '../lib/tradein'
@@ -54,9 +54,6 @@ function Hero() {
 
         <div className="relative">
           <div className="absolute inset-x-6 top-1/2 -z-0 aspect-square -translate-y-1/2 rounded-full bg-stone sm:inset-x-14" />
-          <span className="pointer-events-none absolute -top-2 right-0 select-none font-display text-[9rem] font-black leading-none text-ink/[0.04] sm:text-[13rem]" style={display}>
-            {String(COLORS.findIndex((c) => c.id === color) + 1).padStart(2, '0')}
-          </span>
           <div key={color} className="relative animate-fade">
             <Shoe color={color} view="pair" className="relative w-full animate-step drop-shadow-xl" />
           </div>
@@ -103,8 +100,7 @@ function Colors() {
       <Container>
         <div className="reveal flex flex-wrap items-end justify-between gap-4">
           <div>
-            <Eyebrow n="01">One model, three colours</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
+            <h2 className="mt-0 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
               สามสี ครบทุกระเบียบ
             </h2>
           </div>
@@ -149,10 +145,7 @@ function TwoStores() {
       <Container className="grid gap-4 lg:grid-cols-2">
         <Link to="/shop" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-paper sm:p-10">
           <div>
-            <Eyebrow className="!text-paper/60">
-              <span className="text-paper">02</span> Shop New
-            </Eyebrow>
-            <h3 className="mt-4 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
+            <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
               คู่ใหม่
               <br />
               กล่องใหม่
@@ -166,8 +159,7 @@ function TwoStores() {
         </Link>
         <Link to="/preowned" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl border border-line bg-card p-8 sm:p-10">
           <div>
-            <Eyebrow n="03">Shop Pre-owned</Eyebrow>
-            <h3 className="mt-4 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
+            <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
               มือสอง
               <br />
               ที่ไม่มือสอง
@@ -199,8 +191,7 @@ function TradeInSection() {
     <section id="trade-in" className="bg-stone py-20 sm:py-28">
       <Container>
         <div className="reveal max-w-3xl">
-          <Eyebrow n="04">How Trade-in works</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-black uppercase leading-[0.92] tracking-tight sm:text-7xl" style={display}>
+          <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.92] tracking-tight sm:text-7xl" style={display}>
             เท้าโต ไม่ต้องทิ้ง<span className="text-signal">.</span>
           </h2>
           <p className="mt-4 text-lg text-sub">รองเท้าที่ซื้อจาก KAOWNA สภาพ 75% ขึ้นไป เปลี่ยนเป็นส่วนลดคู่ใหม่ได้ทันที ในรายการสั่งซื้อเดียวกัน</p>
@@ -294,8 +285,7 @@ function SizeTeaser() {
     <section className="py-20 sm:py-28">
       <Container className="grid items-center gap-10 lg:grid-cols-2">
         <div className="reveal">
-          <Eyebrow n="05">Size Finder</Eyebrow>
-          <h2 className="mt-4 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
+          <h2 className="mt-0 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
             ลูกเรียนชั้นไหน?
           </h2>
           <p className="mt-4 max-w-md text-sub">เลือกระดับชั้นเพื่อดูไซซ์ที่นักเรียนส่วนใหญ่ใส่ หรือวัดความยาวเท้าเพื่อได้เบอร์ที่แม่นที่สุด</p>
@@ -344,11 +334,7 @@ function SecondLife() {
       <Container>
         <div className="reveal grid gap-10 lg:grid-cols-2">
           <div>
-            <Eyebrow className="!text-paper/60">
-              <span className="text-paper">06</span>
-              <span className="h-px w-8 bg-paper/20" /> Give shoes a second life
-            </Eyebrow>
-            <h2 className="mt-4 font-display text-5xl font-black uppercase leading-[0.88] tracking-tight sm:text-7xl" style={display}>
+            <h2 className="mt-0 font-display text-5xl font-black uppercase leading-[0.88] tracking-tight sm:text-7xl" style={display}>
               หนึ่งคู่
               <br />
               <span className="text-paper/40">สองเจ้าของ</span>
@@ -367,21 +353,6 @@ function SecondLife() {
             </li>
           ))}
         </ol>
-        <dl className="reveal mt-14 grid grid-cols-2 gap-8 border-t border-paper/15 pt-10 sm:grid-cols-4">
-          {[
-            ['1,284', 'คู่ที่ได้ใช้ต่อ'],
-            ['5 จุด', 'ตรวจทุกคู่ก่อนขาย'],
-            ['100%', 'ผ่านอบโอโซนฆ่าเชื้อ'],
-            ['ใหม่', 'แผ่นรองและเชือกทุกคู่'],
-          ].map(([v, l]) => (
-            <div key={l}>
-              <dt className="font-display text-4xl font-black tabular sm:text-5xl" style={display}>
-                {v}
-              </dt>
-              <dd className="mt-1 text-sm text-paper/60">{l}</dd>
-            </div>
-          ))}
-        </dl>
       </Container>
     </section>
   )

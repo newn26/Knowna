@@ -2,7 +2,7 @@ import { Camera, Check, History, ImagePlus, Keyboard, QrCode, Recycle, ScanLine,
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
-import { Button, ConditionBar, Container, Eyebrow, Field, LinkButton, Spinner } from '../components/ui'
+import { Button, ConditionBar, Container, Field, LinkButton, Spinner } from '../components/ui'
 import { inspect, listMyUnits, loginDemo, verifyPurchase } from '../lib/api'
 import { PRODUCT, colorInfo } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
@@ -374,7 +374,7 @@ function Result({ t, onApply, onRetry }: { t: TradeInT; onApply: () => void; onR
 function Rules() {
   return (
     <section id="rules" className="mt-20 scroll-mt-24">
-      <Eyebrow>เงื่อนไข Trade-in</Eyebrow>
+      <h2 className="font-display text-2xl font-black uppercase">เงื่อนไข Trade-in</h2>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <ul className="space-y-3 text-sm">
           {[
@@ -450,8 +450,7 @@ export default function TradeIn() {
     <Container className="pb-10 pt-8 sm:pt-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Eyebrow>Trade-in</Eyebrow>
-          <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-7xl" style={{ fontStretch: '78%' }}>
+          <h1 className="font-display text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-7xl" style={{ fontStretch: '78%' }}>
             เทิร์นคู่เก่า<span className="text-signal">.</span>
           </h1>
         </div>

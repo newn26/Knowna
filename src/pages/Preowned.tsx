@@ -82,7 +82,6 @@ export default function Preowned() {
   return (
     <div ref={ref}>
       <PageHead
-        eyebrow="Pre-owned Store"
         title={
           <>
             Second step<span className="text-signal">.</span>

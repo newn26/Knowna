@@ -24,7 +24,7 @@ export default function Shop() {
 
   return (
     <div ref={ref}>
-      <PageHead eyebrow={`Shop · ${PRODUCT.model}`} title="รองเท้าใหม่" sub="รุ่นเดียว 3 สี ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ใช้เทิร์นในอนาคต" />
+      <PageHead title="รองเท้าใหม่" sub="รุ่นเดียว 3 สี ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ใช้เทิร์นในอนาคต" />
       <Container>
         <div className="sticky top-16 z-20 -mx-4 flex flex-wrap items-center gap-2 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
           {(['all', ...COLORS.map((c) => c.id)] as const).map((c) => (

@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import { useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS } from '../lib/catalog'
@@ -28,16 +29,6 @@ export function LinkButton({ to, variant = 'solid', size = 'md', className = '',
     <Link to={to} className={`${buttonClass(variant, size)} ${className}`}>
       {children}
     </Link>
-  )
-}
-
-export function Eyebrow({ n, children, className = '' }: { n?: string; children: ReactNode; className?: string }) {
-  return (
-    <p className={`flex items-center gap-3 font-display text-xs font-semibold uppercase tracking-[0.2em] text-sub ${className}`}>
-      {n && <span className="text-ink">{n}</span>}
-      {n && <span className="h-px w-8 bg-line" />}
-      {children}
-    </p>
   )
 }
 
@@ -100,7 +91,7 @@ export function SizeGrid({
             } ${out ? 'cursor-not-allowed text-sub/50 line-through' : ''}`}
           >
             {s}
-            {!out && left <= 3 && <span className="absolute -top-1.5 right-1 rounded-full bg-signal px-1.5 text-[10px] font-bold leading-4 text-white">{left}</span>}
+            {!out && left <= 3 && <span title={`เหลือ ${left} คู่`} aria-label={`เหลือ ${left} คู่`} className="absolute -top-1.5 right-1 rounded-full bg-signal px-1.5 text-[10px] font-bold leading-4 text-white">{left}</span>}
           </button>
         )
       })}
@@ -167,7 +158,7 @@ export function Timeline({ steps, now }: { steps: Step[]; now: number }) {
               }`}
             >
               {state === 'current' && <span className="absolute inset-0 animate-ping rounded-full bg-ink/30" />}
-              {state === 'todo' ? i + 1 : '✓'}
+              {state === 'todo' ? i + 1 : <Check size={13} strokeWidth={3} />}
             </span>
             <div>
               <p className={`font-semibold ${state === 'todo' ? 'text-sub' : ''}`}>{s.label}</p>
@@ -249,11 +240,10 @@ export const Container = ({ children, className = '' }: { children: ReactNode; c
   <div className={`mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-10 ${className}`}>{children}</div>
 )
 
-export function PageHead({ eyebrow, title, sub }: { eyebrow: string; title: ReactNode; sub?: ReactNode }) {
+export function PageHead({ title, sub }: { title: ReactNode; sub?: ReactNode }) {
   return (
     <Container className="pb-8 pt-10 sm:pt-16">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h1 className="mt-4 font-display text-4xl font-black uppercase leading-[0.95] tracking-tightest sm:text-6xl" style={{ fontStretch: '80%' }}>
+      <h1 className="font-display text-4xl font-black uppercase leading-[0.95] tracking-tightest sm:text-6xl" style={{ fontStretch: '80%' }}>
         {title}
       </h1>
       {sub && <p className="mt-4 max-w-2xl text-sub">{sub}</p>}
