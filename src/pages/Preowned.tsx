@@ -91,7 +91,7 @@ export default function Preowned() {
             Second step<span className="text-signal">.</span>
           </>
         }
-        sub="รองเท้าที่ลูกค้าเทิร์นกลับมา ผ่านการตรวจ 5 จุด ล้างและอบโอโซนฆ่าเชื้อ เปลี่ยนแผ่นรองและเชือกใหม่ แล้ว Quality Check อีกรอบ ทุกคู่บอกสภาพเป็นเปอร์เซ็นต์ตรง ๆ"
+        sub="รองเท้าที่ลูกค้าเทิร์นกลับมา ผ่านการตรวจ 5 จุด ล้างและอบโอโซนฆ่าเชื้อ เปลี่ยนแผ่นรองและเชือกใหม่ แล้วตรวจซ้ำอีกรอบ ทุกคู่บอกสภาพเป็นเปอร์เซ็นต์ตรง ๆ"
       />
       <Container>
         <div className="grid gap-3 rounded-3xl bg-stone p-5 sm:grid-cols-4">
@@ -115,13 +115,13 @@ export default function Preowned() {
         </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-2">
-          {COLORS.map((c) => (
+          {COLORS.length > 1 && COLORS.map((c) => (
             <button key={c.id} onClick={() => set('color', c.id)} className={`${chip(color === c.id)} inline-flex items-center gap-2`}>
               <span className="h-3 w-3 rounded-full ring-1 ring-black/20" style={{ background: SWATCH[c.id] }} />
               {c.name}
             </button>
           ))}
-          <span className="mx-1 h-5 w-px bg-line" />
+          {COLORS.length > 1 && <span className="mx-1 h-5 w-px bg-line" />}
           {['A', 'B'].map((g) => (
             <button key={g} onClick={() => set('grade', g)} className={chip(grade === g)}>
               เกรด {g}

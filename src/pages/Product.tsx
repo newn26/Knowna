@@ -150,9 +150,9 @@ export default function Product() {
     <Container className="pb-10 pt-6 sm:pt-10">
       <nav className="mb-6 text-sm text-sub" aria-label="breadcrumb">
         <Link to="/shop" className="hover:text-ink">
-          Shop
+          รองเท้าใหม่
         </Link>{' '}
-        / {PRODUCT.model} / {colorInfo(color).name}
+        / {PRODUCT.model} / สี{colorInfo(color).nameTh}
       </nav>
       <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
         <Gallery color={color} />
