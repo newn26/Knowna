@@ -2,27 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens: RGB triplets so Tailwind opacity modifiers work (bg-ink/10). */
+:root {
+  --paper: 246 244 240;
+  --card: 255 255 255;
+  --ink: 17 17 17;
+  --sub: 104 100 94;
+  --line: 224 220 213;
+  --stone: 236 233 227;
+  --signal: 214 79 38;
+  --ok: 38 120 82;
+  --bad: 190 48 48;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: 16 16 15;
+  --card: 27 27 25;
+  --ink: 242 240 235;
+  --sub: 160 155 147;
+  --line: 52 51 48;
+  --stone: 36 35 33;
+  --signal: 240 112 70;
+  --ok: 92 186 140;
+  --bad: 236 104 104;
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  @apply bg-surface text-fg antialiased;
-  font-feature-settings: 'cv11', 'ss01';
+  @apply bg-paper text-ink antialiased;
 }
 
 ::selection {
-  background: #d1fae5;
-  color: #10243a;
+  background: rgb(var(--ink));
+  color: rgb(var(--paper));
 }
 
 :focus-visible {
-  outline: 2px solid #047857;
-  outline-offset: 2px;
-  border-radius: 6px;
+  outline: 2px solid rgb(var(--signal));
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
+/* Section reveal: elements get .in when they scroll into view (see useReveal). */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
@@ -30,9 +81,8 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
-}
-
-@media print {
-  body { background: white; }
-  @page { margin: 18mm; }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }

@@ -1,38 +1,43 @@
-import colors from 'tailwindcss/colors'
-
 /** @type {import('tailwindcss').Config} */
+// Colours are CSS variables (see src/index.css) so light/dark themes swap in one place.
+const v = (name) => `rgb(var(--${name}) / <alpha-value>)`
+
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // V3: navy + emerald. #10B981 fails 4.5:1 under white text, so solid buttons/links use the
-        // deeper 600/700 steps and the pure accent (brand-400) is kept for icons, dots and dark surfaces.
-        brand: { 50: '#ECFDF5', 100: '#D1FAE5', 400: '#10B981', 500: '#047857', 600: '#065F46', 700: '#064E3B' },
-        ink: '#10243A',
-        navy: { DEFAULT: '#10243A', 2: '#1D3553' },
-        surface: '#F8FAFC',
-        muted: '#64748B',
-        fg: '#0F172A',
-        // cool neutrals everywhere, matching the brief's border/text values
-        gray: colors.slate,
+        paper: v('paper'), // page background
+        card: v('card'), // raised surfaces
+        ink: v('ink'), // primary text and solid buttons
+        sub: v('sub'), // secondary text
+        line: v('line'), // borders and dividers
+        stone: v('stone'), // tinted neutral panels
+        signal: v('signal'), // Trade-in accent, used sparingly
+        ok: v('ok'),
+        bad: v('bad'),
       },
-      fontFamily: { sans: ['Inter', '"Noto Sans Thai"', 'system-ui', 'sans-serif'] },
-      boxShadow: {
-        card: '0 1px 2px rgb(16 36 58 / 0.05), 0 1px 3px rgb(16 36 58 / 0.06)',
-        lift: '0 12px 32px -8px rgb(16 36 58 / 0.18)',
+      fontFamily: {
+        sans: ['"IBM Plex Sans Thai"', 'system-ui', 'sans-serif'],
+        display: ['Archivo', '"IBM Plex Sans Thai"', 'sans-serif'],
       },
+      letterSpacing: { tightest: '-0.045em' },
       keyframes: {
-        rise: { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'none' } },
-        sheet: { from: { transform: 'translateY(100%)' }, to: { transform: 'none' } },
-        swap: { from: { opacity: '0', transform: 'translateY(14px)' }, to: { opacity: '1', transform: 'none' } },
-        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-4px)' } },
+        rise: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'none' } },
+        fade: { from: { opacity: '0' }, to: { opacity: '1' } },
+        sheet: { from: { transform: 'translateX(100%)' }, to: { transform: 'none' } },
+        step: { '0%,100%': { transform: 'translateY(0) rotate(0)' }, '50%': { transform: 'translateY(-6px) rotate(-1.5deg)' } },
+        scan: { from: { transform: 'translateY(-100%)' }, to: { transform: 'translateY(100%)' } },
+        marquee: { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },
       },
       animation: {
-        rise: 'rise 500ms cubic-bezier(0.16,1,0.3,1) both',
-        sheet: 'sheet 220ms cubic-bezier(0.16,1,0.3,1)',
-        swap: 'swap 400ms cubic-bezier(0.16,1,0.3,1) both',
-        float: 'float 5.5s ease-in-out infinite',
+        rise: 'rise 700ms cubic-bezier(0.16,1,0.3,1) both',
+        fade: 'fade 400ms ease both',
+        sheet: 'sheet 320ms cubic-bezier(0.16,1,0.3,1)',
+        step: 'step 6s ease-in-out infinite',
+        scan: 'scan 1.4s ease-in-out infinite',
+        marquee: 'marquee 40s linear infinite',
       },
     },
   },
