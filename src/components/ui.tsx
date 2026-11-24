@@ -111,23 +111,6 @@ export function Qty({ value, onChange, max = 10 }: { value: number; onChange: (n
   )
 }
 
-export function GradeBadge({ grade, pct }: { grade: string; pct: number }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-paper tabular">
-      เกรด {grade} · {pct}%
-    </span>
-  )
-}
-
-export function ConditionBar({ pct }: { pct: number }) {
-  return (
-    <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-line" aria-label={`สภาพ ${pct}%`}>
-      <div className="absolute inset-y-0 left-0 rounded-full bg-ink transition-all duration-700" style={{ width: `${pct}%` }} />
-      <div className="absolute inset-y-0 w-px bg-signal" style={{ left: '75%' }} title="เกณฑ์รับเทิร์น 75%" />
-    </div>
-  )
-}
-
 export function Field({ label, error, ...p }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
   const errId = useId()
   return (
@@ -177,44 +160,6 @@ export function Timeline({ steps, now }: { steps: Step[]; now: number }) {
   )
 }
 
-/** Not a scannable QR: a deterministic pattern standing in for the tag printed under the tongue. */
-export function FakeQR({ value, size = 96 }: { value: string; size?: number }) {
-  const n = 21
-  let h = 2166136261
-  const cells: boolean[] = []
-  for (let i = 0; i < n * n; i++) {
-    h ^= value.charCodeAt(i % value.length) + i
-    h = Math.imul(h, 16777619)
-    cells.push((h >>> 7) % 2 === 0)
-  }
-  const finder = (x: number, y: number) => {
-    const inBox = (ox: number, oy: number) => x >= ox && x < ox + 7 && y >= oy && y < oy + 7
-    for (const [ox, oy] of [
-      [0, 0],
-      [n - 7, 0],
-      [0, n - 7],
-    ]) {
-      if (inBox(ox, oy)) {
-        const dx = x - ox
-        const dy = y - oy
-        return dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4) ? 1 : 0
-      }
-    }
-    return -1
-  }
-  return (
-    <svg viewBox={`-1 -1 ${n + 2} ${n + 2}`} width={size} height={size} className="rounded bg-white" aria-label={`QR ของ ${value}`} role="img">
-      {cells.map((on, i) => {
-        const x = i % n
-        const y = Math.floor(i / n)
-        const f = finder(x, y)
-        return (f === 1 || (f === -1 && on)) && <rect key={i} x={x} y={y} width="1" height="1" fill="#111" />
-      })}
-    </svg>
-  )
-}
-
-/** Adds .in to every .reveal inside the returned ref once it scrolls into view. */
 export function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null)
   useEffect(() => {

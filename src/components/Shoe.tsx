@@ -4,11 +4,11 @@
 import { useId } from 'react'
 import type { ColorId } from '../lib/types'
 
-const SOLE = 'M30 146 L30 166 Q30 174 40 174 L352 174 C380 174 395 166 399 154 L400 146 Z'
-const UPPER = 'M36 145 C30 118 31 92 44 66 C74 62 104 72 126 85 L156 80 C168 61 193 52 214 57 C240 71 272 92 308 104 C352 114 386 124 397 139 L399 145 Z'
-const TONGUE = 'M150 84 C160 62 186 48 214 52 C223 55 228 61 228 67 C202 66 178 74 160 88 Z'
+export const SOLE_PATH = 'M30 146 L30 166 Q30 174 40 174 L352 174 C380 174 395 166 399 154 L400 146 Z'
+export const UPPER = 'M36 145 C30 118 31 92 44 66 C74 62 104 72 126 85 L156 80 C168 61 193 52 214 57 C240 71 272 92 308 104 C352 114 386 124 397 139 L399 145 Z'
+export const TONGUE = 'M150 84 C160 62 186 48 214 52 C223 55 228 61 228 67 C202 66 178 74 160 88 Z'
 
-const PALETTE: Record<ColorId, Record<string, string>> = {
+export const PALETTE: Record<ColorId, Record<string, string>> = {
   black: { upper: '#1d1d1d', hi: '#4a4a4a', counter: '#151515', tongue: '#262626', sole: '#0c0c0c', edge: '#2c2c2c', lace: '#0f0f0f', stitch: '#6b6b6b', eyelet: '#9a9a9a', lining: '#4a3a2e', outline: '#000000' },
   white: { upper: '#f5f3ee', hi: '#ffffff', counter: '#e8e4da', tongue: '#efece5', sole: '#e3ded3', edge: '#cdc6b8', lace: '#fafafa', stitch: '#b8b0a1', eyelet: '#8f887d', lining: '#cfc3ad', outline: '#a8a092' },
   brown: { upper: '#6b3f22', hi: '#9a643c', counter: '#56321a', tongue: '#74472a', sole: '#24170f', edge: '#3d2a1c', lace: '#3a2414', stitch: '#b08259', eyelet: '#d1ad84', lining: '#3a2618', outline: '#2a170b' },
@@ -51,12 +51,12 @@ function Body({ color, wear = 0, seed = 1, id }: { color: ColorId; wear?: number
       </defs>
       {/* rim light: off (--rim-a: 0) on light surfaces, on in dark mode and on dark cards */}
       <g transform="translate(0 -1.5)" fill="none" stroke="#d8d3cb" strokeWidth="3" style={{ strokeOpacity: 'var(--rim-a, 0)' }}>
-        <path d={SOLE} />
+        <path d={SOLE_PATH} />
         <path d={UPPER} />
         <path d={TONGUE} />
       </g>
       {/* outsole */}
-      <path d={SOLE} fill={`url(#${id}-sole)`} stroke={p.outline} strokeOpacity=".35" />
+      <path d={SOLE_PATH} fill={`url(#${id}-sole)`} stroke={p.outline} strokeOpacity=".35" />
       {Array.from({ length: 22 }, (_, i) => (
         <line key={i} x1={46 + i * 15} y1="168" x2={46 + i * 15} y2="173" stroke={p.outline} strokeOpacity=".25" strokeWidth="2" />
       ))}

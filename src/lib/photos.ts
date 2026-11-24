@@ -27,7 +27,7 @@ export const PHOTOS: Record<ColorId, { pair: Photo; side: Photo }> = {
   },
 }
 
-/** Brown pair after a year of school (still trade-in grade). */
+/** Brown pair after a year of school: canvas fine, tread worn down. */
 export const USED: Photo = { src: brownUsed, alt: 'รองเท้าผ้าใบสีน้ำตาลที่ใส่มาแล้วราวหนึ่งปี มีรอยใช้งาน' }
-/** Brown pair worn past the 75% line: torn canvas, caked sole. */
+/** Brown pair worn out: torn canvas, caked sole. */
 export const WORN: Photo = { src: brownWorn, alt: 'รองเท้าผ้าใบสีน้ำตาลสภาพชำรุด ผ้าขาด พื้นเลอะ' }

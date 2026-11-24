@@ -24,8 +24,8 @@ export default function NotFound() {
           <LinkButton to="/shop" size="lg" variant="outline">
             ซื้อคู่ใหม่
           </LinkButton>
-          <LinkButton to="/trade-in" size="lg" variant="outline">
-            เทิร์นคู่เก่า
+          <LinkButton to="/soles" size="lg" variant="outline">
+            พื้นรองเท้า
           </LinkButton>
         </div>
       </div>

@@ -1,21 +1,20 @@
 // Client-side state (cart, session, theme). Persisted per browser in localStorage.
 // This stays on the client even with a real backend; only api.ts changes.
 import { useSyncExternalStore } from 'react'
-import type { CartLine, TradeIn, User } from './types'
+import type { CartLine, User } from './types'
 
 interface State {
   cart: CartLine[]
-  tradeIns: TradeIn[]
   user: User | null
   orders: string[] // ids placed from this browser, so guests also get an order history
   cartOpen: boolean
   toast: { id: number; text: string } | null
 }
 
-const KEY = 'kw.client.v2'
+const KEY = 'kw.client.v3'
 
 function read(): State {
-  const base: State = { cart: [], tradeIns: [], user: null, orders: [], cartOpen: false, toast: null }
+  const base: State = { cart: [], user: null, orders: [], cartOpen: false, toast: null }
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) return { ...base, ...JSON.parse(raw), cartOpen: false, toast: null }
@@ -31,8 +30,8 @@ const listeners = new Set<() => void>()
 function set(patch: Partial<State>) {
   state = { ...state, ...patch }
   try {
-    const { cart, tradeIns, user, orders } = state
-    localStorage.setItem(KEY, JSON.stringify({ cart, tradeIns, user, orders }))
+    const { cart, user, orders } = state
+    localStorage.setItem(KEY, JSON.stringify({ cart, user, orders }))
   } catch {
     /* ignore */
   }
@@ -62,9 +61,8 @@ export const actions = {
   openCart: (open = true) => set({ cartOpen: open }),
 
   addLine(line: Omit<CartLine, 'key'>) {
-    const key = line.kind === 'preowned' ? `po-${line.preownedId}` : `new-${line.color}-${line.size}`
+    const key = `${line.kind}-${line.color}-${line.size}`
     const existing = state.cart.find((l) => l.key === key)
-    if (existing && line.kind === 'preowned') return // one of a kind
     const cart = existing
       ? state.cart.map((l) => (l.key === key ? { ...l, qty: l.qty + line.qty } : l))
       : [...state.cart, { ...line, key }]
@@ -78,10 +76,7 @@ export const actions = {
     actions.toast('ลบออกจากตะกร้าแล้ว')
   },
 
-  addTradeIn: (t: TradeIn) => set({ tradeIns: [...state.tradeIns.filter((x) => x.serial !== t.serial), t] }),
-  removeTradeIn: (id: string) => set({ tradeIns: state.tradeIns.filter((t) => t.id !== id) }),
-
-  clearCart: () => set({ cart: [], tradeIns: [] }),
+  clearCart: () => set({ cart: [] }),
   rememberOrder: (id: string) => set({ orders: [id, ...state.orders.filter((x) => x !== id)] }),
   login: (user: User) => set({ user }),
   logout: () => set({ user: null }),

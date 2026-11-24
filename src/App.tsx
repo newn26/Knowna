@@ -5,11 +5,10 @@ import Home from './pages/Home'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import { Account, OrderDetail, Track } from './pages/Orders'
-import Preowned, { PreownedDetail } from './pages/Preowned'
 import Product from './pages/Product'
 import Shop from './pages/Shop'
 import SizeFinder from './pages/SizeFinder'
-import TradeIn from './pages/TradeIn'
+import Soles from './pages/Soles'
 import NotFound from './pages/NotFound'
 
 function ScrollManager() {
@@ -45,9 +44,7 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Product />} />
           <Route path="/size" element={<SizeFinder />} />
-          <Route path="/preowned" element={<Preowned />} />
-          <Route path="/preowned/:id" element={<PreownedDetail />} />
-          <Route path="/trade-in" element={<TradeIn />} />
+          <Route path="/soles" element={<Soles />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/track" element={<Track />} />

@@ -1,14 +1,14 @@
-import { CheckCircle2, LogOut, Package, Recycle } from 'lucide-react'
+import { CheckCircle2, LogOut, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
-import { Button, Container, FakeQR, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
-import { findOrder, getOrder, listMyUnits, listOrders, loginDemo } from '../lib/api'
+import { Shoe, ShoeFlat } from '../components/Shoe'
+import { Button, Container, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
+import { findOrder, getOrder, listOrders, loginDemo } from '../lib/api'
 import { colorInfo } from '../lib/catalog'
 import { baht } from '../lib/pricing'
-import { orderSteps, reached, tradeInSteps } from '../lib/status'
+import { orderSteps, reached } from '../lib/status'
 import { actions, useStore } from '../lib/store'
-import type { Order, Unit } from '../lib/types'
+import type { ColorId, Order } from '../lib/types'
 
 const useNow = (ms = 1000) => {
   const [now, setNow] = useState(Date.now())
@@ -66,7 +66,7 @@ export function Track() {
         <div className="rounded-3xl bg-stone p-6 text-sm text-sub sm:p-8">
           <Package className="text-ink" />
           <p className="mt-4 font-semibold text-ink">มีบัญชีอยู่แล้ว?</p>
-          <p className="mt-1">ดูทุกคำสั่งซื้อ Product ID และสถานะคู่ที่เทิร์นได้ในหน้าบัญชี</p>
+          <p className="mt-1">ดูทุกคำสั่งซื้อ และสั่งพื้นใหม่ให้คู่ที่เคยซื้อได้ในหน้าบัญชี</p>
           <Link to="/account" className="mt-4 inline-block font-semibold text-ink underline underline-offset-4">
             ไปหน้าบัญชี →
           </Link>
@@ -96,7 +96,6 @@ export function OrderDetail() {
     )
   const steps = orderSteps(o)
   const isNew = params.get('new') === '1'
-  const newSerials = [...o.serials]
   return (
     <Container className="pb-10 pt-8 sm:pt-12">
       {isNew && (
@@ -136,65 +135,29 @@ export function OrderDetail() {
             <h2 className="mb-5 font-semibold">{o.fulfilment === 'pickup' ? 'สถานะการรับที่สาขา' : 'สถานะการจัดส่ง'}</h2>
             <Timeline steps={steps} now={now} />
           </section>
-          {o.tradeIns.map((t) => {
-            const ts = tradeInSteps(o, t)
-            const r = reached(ts, now)
-            return (
-              <section key={t.id} className="rounded-3xl border border-signal/40 bg-card p-6">
-                <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="flex items-center gap-2 font-semibold">
-                    <Recycle size={18} className="text-signal" /> คู่เก่า {t.serial}
-                  </h2>
-                  <span className="text-sm text-sub">
-                    สภาพ {t.conditionPct}% · ลด {t.rate * 100}%
-                  </span>
-                </div>
-                {r === 0 ? <p className="text-sm text-sub">รอรับคู่เก่าตอน{o.fulfilment === 'pickup' ? 'มารับที่สาขา' : 'ส่งคู่ใหม่'}</p> : <Timeline steps={ts} now={now} />}
-                {r === ts.length && (
-                  <Link to="/preowned" className="mt-4 inline-block text-sm font-semibold underline underline-offset-4">
-                    คู่นี้ขึ้นร้านมือสองแล้ว →
-                  </Link>
-                )}
-              </section>
-            )
-          })}
         </div>
 
         <aside className="space-y-4">
           <div className="rounded-3xl bg-stone p-6">
             <p className="font-semibold">สินค้า</p>
             <ul className="mt-4 space-y-4">
-              {o.lines.map((l) =>
-                Array.from({ length: l.qty }, (_, i) => {
-                  const serial = l.kind === 'new' ? newSerials.shift() : undefined
-                  return (
-                    <li key={l.key + i} className="flex items-center gap-3 text-sm">
-                      <div className="grid h-14 w-16 shrink-0 place-items-center rounded-xl bg-card">
-                        <Shoe color={l.color} className="w-14" shadow={false} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium">
-                          สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'มือสอง'}
-                        </p>
-                        {serial && <p className="text-xs text-sub tabular">Product ID {serial}</p>}
-                      </div>
-                      {serial && <FakeQR value={serial} size={44} />}
-                    </li>
-                  )
-                }),
-              )}
+              {o.lines.map((l) => (
+                <li key={l.key} className="flex items-center gap-3 text-sm">
+                  <div className="grid h-14 w-16 shrink-0 place-items-center rounded-xl bg-card">
+                    {l.kind === 'sole' ? <ShoeFlat color={l.color} side="sole" className="w-14" /> : <Shoe color={l.color} className="w-14" shadow={false} />}
+                  </div>
+                  <p className="min-w-0 flex-1 font-medium">
+                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'พื้นอะไหล่'} × {l.qty}
+                  </p>
+                  <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
+                </li>
+              ))}
             </ul>
             <dl className="mt-5 space-y-1 border-t border-line pt-4 text-sm tabular">
               <div className="flex justify-between">
                 <dt className="text-sub">ยอดสินค้า</dt>
                 <dd>{baht(o.subtotal)}</dd>
               </div>
-              {o.discount > 0 && (
-                <div className="flex justify-between text-signal">
-                  <dt>ส่วนลดเทิร์น</dt>
-                  <dd>−{baht(o.discount)}</dd>
-                </div>
-              )}
               <div className="flex justify-between">
                 <dt className="text-sub">ค่าจัดส่ง</dt>
                 <dd>{o.shipping ? baht(o.shipping) : 'ฟรี'}</dd>
@@ -213,7 +176,7 @@ export function OrderDetail() {
               {o.customer.address}
             </p>
           </div>
-          <p className="px-1 text-xs text-sub">เก็บ Product ID ไว้ ใช้เทิร์นคู่นี้ได้ในอนาคต (พิมพ์อยู่ใต้ลิ้นรองเท้าด้วย)</p>
+          <p className="px-1 text-xs text-sub">พื้นสึกเมื่อไร สั่งพื้นอะไหล่ไซซ์เดียวกับรองเท้าได้ที่หน้าพื้นรองเท้า</p>
         </aside>
       </div>
     </Container>
@@ -229,18 +192,20 @@ export function Account() {
     if (user) return
     Promise.all(localIds.map(getOrder)).then((list) => setLocal(list.filter((o): o is Order => !!o)))
   }, [user, localIds])
-  const [units, setUnits] = useState<Unit[]>([])
   const [busy, setBusy] = useState(false)
   useEffect(() => {
     if (!user) return
     listOrders(user.id).then(setOrders)
-    listMyUnits(user.id).then(setUnits)
   }, [user])
+  // every new pair this account bought, newest first: these are the shoes a sole can be ordered for
+  const pairs: { key: string; color: ColorId; size: number; at: string }[] = (orders ?? []).flatMap((o) =>
+    o.lines.filter((l) => l.kind === 'new').flatMap((l) => Array.from({ length: l.qty }, (_, i) => ({ key: `${o.id}-${l.key}-${i}`, color: l.color, size: l.size, at: o.createdAt }))),
+  )
 
   if (!user)
     return (
       <>
-        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ Product ID ของทุกคู่ และเทิร์นได้ในคลิกเดียว" />
+        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ และสั่งพื้นใหม่ให้คู่ที่ใช้อยู่ได้ในคลิกเดียว" />
         <Container className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-line bg-card p-6 sm:p-8">
             <p className="font-semibold">เข้าสู่ระบบ (เดโม)</p>
@@ -283,30 +248,23 @@ export function Account() {
             <h2 className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
               รองเท้าของฉัน
             </h2>
-            <span className="text-sm text-sub">{units.filter((u) => !u.tradedIn).length} คู่เทิร์นได้</span>
+            <span className="text-sm text-sub">{pairs.length} คู่</span>
           </div>
           <div className="no-scrollbar -mx-4 mt-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:grid-cols-4">
-            {units.map((u) => (
-              <div key={u.serial} className="w-64 shrink-0 snap-start rounded-3xl border border-line bg-card p-4 sm:w-auto">
+            {pairs.map((u) => (
+              <div key={u.key} className="w-64 shrink-0 snap-start rounded-3xl border border-line bg-card p-4 sm:w-auto">
                 <div className="grid aspect-[4/3] place-items-center rounded-2xl bg-stone">
                   <Shoe color={u.color} wear={8} className="w-[85%]" shadow={false} />
                 </div>
-                <div className="mt-3 flex items-start justify-between gap-2">
-                  <div className="text-sm">
-                    <p className="font-semibold">
-                      สี{colorInfo(u.color).nameTh} · EU {u.size}
-                    </p>
-                    <p className="text-xs text-sub tabular">{u.serial}</p>
-                  </div>
-                  <FakeQR value={u.serial} size={40} />
+                <div className="mt-3 text-sm">
+                  <p className="font-semibold">
+                    สี{colorInfo(u.color).nameTh} · EU {u.size}
+                  </p>
+                  <p className="text-xs text-sub">ซื้อเมื่อ {new Date(u.at).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</p>
                 </div>
-                {u.tradedIn ? (
-                  <p className="mt-3 rounded-full bg-stone py-2 text-center text-xs text-sub">เทิร์นแล้ว · ได้ชีวิตใหม่</p>
-                ) : (
-                  <Link to={`/trade-in?serial=${u.serial}`} className="mt-3 block rounded-full border border-ink py-2 text-center text-xs font-semibold transition hover:bg-ink hover:text-paper">
-                    เท้าโตแล้ว? เทิร์นคู่นี้
-                  </Link>
-                )}
+                <Link to={`/soles?color=${u.color}&size=${u.size}#buy`} className="mt-3 block rounded-full border border-ink py-2 text-center text-xs font-semibold transition hover:bg-ink hover:text-paper">
+                  พื้นสึกแล้ว? สั่งพื้นใหม่
+                </Link>
               </div>
             ))}
           </div>
@@ -354,8 +312,8 @@ function OrderList({ orders }: { orders: Order[] | null }) {
             <Link to={`/order/${o.id}`} className="flex flex-wrap items-center gap-x-6 gap-y-1 py-4 transition hover:bg-stone/60 sm:px-3">
               <span className="font-semibold tabular">{o.id}</span>
               <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
-              <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} คู่</span>
-              {o.tradeIns.length > 0 && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">เทิร์น</span>}
+              <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} ชิ้น</span>
+              {o.lines.some((l) => l.kind === 'sole') && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">พื้นอะไหล่</span>}
               <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
               <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
             </Link>

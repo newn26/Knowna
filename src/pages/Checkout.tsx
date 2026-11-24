@@ -23,7 +23,6 @@ function Choice({ on, onClick, icon: Icon, title, sub }: { on: boolean; onClick:
 
 export default function Checkout() {
   const cart = useStore((s) => s.cart)
-  const tradeIns = useStore((s) => s.tradeIns)
   const user = useStore((s) => s.user)
   const navigate = useNavigate()
   // every field starts empty; placeholders are only faint hints
@@ -45,7 +44,7 @@ export default function Checkout() {
       </>
     )
 
-  const t = totals(cart, tradeIns, fulfilment)
+  const t = totals(cart, fulfilment)
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, [k]: e.target.value })
 
   const submit = async (e: React.FormEvent) => {
@@ -70,7 +69,6 @@ export default function Checkout() {
         userId: user?.id ?? null,
         customer: { name: form.name, phone: form.phone, email: form.email, address: fulfilment === 'pickup' ? store : formatAddress(form) },
         lines: cart,
-        tradeIns,
         fulfilment,
         payment,
       })
@@ -103,8 +101,8 @@ export default function Checkout() {
             <section>
               <h2 className="font-semibold">2 · รับสินค้า</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <Choice on={fulfilment === 'delivery'} onClick={() => setFulfilment('delivery')} icon={Truck} title="จัดส่งถึงบ้าน" sub={`฿50 · ฟรีเมื่อครบ ฿${FREE_SHIPPING_FROM.toLocaleString()}${tradeIns.length ? ' · ไรเดอร์รับคู่เก่ากลับ' : ''}`} />
-                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub={`ฟรี · ลองไซซ์ได้${tradeIns.length ? ' · นำคู่เก่ามาด้วย' : ''}`} />
+                <Choice on={fulfilment === 'delivery'} onClick={() => setFulfilment('delivery')} icon={Truck} title="จัดส่งถึงบ้าน" sub={`฿50 · ฟรีเมื่อครบ ฿${FREE_SHIPPING_FROM.toLocaleString()}`} />
+                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub="ฟรี · ลองไซซ์ได้ · ให้พนักงานช่วยเปลี่ยนพื้นได้" />
               </div>
               <div className="mt-4">
                 {fulfilment === 'delivery' ? (
@@ -163,13 +161,13 @@ export default function Checkout() {
               {cart.map((l) => (
                 <li key={l.key} className="flex justify-between gap-3 py-3">
                   <span>
-                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'มือสอง'} × {l.qty}
+                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'พื้นอะไหล่'} × {l.qty}
                   </span>
                   <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
                 </li>
               ))}
             </ul>
-            <Summary lines={cart} tradeIns={tradeIns} shipping={t.shipping}>
+            <Summary lines={cart} shipping={t.shipping}>
               {apiError && (
                 <p className="mt-4 rounded-xl bg-bad/10 p-3 text-sm text-bad" role="alert">
                   {apiError}

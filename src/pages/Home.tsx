@@ -1,12 +1,12 @@
-import { ArrowRight, BadgeCheck, Check, Recycle, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Layers } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
-import { ConditionBar, Container, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
-import { COLORS, GRADES, PRODUCT, SIZES } from '../lib/catalog'
-import { PHOTOS, USED, WORN } from '../lib/photos'
-import { baht, preownedPrice } from '../lib/pricing'
-import { CHECKLIST, gradeFor, rateFor } from '../lib/tradein'
+import { ShoeFlat } from '../components/Shoe'
+import { DovetailSection, SoleSwapDemo } from '../components/SoleRail'
+import { Container, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
+import { COLORS, GRADES, PRODUCT, SIZES, SOLE } from '../lib/catalog'
+import { PHOTOS, USED } from '../lib/photos'
+import { baht } from '../lib/pricing'
 import type { ColorId } from '../lib/types'
 
 const display = { fontStretch: '78%' } as const
@@ -21,33 +21,33 @@ function Hero() {
           <div className="relative z-10 order-1">
             <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-xs font-medium">
               <span className="h-1.5 w-1.5 rounded-full bg-signal" />
-              เอาคู่เก่ามาเทิร์น ลดคู่ใหม่ทันทีในบิลเดียว
+              พื้นถอดเปลี่ยนได้ · รางสไลด์ + ล็อกท้าย
             </p>
             <h1 className="mt-6 font-display text-[clamp(3.2rem,11vw,8.5rem)] font-black uppercase leading-[0.84] tracking-tightest [word-spacing:0.14em]" style={display}>
               <span className="block animate-rise [animation-delay:80ms]">Step up.</span>
               <span className="block animate-rise [animation-delay:180ms]">
-                <span className="text-sub/70">Pass it</span> on<span className="text-signal">.</span>
+                <span className="text-sub/70">Swap</span> it<span className="text-signal">.</span>
               </span>
             </h1>
           </div>
           <div className="order-3">
             <p className="mt-2 max-w-md animate-rise text-lg text-sub [animation-delay:160ms] lg:mt-6">
-              รองเท้าผ้าใบนักเรียนชาย ป.1–ป.6 พอเท้าลูกโต เอาคู่เดิมมาเทิร์นรับส่วนลด <b className="text-ink">สูงสุด 15%</b> แล้วคู่นั้นจะถูกซัก ตรวจ และส่งต่อให้รุ่นน้อง
+              รองเท้าผ้าใบนักเรียนชาย ป.1–ป.6 ที่พื้นถอดเปลี่ยนได้ ดอกยางสึกเมื่อไร ซื้อแค่พื้นใหม่ <b className="text-ink">{baht(SOLE.price)}</b> สไลด์เข้าเองที่บ้าน ไม่ต้องทิ้งทั้งคู่
             </p>
             <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:240ms]">
               <LinkButton to="/shop" size="lg">
                 ซื้อคู่ใหม่ <ArrowRight size={18} />
               </LinkButton>
-              <LinkButton to="/trade-in" size="lg" variant="outline">
-                เทิร์นคู่เก่า
+              <LinkButton to="/soles" size="lg" variant="outline">
+                พื้นรองเท้า
               </LinkButton>
             </div>
             <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
               {(
                 [
                   [PRODUCT.price, baht, 'คู่ใหม่'],
-                  [15, (n: number) => `${n}%`, 'ส่วนลดเทิร์นสูงสุด'],
-                  [preownedPrice(PRODUCT.price, 'B'), (n: number) => `${baht(n)}+`, 'มือสองเริ่มต้น'],
+                  [SOLE.price, baht, 'พื้นใหม่ทั้งชุด'],
+                  [3, (n: number) => `${n} ขั้น`, 'เปลี่ยนพื้นเองที่บ้าน'],
                 ] as const
               ).map(([v, f, l]) => (
                 <div key={l}>
@@ -90,7 +90,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['คู่ใหม่', 'มือสอง', 'เทิร์นคู่เก่า', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ตรวจทุกคู่']
+  const words = ['คู่ใหม่', 'พื้นถอดเปลี่ยนได้', 'รางสไลด์ + ล็อกท้าย', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', `พื้นใหม่ ${baht(SOLE.price)}`]
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
@@ -167,25 +167,25 @@ function TwoStores() {
               <br />
               กล่องใหม่
             </h3>
-            <p className="mt-3 max-w-xs text-paper/70">ทุกคู่มี Product ID และ QR ใต้ลิ้น เก็บไว้ ใช้เทิร์นได้วันที่เท้าโต</p>
+            <p className="mt-3 max-w-xs text-paper/70">ผ้าใบ หัวยางหุ้มปลายเท้า มาพร้อมพื้นหนึ่งชุดในราง</p>
           </div>
           <img src={PHOTOS.black.side.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink">
             {baht(PRODUCT.price)} · ช้อปเลย <ArrowRight size={16} />
           </span>
         </Link>
-        <Link to="/preowned" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl border border-line bg-card p-8 sm:p-10">
+        <Link to="/soles" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl border border-line bg-card p-8 sm:p-10">
           <div>
             <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
-              มือสอง
+              พื้นใหม่
               <br />
-              ที่ไม่มือสอง
+              คู่เดิม
             </h3>
-            <p className="mt-3 max-w-xs text-sub">ทุกคู่ผ่านการตรวจ 5 จุด ซัก ฆ่าเชื้อ และตรวจซ้ำ บอกสภาพเป็นเปอร์เซ็นต์ พร้อมจุดที่มีรอยใช้งาน</p>
+            <p className="mt-3 max-w-xs text-sub">ดอกยางสึกแต่ผ้าใบยังดี? ซื้อแค่พื้นอะไหล่ กดสลัก ดึงออก สไลด์พื้นใหม่เข้า จบ</p>
           </div>
-          <img src={USED.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
+          <ShoeFlat color="brown" side="sole" className="absolute -bottom-6 -right-16 w-[88%] -rotate-6 transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-3" />
           <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
-            เริ่ม {baht(preownedPrice(PRODUCT.price, 'B'))} · ดูทั้งหมด <ArrowRight size={16} />
+            {baht(SOLE.price)} · ดูวิธีเปลี่ยน <ArrowRight size={16} />
           </span>
         </Link>
       </Container>
@@ -193,18 +193,11 @@ function TwoStores() {
   )
 }
 
-const FLOW = [
-  { icon: Sparkles, t: 'เลือกคู่ใหม่', d: 'เลือกไซซ์ แล้วกด “เทิร์นคู่เก่า”' },
-  { icon: ScanLine, t: 'ยืนยันว่าซื้อจากเรา', d: 'ประวัติการสั่งซื้อ, Product ID หรือสแกน QR ใต้ลิ้น' },
-  { icon: ShieldCheck, t: 'ประเมินสภาพ', d: 'ตอบเช็กลิสต์ 5 จุด + แนบรูป ระบบคำนวณ % ทันที' },
-  { icon: BadgeCheck, t: 'หักส่วนลดในบิลนี้', d: 'ไม่ต้องรอ ไม่มีคูปอง ไรเดอร์รับคู่เก่าตอนส่งคู่ใหม่' },
-]
-
 const CHAPTERS = [
-  { id: 'old', label: 'คู่เดิม', h: 'เท้าโต คู่เดิมคับแล้ว', d: 'ใส่มาทั้งปี ยังดีอยู่ แค่ไม่พอสำหรับเทอมหน้า อย่าเพิ่งทิ้ง' },
-  { id: 'check', label: 'ตรวจ', h: 'ตรวจ 5 จุด รู้ผลทันที', d: 'สภาพ 75% ขึ้นไปรับเทิร์น ต่ำกว่านั้นส่งคืนเจ้าของ' },
-  { id: 'discount', label: 'ส่วนลด', h: 'ลดคู่ใหม่ทันที', d: '90–100% ลด 15% · 75–89% ลด 10% หักในบิลเดียวกัน ไม่มีคูปอง' },
-  { id: 'next', label: 'ส่งต่อ', h: 'ส่งต่อให้รุ่นน้อง', d: 'คู่เก่าถูกซัก อบโอโซน ตรวจซ้ำ แล้วขึ้นร้านมือสองในราคาเกือบครึ่ง' },
+  { id: 'worn', label: 'พื้นสึก', h: 'ผ้ายังดี แต่พื้นเรียบแล้ว', d: 'ใส่วิ่งเล่นมาทั้งเทอม ดอกยางใต้ส้นกับปลายเท้าหายก่อนผ้าใบจะขาด อย่าเพิ่งทิ้ง' },
+  { id: 'unlock', label: 'ปลดล็อก', h: 'กดสลักที่ส้น', d: 'กดปุ่มสลักด้านหลังส้นค้างไว้ พื้นจะหลุดจากตัวล็อก' },
+  { id: 'swap', label: 'สไลด์', h: 'ดึงออก สไลด์เข้า', d: 'ดึงพื้นเก่าออกทางส้น แล้วสไลด์พื้นใหม่เข้าจากส้นไปหาปลายเท้า' },
+  { id: 'done', label: 'คลิก', h: 'คลิก แล้วใส่ต่อ', d: 'ได้ยินเสียงคลิกแปลว่าล็อกแล้ว รองเท้าคู่เดิม พื้นใหม่ พร้อมไปโรงเรียน' },
 ] as const
 
 // The shoe's pose along the scroll (t = 0…1): x/y in vw/vh, scale, tilt (rz) and spin (ry) in degrees.
@@ -227,7 +220,7 @@ function poseAt(p: number, sideways: number) {
 }
 
 /** Full-screen, scroll-scrubbed: the pair spins and travels while four short chapters swap beside it. */
-function TradeInStory() {
+function SoleStory() {
   const ref = useRef<HTMLElement>(null)
   const shoe = useRef<HTMLDivElement>(null)
   const [chapter, setChapter] = useState(0)
@@ -256,12 +249,12 @@ function TradeInStory() {
   const fade = (on: boolean) =>
     `transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${on ? 'opacity-100 translate-y-0 blur-0' : 'pointer-events-none opacity-0 translate-y-4 blur-sm'}`
   return (
-    <section ref={ref} aria-label="คู่เก่าไปไหนต่อ" className="relative bg-stone" style={{ height: `${CHAPTERS.length * 90}vh` }}>
+    <section ref={ref} aria-label="เปลี่ยนพื้นยังไง" className="relative bg-stone" style={{ height: `${CHAPTERS.length * 90}vh` }}>
       <div className="sticky top-16 h-[calc(100dvh-4rem)] overflow-hidden [perspective:1600px]">
         <div className="absolute inset-0 grid place-items-center" aria-hidden>
           <div ref={shoe} className="relative w-[120vw] max-w-[1400px] will-change-transform sm:w-[84vw]">
             <img src={USED.src} alt="" className="w-full drop-shadow-[0_30px_30px_rgba(0,0,0,.2)]" />
-            <img src={PHOTOS.brown.side.src} alt="" className={`absolute inset-0 w-full transition-opacity duration-1000 ${at === 'next' ? 'opacity-100' : 'opacity-0'}`} />
+            <img src={PHOTOS.brown.side.src} alt="" className={`absolute inset-0 w-full transition-opacity duration-1000 ${at === 'done' ? 'opacity-100' : 'opacity-0'}`} />
           </div>
         </div>
 
@@ -287,20 +280,19 @@ function TradeInStory() {
               </div>
             ))}
             <div className="mt-5 flex min-h-12 flex-wrap items-center gap-2 [grid-area:2/1]">
-              {at === 'check' &&
-                CHECKLIST.map((c, i) => (
-                  <span key={c.id} className="flex animate-rise items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-medium shadow-sm" style={{ animationDelay: `${i * 70}ms` }}>
-                    <Check size={14} className="text-ok" /> {c.label}
-                  </span>
-                ))}
-              {at === 'discount' && (
+              {at === 'unlock' && (
+                <span className="flex animate-rise items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-medium shadow-sm">
+                  <Check size={14} className="text-ok" /> ไม่ต้องใช้เครื่องมือ
+                </span>
+              )}
+              {at === 'swap' && (
                 <p className="animate-rise font-display text-3xl font-black tabular sm:text-4xl" style={display}>
-                  <span className="text-sub line-through decoration-2">{baht(PRODUCT.price)}</span> <span className="text-signal">{baht(PRODUCT.price - Math.round(PRODUCT.price * 0.15))}</span>
+                  <span className="text-sub line-through decoration-2">{baht(PRODUCT.price)}</span> <span className="text-signal">{baht(SOLE.price)}</span>
                 </p>
               )}
-              {at === 'next' && (
-                <Link to="/preowned" className="inline-flex animate-rise items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
-                  มือสองเริ่ม {baht(preownedPrice(PRODUCT.price, 'B'))} <ArrowRight size={16} />
+              {at === 'done' && (
+                <Link to="/soles#buy" className="inline-flex animate-rise items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
+                  สั่งพื้นใหม่ {baht(SOLE.price)} <ArrowRight size={16} />
                 </Link>
               )}
             </div>
@@ -311,103 +303,36 @@ function TradeInStory() {
   )
 }
 
-function TradeInSection() {
-  const [pct, setPct] = useState(92)
-  const rate = rateFor(pct)
-  const grade = gradeFor(pct)
+function HowItLocks() {
   return (
-    <section id="trade-in" className="bg-stone py-20 sm:py-28">
+    <section id="how-it-locks" className="scroll-mt-16 bg-stone py-20 sm:py-28">
       <Container>
         <div className="reveal max-w-3xl">
           <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.92] tracking-tight sm:text-7xl" style={display}>
-            เท้าโต ไม่ต้องทิ้ง<span className="text-signal">.</span>
+            รางสไลด์ + ล็อกท้าย<span className="text-signal">.</span>
           </h2>
-          <p className="mt-4 text-lg text-sub">รองเท้าที่ซื้อจาก KNOWNA สภาพ 75% ขึ้นไป เปลี่ยนเป็นส่วนลดคู่ใหม่ได้ทันที ในรายการสั่งซื้อเดียวกัน</p>
+          <p className="mt-4 text-lg text-sub">ใต้รองเท้ามีรางรูปหางเหยี่ยว (dovetail) แบบลิ้นชักหรือรางกล้อง พื้นสไลด์เข้าจากส้นไปหาปลายเท้า แล้วมีสลักกดล็อกที่ส้น</p>
         </div>
-        <ol className="mt-12 grid gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          {FLOW.map(({ icon: Icon, t, d }, i) => (
-            <li key={t} className="reveal group bg-card p-6 transition hover:bg-paper" style={{ transitionDelay: `${i * 70}ms` }}>
-              <div className="flex items-center justify-between">
-                <span className="font-display text-5xl font-black text-line transition group-hover:text-signal" style={display}>
-                  0{i + 1}
-                </span>
-                <Icon size={22} className="text-sub" />
-              </div>
-              <p className="mt-6 font-semibold">{t}</p>
-              <p className="mt-1 text-sm text-sub">{d}</p>
-            </li>
-          ))}
-        </ol>
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <div className="reveal mt-12">
+          <SoleSwapDemo />
+        </div>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
           <div className="reveal rounded-3xl bg-card p-6 sm:p-8">
-            <div className="flex items-center justify-between">
-              <p className="font-semibold">ลองคำนวณส่วนลด</p>
-              <span className="text-sm text-sub">ลากเพื่อเปลี่ยนสภาพรองเท้า</span>
-            </div>
-            <div className="mt-8 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-sm text-sub">สภาพคู่เก่า</p>
-                <p className="font-display text-7xl font-black tabular leading-none" style={display}>
-                  {pct}%
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-sub">{rate ? `เกรด ${grade} · ลด ${rate * 100}%` : 'ต่ำกว่าเกณฑ์'}</p>
-                <p className={`font-display text-4xl font-black tabular transition-colors ${rate ? 'text-signal' : 'text-sub'}`} style={display}>
-                  {rate ? (
-                    <>
-                      −<Num value={Math.round(PRODUCT.price * rate)} format={baht} />
-                    </>
-                  ) : (
-                    'ไม่รับเทิร์น'
-                  )}
-                </p>
-              </div>
-            </div>
-            <input
-              type="range"
-              min={50}
-              max={100}
-              value={pct}
-              onChange={(e) => setPct(+e.target.value)}
-              className="mt-8 h-8 w-full accent-[rgb(var(--ink))]"
-              aria-label="สภาพรองเท้า (%)"
-            />
-            <div className="mt-2">
-              <ConditionBar pct={pct} />
-            </div>
-            <div className="mt-2 flex justify-between text-xs text-sub tabular">
-              <span>50%</span>
-              <span className="text-signal">75% เกณฑ์ขั้นต่ำ</span>
-              <span>100%</span>
-            </div>
-            <p className="mt-6 text-sm">
-              คู่ใหม่ {baht(PRODUCT.price)} → จ่ายจริง <b>
-                <Num value={PRODUCT.price - Math.round(PRODUCT.price * rate)} format={baht} />
-              </b>
-            </p>
+            <DovetailSection className="w-full" />
           </div>
           <div className="reveal grid gap-3 text-sm">
             {[
-              ['90–100%', 'ส่วนลด 15%', 'เกรด A'],
-              ['75–89%', 'ส่วนลด 10%', 'เกรด B'],
-              ['ต่ำกว่า 75%', 'ไม่รับเทิร์น', 'ส่งคืนเจ้าของ'],
-            ].map(([r, d, g], i) => (
-              <div key={r} className={`flex items-center justify-between gap-4 rounded-2xl p-5 ${i === 2 ? 'border border-dashed border-line text-sub' : 'bg-card'}`}>
-                {i === 2 && <img src={WORN.src} alt={WORN.alt} className="w-28 shrink-0" />}
-                <div className="mr-auto">
-                  <p className="font-display text-2xl font-black tabular" style={display}>
-                    {r}
-                  </p>
-                  <p className="text-xs text-sub">{g}</p>
-                </div>
-                <p className={`font-semibold ${i < 2 ? 'text-signal' : ''}`}>{d}</p>
+              ['ยิ่งเหยียบ ยิ่งแน่น', 'ลิ้นของพื้นกว้างด้านในแคบที่ปากราง แรงเหยียบดันพื้นเข้ารางให้แนบขึ้น พื้นจึงหลุดลงไม่ได้'],
+              ['ออกได้ทางเดียว', 'พื้นไหลออกได้ทางส้นเท่านั้น และมีสลักล็อกกั้นไว้ วิ่งเล่นแล้วพื้นไม่เลื่อน'],
+              ['ต้องดูแลราง', 'ทรายหรือเศษดินอาจเข้าไปติดในราง ถอดพื้นเคาะทุกสัปดาห์ หรือล้างด้วยน้ำเปล่า'],
+            ].map(([h, d], i) => (
+              <div key={h} className={`rounded-2xl p-5 ${i === 2 ? 'border border-dashed border-line' : 'bg-card'}`}>
+                <p className="font-semibold">{h}</p>
+                <p className="mt-1 text-sub">{d}</p>
               </div>
             ))}
-            <p className="px-1 text-xs text-sub">ไม่แลกเป็นเงินสด · ไม่มีคูปองหรือวันหมดอายุ · ใช้ได้กับการซื้อคู่ใหม่ในบิลเดียวกันเท่านั้น</p>
-            <LinkButton to="/trade-in" variant="signal" className="mt-1">
-              เริ่มเทิร์นคู่เก่า <ArrowRight size={16} />
+            <LinkButton to="/soles" variant="signal" className="mt-1">
+              ดูวิธีเปลี่ยนพื้นและสั่งพื้นใหม่ <ArrowRight size={16} />
             </LinkButton>
           </div>
         </div>
@@ -463,22 +388,22 @@ function SizeTeaser() {
   )
 }
 
-const LOOP = ['รับคู่เก่า', 'ตรวจ 5 จุด', 'ซักและฆ่าเชื้อ', 'ตรวจซ้ำ', 'ขึ้นร้านมือสอง']
+const LOOP = ['ซื้อคู่ใหม่', 'ใส่จนพื้นสึก', 'กดสลัก ดึงพื้นออก', 'สไลด์พื้นใหม่เข้า', 'ใส่ต่อจนเท้าโต']
 
-function SecondLife() {
+function OnePair() {
   return (
-    <section id="second-life" className="fixed-tone overflow-hidden bg-ink py-20 text-paper sm:py-28">
+    <section id="one-pair" className="fixed-tone overflow-hidden bg-ink py-20 text-paper sm:py-28">
       <Container>
         <div className="reveal grid gap-10 lg:grid-cols-2">
           <div>
             <h2 className="mt-0 font-display text-5xl font-black uppercase leading-[0.88] tracking-tight sm:text-7xl" style={display}>
-              หนึ่งคู่
+              ผ้าคู่เดิม
               <br />
-              <span className="text-paper/40">สองเจ้าของ</span>
+              <span className="text-paper/40">พื้นใหม่ได้</span>
             </h2>
           </div>
           <p className="self-end text-lg text-paper/70">
-            เด็กโตเร็ว รองเท้าหลายคู่ถูกเก็บเข้าตู้ทั้งที่ยังดีอยู่ เราเลยรับกลับมาล้าง ฆ่าเชื้อ ตรวจซ้ำ แล้วขายต่อในราคาที่ผู้ปกครองเบาใจ ทุกคู่ที่ได้ใช้ต่อ คือขยะที่ไม่ต้องเกิด
+            เด็กวิ่งเล่นทั้งวัน พื้นรองเท้ามักสึกก่อนผ้าใบจะเสีย แต่รองเท้าทั่วไปเปลี่ยนพื้นไม่ได้ เลยต้องซื้อใหม่ทั้งคู่ KNOWNA แยกพื้นออกมา จ่ายแค่ส่วนที่หมดจริง
           </p>
         </div>
         <ol className="mt-14 grid gap-3 sm:grid-cols-5">
@@ -500,16 +425,16 @@ function FinalCTA() {
     <section className="pt-20 sm:pt-28">
       <Container>
         <div className="reveal relative overflow-hidden rounded-[2rem] bg-stone px-6 py-16 text-center sm:px-16 sm:py-24">
-          <Recycle className="mx-auto text-signal" size={28} />
+          <Layers className="mx-auto text-signal" size={28} />
           <h2 className="mx-auto mt-4 max-w-3xl font-display text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-7xl" style={display}>
-            เปิดเทอมนี้ เริ่มคู่ใหม่ ส่งต่อคู่เก่า
+            เปิดเทอมนี้ คู่ใหม่ หรือแค่พื้นใหม่
           </h2>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <LinkButton to="/shop" size="lg">
               ซื้อคู่ใหม่
             </LinkButton>
-            <LinkButton to="/trade-in" size="lg" variant="signal">
-              เทิร์นคู่เก่า
+            <LinkButton to="/soles" size="lg" variant="signal">
+              ซื้อพื้นใหม่ {baht(SOLE.price)}
             </LinkButton>
           </div>
         </div>
@@ -526,10 +451,10 @@ export default function Home() {
       <Marquee />
       <Spotlight />
       <TwoStores />
-      <TradeInStory />
-      <TradeInSection />
+      <SoleStory />
+      <HowItLocks />
       <SizeTeaser />
-      <SecondLife />
+      <OnePair />
       <FinalCTA />
     </div>
   )
