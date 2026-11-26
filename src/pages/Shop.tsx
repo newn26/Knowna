@@ -21,7 +21,7 @@ export default function Shop() {
 
   return (
     <div ref={ref}>
-      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ" />
+      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ" />
       <Container>
         <div className="sticky top-16 z-20 -mx-4 flex flex-wrap items-center gap-2 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
           {COLORS.length > 1 && (['all', ...COLORS.map((c) => c.id)] as const).map((c) => (
@@ -36,12 +36,12 @@ export default function Shop() {
           ))}
           {COLORS.length > 1 && <span className="mx-1 hidden h-5 w-px bg-line sm:block" />}
           <label className="flex items-center gap-2 text-sm">
-            <span className="text-sub">ไซซ์</span>
+            <span className="text-sub">ไซส์</span>
             <select
               value={size ?? ''}
               onChange={(e) => setSize(e.target.value ? +e.target.value : null)}
               className="h-9 rounded-full border border-line bg-card px-3 text-sm"
-              aria-label="กรองตามไซซ์"
+              aria-label="กรองตามไซส์"
             >
               <option value="">ทั้งหมด</option>
               {SIZES.map((s) => (
@@ -52,7 +52,7 @@ export default function Shop() {
             </select>
           </label>
           <Link to="/size" className="ml-auto text-sm text-sub underline-offset-4 hover:text-ink hover:underline">
-            ไม่รู้ไซซ์?
+            ไม่รู้ไซส์?
           </Link>
         </div>
 
@@ -84,7 +84,7 @@ export default function Shop() {
                     <p className="font-semibold tabular">{baht(PRODUCT.price)}</p>
                   </div>
                   <p className="mt-2 text-xs text-sub">
-                    มีของ {left.length}/{SIZES.length} ไซซ์ · {EXCHANGE.short}
+                    มีของ {left.length}/{SIZES.length} ไซส์ · {EXCHANGE.short}
                   </p>
                 </Link>
               </article>
@@ -96,7 +96,7 @@ export default function Shop() {
           <div>
             <p className="text-sm text-paper/60">บริการหลังการขาย</p>
             <p className="mt-1 font-display text-3xl font-black uppercase sm:text-4xl" style={{ fontStretch: '80%' }}>
-              สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้ง
+              สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้ง
             </p>
           </div>
           <span className="inline-flex items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink transition group-hover:gap-3">

@@ -73,7 +73,7 @@ export function SizeGrid({
   highlight?: [number, number] | null
 }) {
   return (
-    <div className="grid grid-cols-4 gap-2 sm:grid-cols-8" role="group" aria-label="ไซซ์">
+    <div className="grid grid-cols-4 gap-2 sm:grid-cols-8" role="group" aria-label="ไซส์">
       {sizes.map((s) => {
         const left = stockOf ? stockOf(s) : 99
         const out = left <= 0

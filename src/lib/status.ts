@@ -18,13 +18,13 @@ export function orderSteps(o: Order): Step[] {
   if (o.fulfilment === 'pickup')
     return [
       { id: 'placed', label: 'รับคำสั่งซื้อ', detail: 'ชำระเงินเรียบร้อย', at: t0 },
-      { id: 'packed', label: 'เตรียมสินค้า', detail: 'หยิบสินค้าตามไซซ์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
+      { id: 'packed', label: 'เตรียมสินค้า', detail: 'หยิบสินค้าตามไซส์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
       { id: 'ready', label: 'พร้อมรับที่สาขา', detail: 'แสดงเลขคำสั่งซื้อที่เคาน์เตอร์', at: t0 + 60 * unit },
       { id: 'done', label: 'รับสินค้าแล้ว', detail: 'ขอบคุณที่อุดหนุน', at: t0 + 120 * unit },
     ]
   return [
     { id: 'placed', label: 'รับคำสั่งซื้อ', detail: 'ชำระเงินเรียบร้อย', at: t0 },
-    { id: 'packed', label: 'แพ็กสินค้า', detail: 'หยิบสินค้าตามไซซ์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
+    { id: 'packed', label: 'แพ็กสินค้า', detail: 'หยิบสินค้าตามไซส์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
     { id: 'shipped', label: 'กำลังจัดส่ง', detail: 'ไรเดอร์กำลังไปหาคุณ', at: t0 + 60 * unit },
     {
       id: 'done',
@@ -42,9 +42,9 @@ export function exchangeSteps(o: Order): Step[] {
   const t0 = new Date(x.requestedAt).getTime()
   const unit = x.timeScale === 'demo' ? SEC : DAY / 30
   return [
-    { id: 'requested', label: 'รับคำขอเปลี่ยนไซซ์', detail: `EU ${x.fromSize} → EU ${x.toSize} · ใช้สิทธิ์ฟรี 1 ครั้งของคำสั่งซื้อนี้`, at: t0 },
+    { id: 'requested', label: 'รับคำขอเปลี่ยนไซส์', detail: `EU ${x.fromSize} → EU ${x.toSize} · ใช้สิทธิ์ฟรี 1 ครั้งของคำสั่งซื้อนี้`, at: t0 },
     { id: 'shipped', label: 'ส่งคู่ใหม่แล้ว', detail: 'แบรนด์ออกค่าส่งคู่ใหม่ให้', at: t0 + 30 * unit },
-    { id: 'done', label: 'คู่ใหม่ส่งถึงแล้ว', detail: `ไซซ์ใหม่ EU ${x.toSize}`, at: t0 + 60 * unit },
+    { id: 'done', label: 'คู่ใหม่ส่งถึงแล้ว', detail: `ไซส์ใหม่ EU ${x.toSize}`, at: t0 + 60 * unit },
   ]
 }
 

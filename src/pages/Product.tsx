@@ -67,11 +67,11 @@ function Accordion({ title, children, open = false }: { title: string; children:
 function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () => void }) {
   const ref = useDialog<HTMLDivElement>(onClose)
   return (
-    <div ref={ref} className="fixed inset-0 z-50 grid place-items-end sm:place-items-center" role="dialog" aria-modal aria-label="ตารางไซซ์">
+    <div ref={ref} className="fixed inset-0 z-50 grid place-items-end sm:place-items-center" role="dialog" aria-modal aria-label="ตารางไซส์">
       <div className="absolute inset-0 animate-fade bg-black/40" onClick={onClose} />
       <div className="relative max-h-[85dvh] w-full max-w-lg animate-rise overflow-y-auto rounded-t-3xl bg-paper p-6 sm:rounded-3xl">
         <div className="mb-4 flex items-center justify-between">
-          <p className="font-display text-xl font-black uppercase">ตารางไซซ์</p>
+          <p className="font-display text-xl font-black uppercase">ตารางไซส์</p>
           <button onClick={onClose} className="grid h-10 w-10 place-items-center rounded-full hover:bg-ink/5" aria-label="ปิด">
             <X size={20} />
           </button>
@@ -116,10 +116,10 @@ export default function Product() {
   const left = stock && size ? stockOf(stock, color, size) : null
 
   const add = (go: 'cart' | 'checkout') => {
-    if (!size) return setError('เลือกไซซ์ก่อน')
-    if (!left) return setError('ไซซ์นี้หมด')
+    if (!size) return setError('เลือกไซส์ก่อน')
+    if (!left) return setError('ไซส์นี้หมด')
     const inCart = cart.find((l) => l.key === `new-${color}-${size}`)?.qty ?? 0
-    if (inCart + qty > left) return setError(`ไซซ์นี้เหลือ ${left} คู่ (อยู่ในตะกร้าแล้ว ${inCart})`)
+    if (inCart + qty > left) return setError(`ไซส์นี้เหลือ ${left} คู่ (อยู่ในตะกร้าแล้ว ${inCart})`)
     actions.addLine({ kind: 'new', color, size, qty, unitPrice: PRODUCT.price })
     if (go === 'checkout') return navigate('/checkout')
     actions.toast(`เพิ่ม ${colorInfo(color).name} EU ${size} ลงตะกร้าแล้ว`)
@@ -157,13 +157,13 @@ export default function Product() {
             <div>
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-sm font-semibold">
-                  ไซซ์ (EU){' '}
+                  ไซส์ (EU){' '}
                   {left !== null && (
                     <span className={`ml-2 font-normal ${left <= 3 ? 'text-signal' : 'text-sub'}`}>{left === 0 ? 'หมด' : left <= 3 ? `เหลือ ${left} คู่` : `มีของ ${left} คู่`}</span>
                   )}
                 </p>
                 <button onClick={() => setGuide(true)} className="inline-flex items-center gap-1.5 text-sm text-sub underline-offset-4 hover:text-ink hover:underline">
-                  <Ruler size={14} /> ตารางไซซ์
+                  <Ruler size={14} /> ตารางไซส์
                 </button>
               </div>
               <SizeGrid
@@ -183,7 +183,7 @@ export default function Product() {
               <RefreshCw size={20} className="mt-0.5 shrink-0 text-signal" />
               <span className="flex-1">
                 <span className="block font-semibold">{EXCHANGE.short}</span>
-                <span className="mt-1 block text-sm text-sub">ได้รับแล้วไซซ์ไม่พอดี ขอเปลี่ยนได้ในหน้าคำสั่งซื้อ 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
+                <span className="mt-1 block text-sm text-sub">ได้รับแล้วไซส์ไม่พอดี ขอเปลี่ยนได้ในหน้าคำสั่งซื้อ 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
               </span>
               <ArrowRight size={18} className="mt-0.5 shrink-0 transition group-hover:translate-x-1" />
             </Link>
@@ -207,7 +207,7 @@ export default function Product() {
                 <Truck size={16} /> ส่งฟรีเมื่อครบ {baht(FREE_SHIPPING_FROM)}
               </li>
               <li className="flex items-center gap-2">
-                <Ruler size={16} /> เปลี่ยนไซซ์ฟรี 1 ครั้ง/บิล
+                <Ruler size={16} /> เปลี่ยนไซส์ฟรี 1 ครั้ง/บิล
               </li>
               <li className="flex items-center gap-2">
                 <ShieldCheck size={16} /> ส่งคู่ใหม่ฟรี
@@ -232,7 +232,7 @@ export default function Product() {
                   ))}
                 </dl>
               </Accordion>
-              <Accordion title="เงื่อนไขเปลี่ยนไซซ์">
+              <Accordion title="เงื่อนไขเปลี่ยนไซส์">
                 <ExchangeRule />
               </Accordion>
             </div>

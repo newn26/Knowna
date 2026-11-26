@@ -10,8 +10,8 @@ import { buttonClass, Container, Num, useDialog } from './ui'
 
 const NAV = [
   { to: '/shop', label: 'ซื้อคู่ใหม่' },
-  { to: '/size', label: 'หาไซซ์' },
-  { to: '/#exchange', label: 'เปลี่ยนไซซ์ฟรี' },
+  { to: '/size', label: 'หาไซส์' },
+  { to: '/#exchange', label: 'เปลี่ยนไซส์ฟรี' },
   { to: '/track', label: 'ติดตามพัสดุ' },
 ]
 
@@ -186,7 +186,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
         {cart.length > 0 && (
           <div className="border-t border-line px-5 py-4">
             <p className="mb-3 rounded-xl bg-stone px-4 py-3 text-sm">
-              ไซซ์ไม่พอดี? <b>เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</b>
+              ไซส์ไม่พอดี? <b>เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</b>
             </p>
             <dl className="space-y-1 text-sm tabular">
               <div className="flex justify-between">
@@ -234,11 +234,11 @@ function Footer() {
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Wordmark className="text-4xl" />
-            <p className="mt-4 max-w-xs text-sm text-paper/60">รองเท้านักเรียนที่มาพร้อมบริการหลังการขาย สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</p>
+            <p className="mt-4 max-w-xs text-sm text-paper/60">รองเท้านักเรียนที่มาพร้อมบริการหลังการขาย สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</p>
           </div>
           {[
-            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/size', 'หาไซซ์']]],
-            ['เปลี่ยนไซซ์', [['/#exchange', 'เงื่อนไขเปลี่ยนไซซ์ฟรี'], ['/account', 'ขอเปลี่ยนไซซ์']]],
+            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/size', 'หาไซส์']]],
+            ['เปลี่ยนไซส์', [['/#exchange', 'เงื่อนไขเปลี่ยนไซส์ฟรี'], ['/account', 'ขอเปลี่ยนไซส์']]],
             ['ช่วยเหลือ', [['/track', 'ติดตามพัสดุ'], ['/account', 'ประวัติการสั่งซื้อ'], ['/size', 'วิธีวัดเท้า']]],
           ].map(([h, links]) => (
             <div key={h as string}>

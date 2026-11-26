@@ -88,13 +88,13 @@ export async function requestExchange(orderId: string, lineKey: string, toSize: 
   const db = load()
   const o = db.orders.find((x) => x.id === orderId)
   if (!o) throw new ApiError('ไม่พบคำสั่งซื้อ')
-  if (o.exchange) throw new ApiError('คำสั่งซื้อนี้ใช้สิทธิ์เปลี่ยนไซซ์ไปแล้ว (ได้ 1 ครั้งต่อคำสั่งซื้อ)')
+  if (o.exchange) throw new ApiError('คำสั่งซื้อนี้ใช้สิทธิ์เปลี่ยนไซส์ไปแล้ว (ได้ 1 ครั้งต่อคำสั่งซื้อ)')
   const steps = orderSteps(o)
-  if (reached(steps) < steps.length) throw new ApiError('ขอเปลี่ยนไซซ์ได้หลังได้รับสินค้าแล้ว')
+  if (reached(steps) < steps.length) throw new ApiError('ขอเปลี่ยนไซส์ได้หลังได้รับสินค้าแล้ว')
   const line = o.lines.find((l) => l.key === lineKey)
   if (!line) throw new ApiError('ไม่พบรองเท้าคู่นี้ในคำสั่งซื้อ')
-  if (toSize === line.size) throw new ApiError('เลือกไซซ์ใหม่ที่ต่างจากเดิม')
-  if ((db.stock[stockKey(line.color, toSize)] ?? 0) < 1) throw new ApiError(`เบอร์ ${toSize} สี${colorInfo(line.color).nameTh} หมด เลือกไซซ์อื่น`)
+  if (toSize === line.size) throw new ApiError('เลือกไซส์ใหม่ที่ต่างจากเดิม')
+  if ((db.stock[stockKey(line.color, toSize)] ?? 0) < 1) throw new ApiError(`เบอร์ ${toSize} สี${colorInfo(line.color).nameTh} หมด เลือกไซส์อื่น`)
 
   db.stock[stockKey(line.color, toSize)] -= 1
   o.exchange = { lineKey, color: line.color, fromSize: line.size, toSize, requestedAt: new Date().toISOString(), timeScale: 'demo' }

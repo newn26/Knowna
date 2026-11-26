@@ -47,11 +47,11 @@ export default function Cart() {
   if (!cart.length)
     return (
       <>
-        <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ ไม่แน่ใจไซซ์ ใช้หน้าหาไซซ์ช่วยเลือกก่อนได้" />
+        <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ ไม่แน่ใจไซส์ ใช้หน้าหาไซส์ช่วยเลือกก่อนได้" />
         <Container className="flex gap-3">
           <LinkButton to="/shop">ซื้อคู่ใหม่</LinkButton>
           <LinkButton to="/size" variant="outline">
-            หาไซซ์
+            หาไซส์
           </LinkButton>
         </Container>
       </>
@@ -90,10 +90,10 @@ export default function Cart() {
           </ul>
           <Link to="/size" className="mt-6 flex items-center justify-between rounded-2xl bg-ink p-5 text-paper transition hover:bg-ink/90">
             <span>
-              <b>ไม่แน่ใจไซซ์?</b>
-              <span className="block text-sm text-paper/70">ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซซ์ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
+              <b>ไม่แน่ใจไซส์?</b>
+              <span className="block text-sm text-paper/70">ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซส์ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
             </span>
-            <span className="font-semibold">หาไซซ์ →</span>
+            <span className="font-semibold">หาไซส์ →</span>
           </Link>
         </div>
         <div className="lg:sticky lg:top-24 lg:self-start">

@@ -66,7 +66,7 @@ export function Track() {
         <div className="rounded-3xl bg-stone p-6 text-sm text-sub sm:p-8">
           <Package className="text-ink" />
           <p className="mt-4 font-semibold text-ink">มีบัญชีอยู่แล้ว?</p>
-          <p className="mt-1">ดูทุกคำสั่งซื้อ และขอเปลี่ยนไซซ์ฟรีได้ในหน้าบัญชี</p>
+          <p className="mt-1">ดูทุกคำสั่งซื้อ และขอเปลี่ยนไซส์ฟรีได้ในหน้าบัญชี</p>
           <Link to="/account" className="mt-4 inline-block font-semibold text-ink underline underline-offset-4">
             ไปหน้าบัญชี →
           </Link>
@@ -197,7 +197,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     <div className="flex items-start gap-3">
       <RefreshCw size={20} className="mt-0.5 shrink-0 text-signal" />
       <div>
-        <h2 className="font-semibold">เปลี่ยนไซซ์ฟรี 1 ครั้ง</h2>
+        <h2 className="font-semibold">เปลี่ยนไซส์ฟรี 1 ครั้ง</h2>
         <ExchangeRule className="mt-1 text-sub" />
       </div>
     </div>
@@ -207,7 +207,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     return (
       <section className="rounded-3xl border border-line bg-card p-6">
         {head}
-        <p className="mt-5 inline-block rounded-full bg-stone px-3 py-1 text-xs font-semibold">ใช้สิทธิ์เปลี่ยนไซซ์ของคำสั่งซื้อนี้แล้ว</p>
+        <p className="mt-5 inline-block rounded-full bg-stone px-3 py-1 text-xs font-semibold">ใช้สิทธิ์เปลี่ยนไซส์ของคำสั่งซื้อนี้แล้ว</p>
         <div className="mt-5">
           <Timeline steps={exchangeSteps(o)} now={now} />
         </div>
@@ -220,7 +220,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     setError('')
     try {
       onChange(await requestExchange(o.id, line.key, toSize))
-      actions.toast('ส่งคำขอเปลี่ยนไซซ์แล้ว')
+      actions.toast('ส่งคำขอเปลี่ยนไซส์แล้ว')
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'ส่งคำขอไม่สำเร็จ ลองอีกครั้ง')
     }
@@ -231,16 +231,16 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     <section className="rounded-3xl border border-line bg-card p-6">
       {head}
       {!delivered ? (
-        <p className="mt-5 text-sm text-sub">ขอเปลี่ยนไซซ์ได้หลังได้รับสินค้าแล้ว</p>
+        <p className="mt-5 text-sm text-sub">ขอเปลี่ยนไซส์ได้หลังได้รับสินค้าแล้ว</p>
       ) : !open ? (
         <Button className="mt-5" onClick={() => setOpen(true)}>
-          ขอเปลี่ยนไซซ์ (ฟรี 1 ครั้ง)
+          ขอเปลี่ยนไซส์ (ฟรี 1 ครั้ง)
         </Button>
       ) : (
         <div className="mt-5 space-y-5">
           {o.lines.length > 1 && (
             <div>
-              <p className="mb-2 text-sm font-semibold">คู่ไหนไซซ์ไม่พอดี</p>
+              <p className="mb-2 text-sm font-semibold">คู่ไหนไซส์ไม่พอดี</p>
               <div className="flex flex-wrap gap-2">
                 {o.lines.map((l) => (
                   <button
@@ -260,7 +260,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
           )}
           {line && (
             <div>
-              <p className="mb-2 text-sm font-semibold">ไซซ์ใหม่ (เดิม EU {line.size})</p>
+              <p className="mb-2 text-sm font-semibold">ไซส์ใหม่ (เดิม EU {line.size})</p>
               <div className="flex flex-wrap gap-2">
                 {SIZES.filter((s) => s !== line.size).map((s) => (
                   <button
@@ -275,7 +275,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
               </div>
             </div>
           )}
-          <p className="text-xs text-sub">ใช้สิทธิ์ได้ 1 ครั้งต่อคำสั่งซื้อ ยืนยันแล้วเปลี่ยนไซซ์อีกไม่ได้</p>
+          <p className="text-xs text-sub">ใช้สิทธิ์ได้ 1 ครั้งต่อคำสั่งซื้อ ยืนยันแล้วเปลี่ยนไซส์อีกไม่ได้</p>
           {error && (
             <p className="text-sm text-bad" role="alert">
               {error}
@@ -283,7 +283,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
           )}
           <div className="flex flex-wrap gap-2">
             <Button onClick={submit} disabled={toSize === null || busy}>
-              {busy ? <Spinner /> : toSize === null ? 'เลือกไซซ์ใหม่ก่อน' : `ยืนยันเปลี่ยนเป็น EU ${toSize}`}
+              {busy ? <Spinner /> : toSize === null ? 'เลือกไซส์ใหม่ก่อน' : `ยืนยันเปลี่ยนเป็น EU ${toSize}`}
             </Button>
             <Button variant="ghost" onClick={() => setOpen(false)} disabled={busy}>
               ยกเลิก
@@ -322,7 +322,7 @@ export function Account() {
   if (!user)
     return (
       <>
-        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ และขอเปลี่ยนไซซ์ฟรี 1 ครั้งต่อคำสั่งซื้อ" />
+        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ และขอเปลี่ยนไซส์ฟรี 1 ครั้งต่อคำสั่งซื้อ" />
         <Container className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-line bg-card p-6 sm:p-8">
             <p className="font-semibold">เข้าสู่ระบบ (เดโม)</p>
@@ -379,11 +379,11 @@ export function Account() {
                   </p>
                   <p className="text-xs text-sub">
                     ซื้อเมื่อ {new Date(u.at).toLocaleDateString('th-TH', { dateStyle: 'medium' })}
-                    {u.exchanged && ' · เปลี่ยนไซซ์แล้ว'}
+                    {u.exchanged && ' · เปลี่ยนไซส์แล้ว'}
                   </p>
                 </div>
                 <Link to={`/order/${u.orderId}`} className="mt-3 block rounded-full border border-ink py-2 text-center text-xs font-semibold transition hover:bg-ink hover:text-paper">
-                  ดูคำสั่งซื้อ / เปลี่ยนไซซ์
+                  ดูคำสั่งซื้อ / เปลี่ยนไซส์
                 </Link>
               </div>
             ))}
@@ -433,7 +433,7 @@ function OrderList({ orders }: { orders: Order[] | null }) {
               <span className="font-semibold tabular">{o.id}</span>
               <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
               <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} ชิ้น</span>
-              {o.exchange && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">เปลี่ยนไซซ์แล้ว</span>}
+              {o.exchange && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">เปลี่ยนไซส์แล้ว</span>}
               <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
               <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
             </Link>

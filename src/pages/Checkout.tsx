@@ -102,7 +102,7 @@ export default function Checkout() {
               <h2 className="font-semibold">2 · รับสินค้า</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Choice on={fulfilment === 'delivery'} onClick={() => setFulfilment('delivery')} icon={Truck} title="จัดส่งถึงบ้าน" sub={`฿50 · ฟรีเมื่อครบ ฿${FREE_SHIPPING_FROM.toLocaleString()}`} />
-                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub="ฟรี · ลองไซซ์ได้" />
+                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub="ฟรี · ลองไซส์ได้" />
               </div>
               <div className="mt-4">
                 {fulfilment === 'delivery' ? (

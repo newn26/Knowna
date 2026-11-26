@@ -22,7 +22,7 @@ function Hero() {
               {EXCHANGE.short} · แบรนด์ออกค่าส่งคู่ใหม่
             </p>
             <h1 className="mt-6 font-display text-[clamp(3rem,9vw,7rem)] font-black leading-[1.12] tracking-tightest" style={display}>
-              <span className="block animate-rise [animation-delay:80ms]">ไซซ์ผิด</span>
+              <span className="block animate-rise [animation-delay:80ms]">ไซส์ผิด</span>
               <span className="block animate-rise [animation-delay:180ms]">
                 <span className="text-sub/70">เปลี่ยน</span>ฟรี<span className="text-signal">.</span>
               </span>
@@ -30,21 +30,21 @@ function Hero() {
           </div>
           <div className="order-3">
             <p className="mt-2 max-w-md animate-rise text-lg text-sub [animation-delay:160ms] lg:mt-6">
-              รองเท้าผ้าใบนักเรียนชายที่มาพร้อมบริการหลังการขาย ถ้าสั่งไซซ์ผิด เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ให้ผู้ปกครองมั่นใจในการซื้อรองเท้าออนไลน์มากขึ้น
+              รองเท้าผ้าใบนักเรียนชายที่มาพร้อมบริการหลังการขาย ถ้าสั่งไซส์ผิด เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ให้ผู้ปกครองมั่นใจในการซื้อรองเท้าออนไลน์มากขึ้น
             </p>
             <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:240ms]">
               <LinkButton to="/shop" size="lg">
                 ซื้อคู่ใหม่ <ArrowRight size={18} />
               </LinkButton>
               <LinkButton to="/#exchange" size="lg" variant="outline">
-                เปลี่ยนไซซ์ยังไง
+                เปลี่ยนไซส์ยังไง
               </LinkButton>
             </div>
             <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
               {(
                 [
                   [PRODUCT.price, baht, 'คู่ใหม่'],
-                  [1, (n: number) => `${n} ครั้ง`, 'เปลี่ยนไซซ์ฟรีต่อบิล'],
+                  [1, (n: number) => `${n} ครั้ง`, 'เปลี่ยนไซส์ฟรีต่อบิล'],
                   [0, baht, 'ค่าส่งคู่ใหม่ แบรนด์ออกให้'],
                 ] as const
               ).map(([v, f, l]) => (
@@ -88,7 +88,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['คู่ใหม่', 'ไซซ์ผิด เปลี่ยนฟรี', '1 ครั้งต่อบิล', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ส่งคู่ใหม่ฟรี']
+  const words = ['คู่ใหม่', 'ไซส์ผิด เปลี่ยนฟรี', '1 ครั้งต่อบิล', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ส่งคู่ใหม่ฟรี']
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
@@ -146,7 +146,7 @@ function Spotlight() {
             </span>
           </p>
           <LinkButton to={`/product?color=${color}`} size="lg" className="mt-6">
-            เลือกไซซ์ <ArrowRight size={18} />
+            เลือกไซส์ <ArrowRight size={18} />
           </LinkButton>
         </div>
       </Container>
@@ -155,8 +155,8 @@ function Spotlight() {
 }
 
 const STEPS = [
-  { h: 'สั่งซื้อตามไซซ์ที่เลือก', d: 'ใช้หน้าหาไซซ์ช่วยเลือกก่อนสั่ง เพื่อให้ได้ไซซ์ที่พอดีตั้งแต่ครั้งแรก' },
-  { h: 'ได้รับแล้วไซซ์ไม่พอดี', d: 'เปิดหน้าคำสั่งซื้อ กด "ขอเปลี่ยนไซซ์" แล้วเลือกไซซ์ใหม่' },
+  { h: 'สั่งซื้อตามไซส์ที่เลือก', d: 'ใช้หน้าหาไซส์ช่วยเลือกก่อนสั่ง เพื่อให้ได้ไซส์ที่พอดีตั้งแต่ครั้งแรก' },
+  { h: 'ได้รับแล้วไซส์ไม่พอดี', d: 'เปิดหน้าคำสั่งซื้อ กด "ขอเปลี่ยนไซส์" แล้วเลือกไซส์ใหม่' },
   { h: 'รับคู่ใหม่ ไม่เสียค่าส่ง', d: 'แบรนด์เป็นผู้ออกค่าจัดส่งรองเท้าคู่ใหม่ให้ ใช้ได้ 1 ครั้งต่อคำสั่งซื้อ' },
 ]
 
@@ -167,7 +167,7 @@ function ExchangeHow() {
       <Container>
         <div className="reveal max-w-3xl">
           <h2 className="mt-0 font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl" style={display}>
-            สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้ง<span className="text-signal">.</span>
+            สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้ง<span className="text-signal">.</span>
           </h2>
           <ExchangeRule className="mt-5 text-lg text-sub" />
         </div>
@@ -183,10 +183,10 @@ function ExchangeHow() {
         </ol>
         <div className="reveal mt-8 flex flex-wrap gap-3">
           <LinkButton to="/size" variant="signal">
-            หาไซซ์ก่อนสั่ง <ArrowRight size={16} />
+            หาไซส์ก่อนสั่ง <ArrowRight size={16} />
           </LinkButton>
           <LinkButton to="/account" variant="outline">
-            ลองขอเปลี่ยนไซซ์กับบัญชีเดโม
+            ลองขอเปลี่ยนไซส์กับบัญชีเดโม
           </LinkButton>
         </div>
       </Container>
@@ -203,7 +203,7 @@ function SizeTeaser() {
           <h2 className="mt-0 font-display text-4xl font-black uppercase leading-none tracking-tight sm:text-6xl" style={display}>
             ลูกเรียนชั้นไหน?
           </h2>
-          <p className="mt-4 max-w-md text-sub">เลือกระดับชั้นเพื่อดูไซซ์ที่นักเรียนส่วนใหญ่ใส่ หรือวัดความยาวเท้าเพื่อได้เบอร์ที่แม่นที่สุด</p>
+          <p className="mt-4 max-w-md text-sub">เลือกระดับชั้นเพื่อดูไซส์ที่นักเรียนส่วนใหญ่ใส่ หรือวัดความยาวเท้าเพื่อได้เบอร์ที่แม่นที่สุด</p>
           <div className="mt-8 flex flex-wrap gap-2">
             {GRADES.map((x) => (
               <button
@@ -248,7 +248,7 @@ function FinalCTA() {
         <div className="reveal relative overflow-hidden rounded-[2rem] bg-stone px-6 py-16 text-center sm:px-16 sm:py-24">
           <RefreshCw className="mx-auto text-signal" size={28} />
           <h2 className="mx-auto mt-4 max-w-3xl font-display text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl" style={display}>
-            ซื้อออนไลน์ได้ ไม่ต้องกลัวไซซ์ผิด
+            ซื้อออนไลน์ได้ ไม่ต้องกลัวไซส์ผิด
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-sub">{EXCHANGE.rule}</p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
@@ -256,7 +256,7 @@ function FinalCTA() {
               ซื้อคู่ใหม่
             </LinkButton>
             <LinkButton to="/size" size="lg" variant="signal">
-              หาไซซ์ที่ใช่
+              หาไซส์ที่ใช่
             </LinkButton>
           </div>
         </div>

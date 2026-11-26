@@ -40,7 +40,7 @@ export default function SizeFinder() {
   const eu = sizeForFoot(cm + (room ? 0.5 : 0))
   return (
     <>
-      <PageHead title="หาไซซ์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้รับแล้วไซซ์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่" />
+      <PageHead title="หาไซส์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่" />
       <Container className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-3xl border border-line bg-card p-6 sm:p-8">
           <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function SizeFinder() {
         </section>
       </Container>
       <Container className="mt-16">
-        <h2 className="font-display text-2xl font-black uppercase">ตารางไซซ์เต็ม</h2>
+        <h2 className="font-display text-2xl font-black uppercase">ตารางไซส์เต็ม</h2>
         <div className="mt-6">
           <SizeTable highlight={eu} />
         </div>

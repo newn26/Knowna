@@ -48,7 +48,7 @@ One canvas model in three colours. Ordered the wrong size? Exchange it free, onc
 
 - **Name:** KNOWNA.
 - **Product name:** KNOWNA Classic.
-- **No English tagline:** the report has none. The hero says "ไซซ์ผิด เปลี่ยนฟรี." from the report's free-exchange promise.
+- **No English tagline:** the report has none. The hero says "ไซส์ผิด เปลี่ยนฟรี." from the report's free-exchange promise.
 - **Removed (2026-11-26):** the swappable sole (slide rail + heel latch, ฿199 sole, `/soles`). The report does not have it.
 
 ## Evidence on Hand

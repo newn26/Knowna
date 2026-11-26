@@ -25,7 +25,7 @@ export default function NotFound() {
             ซื้อคู่ใหม่
           </LinkButton>
           <LinkButton to="/size" size="lg" variant="outline">
-            หาไซซ์
+            หาไซส์
           </LinkButton>
         </div>
       </div>
