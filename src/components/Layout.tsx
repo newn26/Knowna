@@ -6,6 +6,7 @@ import { resetDemo } from '../lib/api'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { Shoe } from './Shoe'
+import { SizeChat } from './SizeChat'
 import { buttonClass, Container, Num, useDialog } from './ui'
 
 const NAV = [
@@ -286,6 +287,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       <Footer />
       <CartDrawer />
+      <SizeChat />
       <Toast />
     </div>
   )

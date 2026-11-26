@@ -1,9 +1,9 @@
-import { Footprints, Ruler } from 'lucide-react'
+import { ArrowLeftRight, Footprints, Ruler } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MeasureStory } from '../components/MeasureStory'
 import { Container, LinkButton, PageHead } from '../components/ui'
-import { GRADES, SIZES, footLengthFor, sizeForFoot } from '../lib/catalog'
+import { BRANDS, GRADES, SIZES, footLengthFor, sizeForFoot, sizeFromBrand } from '../lib/catalog'
 
 const gradesFor = (eu: number) => GRADES.filter((g) => eu >= g.range[0] && eu <= g.range[1]).map((g) => g.label)
 
@@ -33,6 +33,81 @@ export function SizeTable({ highlight }: { highlight?: number | null }) {
   )
 }
 
+/** Method 3 from the report: compare with the brand the child wears now. Offsets are demo samples. */
+function BrandCompare() {
+  const [brand, setBrand] = useState(BRANDS[0].id)
+  const [size, setSize] = useState(34)
+  const eu = sizeFromBrand(brand, size)
+  const select = 'h-12 w-full rounded-xl border border-line bg-card px-4 text-[15px]'
+  return (
+    <section className="rounded-3xl border border-line bg-card p-6 sm:p-8 lg:col-span-2">
+      <div className="flex items-center gap-3">
+        <ArrowLeftRight size={20} />
+        <h2 className="font-semibold">วิธีที่ 3 · เทียบกับแบรนด์ที่ลูกใส่อยู่</h2>
+      </div>
+      <div className="mt-6 grid items-end gap-6 lg:grid-cols-[1fr_1fr_auto]">
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium">ตอนนี้ใส่แบรนด์</span>
+          <select value={brand} onChange={(e) => setBrand(e.target.value)} className={select}>
+            {BRANDS.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium">เบอร์ที่ใส่</span>
+          <select value={size} onChange={(e) => setSize(+e.target.value)} className={`${select} tabular`}>
+            {SIZES.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </label>
+        <div className="flex items-center gap-4">
+          <div>
+            <p className="text-sm text-sub">KNOWNA เบอร์</p>
+            <p key={brand + size} className="animate-rise font-display text-6xl font-black tabular leading-none" style={{ fontStretch: '78%' }}>
+              {eu}
+            </p>
+          </div>
+          <LinkButton to={`/product?size=${eu}`}>ซื้อเบอร์ {eu}</LinkButton>
+        </div>
+      </div>
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
+        <table className="w-full text-sm tabular">
+          <thead className="bg-stone text-left text-xs text-sub">
+            <tr>
+              <th className="px-4 py-3">KNOWNA (EU)</th>
+              {BRANDS.map((b) => (
+                <th key={b.id} className="px-4 py-3">
+                  {b.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {SIZES.filter((s) => s >= 30 && s <= 43).map((s) => (
+              <tr key={s} className={s === eu ? 'bg-ink text-paper' : ''}>
+                <td className="px-4 py-2 font-semibold">{s}</td>
+                {BRANDS.map((b) => {
+                  const theirs = s - b.offset
+                  return (
+                    <td key={b.id} className={`px-4 py-2 ${s === eu ? '' : 'text-sub'}`}>
+                      {SIZES.includes(theirs) ? theirs : '—'}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-xs text-sub">ตัวเลขเทียบไซส์เป็นตัวอย่างสำหรับเว็บสาธิต ยังไม่ได้วัดจากรองเท้าจริงของแต่ละแบรนด์</p>
+    </section>
+  )
+}
+
 export default function SizeFinder() {
   const [params] = useSearchParams()
   const [grade, setGrade] = useState(GRADES.find((g) => g.id === params.get('grade')) ?? GRADES[2])
@@ -41,7 +116,7 @@ export default function SizeFinder() {
   const eu = sizeForFoot(cm + (room ? 0.5 : 0))
   return (
     <>
-      <PageHead title="หาไซส์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่" />
+      <PageHead title="หาไซส์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 3 วิธีนี้ หรือถามไซส์ทางแชต ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่" />
       <MeasureStory />
       <Container id="measure" className="mt-16 grid scroll-mt-24 gap-6 lg:grid-cols-2">
         <section className="rounded-3xl border border-line bg-card p-6 sm:p-8">
@@ -89,7 +164,7 @@ export default function SizeFinder() {
           <input id="cm" type="range" min={17.5} max={29} step={0.1} value={cm} onChange={(e) => setCm(+e.target.value)} className="mt-3 h-8 w-full accent-[rgb(var(--signal))]" />
           <label className="mt-4 flex cursor-pointer items-center gap-3 text-sm">
             <input type="checkbox" checked={room} onChange={(e) => setRoom(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--signal))]" />
-            เผื่อโต +0.5 ซม. (แนะนำสำหรับเด็กประถม)
+            เผื่อโต +0.5 ซม. (แนะนำสำหรับเด็กที่ยังโต)
           </label>
           <div className="mt-6 flex items-center justify-between gap-4 border-t border-paper/15 pt-6">
             <div>
@@ -103,6 +178,7 @@ export default function SizeFinder() {
             </LinkButton>
           </div>
         </section>
+        <BrandCompare />
       </Container>
       <Container className="mt-16">
         <h2 className="font-display text-2xl font-black uppercase">ตารางไซส์เต็ม</h2>

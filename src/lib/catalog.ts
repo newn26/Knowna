@@ -80,7 +80,16 @@ export const BRANDS: { id: string; name: string; offset: number }[] = [
   { id: 'tiger', name: 'Tiger', offset: -1 },
 ]
 
-export const sizeFromBrand = (brandId: string, brandSize: number) => {
+/** Reminders go out before the April–May school-shoe season (report 1.3: 70–80% of yearly sales). */
+export const nextReminder = (now = new Date()) => {
+  const april = new Date(now.getFullYear(), 3, 1)
+  return now < april ? april : new Date(now.getFullYear() + 1, 3, 1)
+}
+
+/** Children grow out of shoes; ask to measure again after 6 months. */
+export const needsRemeasure = (measuredAt: string, now = new Date()) => now.getTime() - new Date(measuredAt).getTime() > 182 * 86400000
+
+export const sizeFromBrand =(brandId: string, brandSize: number) => {
   const b = BRANDS.find((x) => x.id === brandId) ?? BRANDS[0]
   return Math.min(SIZES[SIZES.length - 1], Math.max(SIZES[0], brandSize + b.offset))
 }

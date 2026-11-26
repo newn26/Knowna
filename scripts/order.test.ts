@@ -3,7 +3,8 @@ import assert from 'node:assert/strict'
 import { ApiError, findOrder, getStock, placeOrder, requestExchange, stockOf } from '../src/lib/api'
 import { resetDB } from '../src/lib/db'
 import { totals } from '../src/lib/pricing'
-import { GRADES, PRODUCT, PROVINCES, SIZES, formatAddress, sizeForFoot, sizeFromBrand } from '../src/lib/catalog'
+import { GRADES, PRODUCT, PROVINCES, SIZES, formatAddress, needsRemeasure, nextReminder, sizeForFoot, sizeFromBrand } from '../src/lib/catalog'
+import { replyTo } from '../src/components/SizeChat'
 import type { CartLine } from '../src/lib/types'
 
 let passed = 0
@@ -34,6 +35,21 @@ await test('sizes run EU 28–45 for ป.1–ม.6; brand comparison stays in ra
   assert.equal(sizeForFoot(40), 45)
   assert.equal(sizeFromBrand('goldcity', 45), 45)
   assert.equal(sizeFromBrand('tiger', 28), 28)
+})
+
+await test('size chat: cm, brand + size, grade, and a fallback question', () => {
+  assert.equal(replyTo('เท้ายาว 22.5').size, sizeForFoot(23))
+  assert.equal(replyTo('ใส่นันยาง 36 อยู่').size, 36)
+  assert.equal(replyTo('Gold City 38').size, 39)
+  assert.match(replyTo('ลูกอยู่ ม.2').text, /EU 37–42/)
+  assert.equal(replyTo('สวัสดี').size, undefined)
+})
+
+await test('reminder: next 1 April, and remeasure after 6 months', () => {
+  assert.equal(nextReminder(new Date(2026, 10, 27)).getFullYear(), 2027)
+  assert.equal(nextReminder(new Date(2027, 1, 1)).getMonth(), 3)
+  assert.equal(needsRemeasure('2025-11-10', new Date(2026, 10, 27)), true)
+  assert.equal(needsRemeasure('2026-09-01', new Date(2026, 10, 27)), false)
 })
 
 await test('address: 77 provinces, Bangkok uses แขวง/เขต, others ต./อ./จ.', () => {
