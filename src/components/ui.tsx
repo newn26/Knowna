@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { COLORS, EXCHANGE } from '../lib/catalog'
@@ -184,6 +184,19 @@ export function useReveal<T extends HTMLElement>() {
     return () => io.disconnect()
   })
   return ref
+}
+
+/** Open/close section built on <details>, so it works with the keyboard and without JS. */
+export function Accordion({ title, children, open = false }: { title: string; children: ReactNode; open?: boolean }) {
+  return (
+    <details className="group border-b border-line" open={open}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 font-semibold">
+        {title}
+        <ChevronDown size={18} className="shrink-0 transition group-open:rotate-180" />
+      </summary>
+      <div className="pb-5 text-sm text-sub">{children}</div>
+    </details>
+  )
 }
 
 /** A fact the report (Ecommerce Report.pdf) has not filled in yet. Search PENDING-PDF to fill them later. */

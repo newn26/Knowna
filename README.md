@@ -27,8 +27,9 @@ npm run build    # type-check and build to dist/
 2. **หาไซส์** (`/size`) → three ways to pick a size: by grade, by measuring the foot, or by the brand the child wears now.
 3. **ถามไซส์** (button on every page) → a mock chat that answers with a size from foot length, brand + size, or grade.
 4. **Product** → choose colour and size, buy (stock-checked).
-5. **Checkout** → home delivery (included in the price), PromptPay → order page; demo orders advance every ~30 s.
-6. **Account** (one-click demo login) → every pair bought, the free size exchange on a delivered order,
+5. **Checkout** → home delivery (included in the price) → PromptPay QR for the exact amount (simulated) → order page; demo orders advance every ~30 s.
+6. **คำถามที่พบบ่อย** (`/help`, footer) → price, sizes, payment, delivery and the size exchange, all from the report.
+7. **Account** (one-click demo login) → every pair bought, the free size exchange on a delivered order,
    each child's saved foot size and the pre-term reminder.
 
 Order lookup sample: `KN-250502-0107` + `0812345678`. The footer has a *reset demo data* link.

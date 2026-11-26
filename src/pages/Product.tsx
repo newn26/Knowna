@@ -1,8 +1,8 @@
-import { ArrowRight, ChevronDown, RefreshCw, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
+import { ArrowRight, RefreshCw, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
+import { Accordion, Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
 import { COLORS, EXCHANGE, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
@@ -40,18 +40,6 @@ function Gallery({ color }: { color: ColorId }) {
         ))}
       </div>
     </div>
-  )
-}
-
-function Accordion({ title, children, open = false }: { title: string; children: React.ReactNode; open?: boolean }) {
-  return (
-    <details className="group border-b border-line" open={open}>
-      <summary className="flex cursor-pointer list-none items-center justify-between py-4 font-semibold">
-        {title}
-        <ChevronDown size={18} className="transition group-open:rotate-180" />
-      </summary>
-      <div className="pb-5 text-sm text-sub">{children}</div>
-    </details>
   )
 }
 

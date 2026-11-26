@@ -1,10 +1,11 @@
 import { QrCode, Truck } from 'lucide-react'
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { Button, Container, Field, LinkButton, PageHead, Spinner } from '../components/ui'
+import { Button, Container, Field, LinkButton, PageHead, Spinner, useDialog } from '../components/ui'
 import { ApiError, placeOrder } from '../lib/api'
 import { PROVINCES, colorInfo, formatAddress } from '../lib/catalog'
-import { baht } from '../lib/pricing'
+import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { Summary } from './Cart'
 
@@ -30,6 +31,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [qr, setQr] = useState(false)
 
   if (!cart.length)
     return (
@@ -56,8 +58,13 @@ export default function Checkout() {
     if (!/^\d{5}$/.test(form.zip)) err.zip = 'รหัสไปรษณีย์ 5 หลัก'
     setErrors(err)
     if (Object.keys(err).length) return
-    setBusy(true)
     setApiError('')
+    setQr(true)
+  }
+
+  // the parent confirms the PromptPay transfer; only then is the order created
+  const pay = async () => {
+    setBusy(true)
     try {
       const order = await placeOrder({
         userId: user?.id ?? null,
@@ -71,8 +78,10 @@ export default function Checkout() {
     } catch (x) {
       setApiError(x instanceof ApiError ? x.message : 'สั่งซื้อไม่สำเร็จ ลองใหม่อีกครั้ง')
       setBusy(false)
+      setQr(false)
     }
   }
+  const total = totals(cart).total
 
   return (
     <>
@@ -153,12 +162,70 @@ export default function Checkout() {
                 </p>
               )}
               <Button type="submit" size="lg" className="mt-6 w-full" disabled={busy}>
-                {busy ? <Spinner /> : 'ยืนยันคำสั่งซื้อ'}
+                ยืนยันคำสั่งซื้อ และชำระเงิน
               </Button>
             </Summary>
           </div>
         </form>
       </Container>
+      {qr && <PromptPayDialog amount={total} busy={busy} onPaid={pay} onClose={() => !busy && setQr(false)} />}
     </>
+  )
+}
+
+/** A PromptPay QR for the exact amount. The pattern is a stand-in: a real build gets the QR from Omise. */
+function PromptPayDialog({ amount, busy, onPaid, onClose }: { amount: number; busy: boolean; onPaid: () => void; onClose: () => void }) {
+  const ref = useDialog<HTMLDivElement>(onClose)
+  return createPortal(
+    <div ref={ref} className="fixed inset-0 z-50 grid place-items-center" role="dialog" aria-modal aria-label="สแกนจ่ายด้วยพร้อมเพย์">
+      <div className="absolute inset-0 animate-fade bg-black/50" onClick={onClose} />
+      <div className="relative w-full max-w-sm animate-rise rounded-3xl bg-paper p-7 text-center">
+        <p className="font-semibold">สแกนจ่ายด้วยพร้อมเพย์</p>
+        <p className="mt-1 text-sm text-sub">เปิดแอปธนาคาร สแกน QR แล้วยืนยันยอด</p>
+        <div className="mx-auto mt-5 w-56 rounded-2xl bg-white p-4 shadow-[0_12px_30px_-12px_rgba(0,0,0,.35)]">
+          <FakeQr seed={amount} />
+        </div>
+        <p className="mt-5 text-sm text-sub">ยอดชำระ</p>
+        <p className="font-display text-4xl font-black tabular" style={{ fontStretch: '80%' }}>
+          {baht(amount)}
+        </p>
+        <p className="mt-1 text-xs text-sub">รวมค่าจัดส่งแล้ว · รับชำระผ่าน Omise</p>
+        <Button size="lg" className="mt-6 w-full" onClick={onPaid} disabled={busy}>
+          {busy ? <Spinner /> : 'ชำระเงินแล้ว'}
+        </Button>
+        <Button variant="ghost" className="mt-2 w-full" onClick={onClose} disabled={busy}>
+          ยกเลิก กลับไปแก้ข้อมูล
+        </Button>
+        <p className="mt-3 text-xs text-sub">เว็บสาธิต: QR นี้สแกนจ่ายไม่ได้จริง กด "ชำระเงินแล้ว" เพื่อจำลองการจ่าย</p>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+/** Deterministic QR-looking grid with the three corner finder squares. Not a decodable code. */
+function FakeQr({ seed }: { seed: number }) {
+  const N = 25
+  let s = seed * 9301 + 49297
+  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280)
+  const finder = (x: number, y: number) => {
+    for (const [fx, fy] of [[0, 0], [N - 7, 0], [0, N - 7]]) {
+      const dx = x - fx, dy = y - fy
+      if (dx >= 0 && dx < 7 && dy >= 0 && dy < 7) return dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4) ? 1 : 0
+    }
+    return -1
+  }
+  const cells: [number, number][] = []
+  for (let y = 0; y < N; y++)
+    for (let x = 0; x < N; x++) {
+      const f = finder(x, y)
+      if (f === 1 || (f === -1 && rnd() < 0.48)) cells.push([x, y])
+    }
+  return (
+    <svg viewBox={`0 0 ${N} ${N}`} className="block w-full" shapeRendering="crispEdges" aria-hidden>
+      {cells.map(([x, y]) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill="#111" />
+      ))}
+    </svg>
   )
 }
