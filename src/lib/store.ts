@@ -3,10 +3,21 @@
 import { useSyncExternalStore } from 'react'
 import type { CartLine, User } from './types'
 
+/** A child's saved foot length, so the parent can be reminded before term (report 1.4). */
+export interface Kid {
+  id: string
+  name: string
+  grade: string // GRADES id
+  cm: number
+  measuredAt: string
+}
+
 interface State {
   cart: CartLine[]
   user: User | null
   orders: string[] // ids placed from this browser, so guests also get an order history
+  kids: Kid[]
+  remind: boolean // simulated: no SMS is really sent
   cartOpen: boolean
   toast: { id: number; text: string } | null
 }
@@ -14,7 +25,7 @@ interface State {
 const KEY = 'kw.client.v3'
 
 function read(): State {
-  const base: State = { cart: [], user: null, orders: [], cartOpen: false, toast: null }
+  const base: State = { cart: [], user: null, orders: [], kids: [], remind: true, cartOpen: false, toast: null }
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) return { ...base, ...JSON.parse(raw), cartOpen: false, toast: null }
@@ -30,8 +41,8 @@ const listeners = new Set<() => void>()
 function set(patch: Partial<State>) {
   state = { ...state, ...patch }
   try {
-    const { cart, user, orders } = state
-    localStorage.setItem(KEY, JSON.stringify({ cart, user, orders }))
+    const { cart, user, orders, kids, remind } = state
+    localStorage.setItem(KEY, JSON.stringify({ cart, user, orders, kids, remind }))
   } catch {
     /* ignore */
   }
@@ -78,6 +89,19 @@ export const actions = {
 
   clearCart: () => set({ cart: [] }),
   rememberOrder: (id: string) => set({ orders: [id, ...state.orders.filter((x) => x !== id)] }),
-  login: (user: User) => set({ user }),
+  login: (user: User) =>
+    set({
+      user,
+      // the demo parent has two sons; one was measured long ago so the "measure again" hint shows
+      kids: state.kids.length
+        ? state.kids
+        : [
+            { id: 'k1', name: 'น้องภูมิ', grade: 'm1', cm: 24, measuredAt: '2026-10-01' },
+            { id: 'k2', name: 'น้องต้น', grade: 'p3', cm: 19.5, measuredAt: '2025-11-10' },
+          ],
+    }),
+  saveKid: (kid: Kid) => set({ kids: state.kids.some((k) => k.id === kid.id) ? state.kids.map((k) => (k.id === kid.id ? kid : k)) : [...state.kids, kid] }),
+  removeKid: (id: string) => set({ kids: state.kids.filter((k) => k.id !== id) }),
+  setRemind: (remind: boolean) => set({ remind }),
   logout: () => set({ user: null }),
 }

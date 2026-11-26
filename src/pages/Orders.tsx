@@ -1,10 +1,10 @@
-import { CheckCircle2, LogOut, Package, RefreshCw } from 'lucide-react'
+import { Bell, CheckCircle2, LogOut, Package, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Shoe } from '../components/Shoe'
 import { Button, Container, ExchangeRule, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
 import { ApiError, findOrder, getOrder, listOrders, loginDemo, requestExchange } from '../lib/api'
-import { SIZES, colorInfo } from '../lib/catalog'
+import { GRADES, SIZES, colorInfo, needsRemeasure, nextReminder, sizeForFoot } from '../lib/catalog'
 import { baht } from '../lib/pricing'
 import { exchangeSteps, orderSteps, reached } from '../lib/status'
 import { actions, useStore } from '../lib/store'
@@ -390,6 +390,8 @@ export function Account() {
           </div>
         </section>
 
+        <KidsPanel phone={user.phone} />
+
         <section className="mt-14">
           <h2 className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
             ประวัติการสั่งซื้อ
@@ -401,6 +403,102 @@ export function Account() {
         </Button>
       </Container>
     </>
+  )
+}
+
+/** Saved foot lengths per child and the pre-term reminder from the report (simulated, nothing is sent). */
+function KidsPanel({ phone }: { phone: string }) {
+  const kids = useStore((s) => s.kids)
+  const remind = useStore((s) => s.remind)
+  const [form, setForm] = useState({ name: '', grade: GRADES[0].id, cm: '' })
+  const [error, setError] = useState('')
+  const date = (d: Date | string) => new Date(d).toLocaleDateString('th-TH', { dateStyle: 'long' })
+
+  const add = (e: React.FormEvent) => {
+    e.preventDefault()
+    const cm = Number(form.cm)
+    if (!form.name.trim()) return setError('กรอกชื่อเล่นของลูก')
+    if (!(cm >= 15 && cm <= 32)) return setError('ความยาวเท้า 15–32 ซม.')
+    actions.saveKid({ id: `k${Date.now()}`, name: form.name.trim(), grade: form.grade, cm, measuredAt: new Date().toISOString() })
+    setForm({ name: '', grade: form.grade, cm: '' })
+    setError('')
+  }
+
+  return (
+    <section className="mt-14">
+      <h2 className="font-display text-2xl font-black uppercase" style={{ fontStretch: '80%' }}>
+        ไซส์เท้าลูก
+      </h2>
+      <p className="mt-1 text-sm text-sub">บันทึกไว้ ครั้งหน้าไม่ต้องวัดใหม่ และเราจะเตือนก่อนเปิดเทอม</p>
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-3">
+          {kids.map((k) => {
+            const eu = sizeForFoot(k.cm + 0.5)
+            const old = needsRemeasure(k.measuredAt)
+            return (
+              <div key={k.id} className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-2xl border border-line bg-card p-4">
+                <div className="min-w-[8rem]">
+                  <p className="font-semibold">{k.name}</p>
+                  <p className="text-xs text-sub">
+                    {GRADES.find((g) => g.id === k.grade)?.label} · เท้ายาว {k.cm} ซม.
+                  </p>
+                </div>
+                <p className="font-display text-3xl font-black tabular" style={{ fontStretch: '78%' }}>
+                  EU {eu}
+                </p>
+                <p className={`text-xs ${old ? 'font-semibold text-signal' : 'text-sub'}`}>{old ? `วัดล่าสุด ${date(k.measuredAt)} เกิน 6 เดือนแล้ว ควรวัดใหม่` : `วัดเมื่อ ${date(k.measuredAt)}`}</p>
+                <div className="ml-auto flex gap-2">
+                  <LinkButton to={`/product?size=${eu}`} size="sm">
+                    ซื้อเบอร์ {eu}
+                  </LinkButton>
+                  <Button size="sm" variant="ghost" onClick={() => actions.removeKid(k.id)}>
+                    ลบ
+                  </Button>
+                </div>
+              </div>
+            )
+          })}
+          <form onSubmit={add} noValidate className="grid gap-3 rounded-2xl border border-dashed border-line p-4 sm:grid-cols-[1fr_7rem_7rem_auto] sm:items-end">
+            <Field label="ชื่อเล่นลูก" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="ชื่อเล่น" />
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium">ชั้น</span>
+              <select value={form.grade} onChange={(e) => setForm({ ...form, grade: e.target.value })} className="h-12 w-full rounded-xl border border-line bg-card px-3">
+                {GRADES.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Field label="เท้ายาว (ซม.)" value={form.cm} onChange={(e) => setForm({ ...form, cm: e.target.value.replace(/[^\d.]/g, '') })} inputMode="decimal" placeholder="ซม." />
+            <Button type="submit">เพิ่ม</Button>
+            {error && (
+              <p className="text-sm text-bad sm:col-span-4" role="alert">
+                {error}
+              </p>
+            )}
+          </form>
+        </div>
+        <div className="rounded-3xl bg-ink p-6 text-paper">
+          <div className="flex items-center gap-3">
+            <Bell size={20} />
+            <p className="font-semibold">แจ้งเตือนก่อนเปิดเทอม</p>
+          </div>
+          <label className="mt-5 flex cursor-pointer items-center justify-between gap-4 text-sm">
+            ส่ง SMS ไปที่ {phone}
+            <input type="checkbox" checked={remind} onChange={(e) => actions.setRemind(e.target.checked)} className="h-5 w-5 accent-[rgb(var(--signal))]" />
+          </label>
+          {remind ? (
+            <p className="mt-5 text-sm text-paper/70">
+              ครั้งถัดไป <b className="text-paper">{date(nextReminder())}</b> ก่อนช่วงซื้อรองเท้าเปิดเทอม เมษายน–พฤษภาคม พร้อมไซส์ที่บันทึกไว้ของลูกทุกคน
+            </p>
+          ) : (
+            <p className="mt-5 text-sm text-paper/70">ปิดการแจ้งเตือนอยู่</p>
+          )}
+          <p className="mt-4 text-xs text-paper/50">เว็บสาธิต: ไม่มีการส่ง SMS จริง</p>
+        </div>
+      </div>
+    </section>
   )
 }
 
