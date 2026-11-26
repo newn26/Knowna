@@ -45,6 +45,22 @@ await test('size chat: cm, brand + size, grade, and a fallback question', () => 
   assert.equal(replyTo('สวัสดี').size, undefined)
 })
 
+await test('size chat: tapping through every menu reaches a size or the exchange rule', () => {
+  const menu = replyTo('เมนู').chips!
+  assert.equal(menu.length, 4)
+  for (const topic of menu) {
+    const step = replyTo(topic.text ?? topic.label)
+    assert.ok(step.chips?.length, topic.label)
+    for (const c of step.chips!) {
+      const r = replyTo(c.text ?? c.label)
+      assert.ok(r.size || r.text.includes('EU') || r.text.includes('KNOWNA') || r.chips?.length, `${topic.label} → ${c.label}`)
+      for (const d of r.chips ?? []) assert.ok(!replyTo(d.text ?? d.label).text.startsWith('ยังไม่เข้าใจ'), `${c.label} → ${d.label}`)
+    }
+  }
+  assert.equal(replyTo('Breaker').chips?.[0].text, 'Breaker 30')
+  assert.equal(replyTo('Breaker 30').size, 30)
+})
+
 await test('reminder: next 1 April, and remeasure after 6 months', () => {
   assert.equal(nextReminder(new Date(2026, 10, 27)).getFullYear(), 2027)
   assert.equal(nextReminder(new Date(2027, 1, 1)).getMonth(), 3)

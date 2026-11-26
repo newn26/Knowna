@@ -1,30 +1,56 @@
 import { MessageCircle, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BRANDS, GRADES, sizeForFoot, sizeFromBrand } from '../lib/catalog'
+import { BRANDS, GRADES, SIZES, sizeForFoot, sizeFromBrand } from '../lib/catalog'
 
-type Msg = { from: 'shop' | 'me'; text: string; size?: number }
+/** A tap-to-answer button: `label` is shown, `text` is what gets sent (defaults to the label). */
+type Chip = { label: string; text?: string }
+type Msg = { from: 'shop' | 'me'; text: string; size?: number; chips?: Chip[] }
+
+// Menu topics: replyTo matches these exact texts, so tapping and typing go through the same path.
+const T = { grade: 'เลือกตามชั้นเรียนของลูก', brand: 'เทียบกับแบรนด์ที่ลูกใส่อยู่', measure: 'วัดความยาวเท้าเอง', exchange: 'ไซส์ไม่พอดี เปลี่ยนได้ไหม' }
+const MENU: Chip[] = Object.values(T).map((label) => ({ label }))
+const AGAIN: Chip[] = [{ label: 'ถามเรื่องอื่น', text: 'เมนู' }]
 
 const HELLO: Msg = {
   from: 'shop',
-  text: 'สวัสดีครับ ให้ช่วยเลือกไซส์ไหมครับ บอกได้ 3 แบบ: ความยาวเท้าเป็นเซนติเมตร (เช่น 22.5), แบรนด์กับเบอร์ที่ใส่อยู่ (เช่น นันยาง 36) หรือระดับชั้น (เช่น ม.2)',
+  text: 'สวัสดีครับ ไม่รู้ไซส์ลูกก็ไม่เป็นไร เลือกหัวข้อด้านล่างได้เลย หรือพิมพ์ความยาวเท้า (เช่น 22.5) ก็ได้ครับ',
+  chips: MENU,
 }
 
 /** Auto-reply that reuses the size rules of the size page. A real shop would route this to staff. */
 export function replyTo(text: string): Msg {
+  const shop = (t: string, more: Partial<Msg> = {}): Msg => ({ from: 'shop', text: t, ...more })
+  const said = text.trim()
+  if (said === 'เมนู') return shop('มีอะไรให้ช่วยอีกไหมครับ', { chips: MENU })
+  if (said === T.grade) return shop('ลูกเรียนชั้นไหนครับ', { chips: GRADES.map((g) => ({ label: g.label })) })
+  if (said === T.brand) return shop('ตอนนี้ลูกใส่รองเท้าแบรนด์อะไรครับ', { chips: BRANDS.map((b) => ({ label: b.name })) })
+  if (said === T.measure)
+    return shop('ให้ลูกยืนบนกระดาษ ส้นเท้าชิดผนัง ขีดเส้นที่ปลายนิ้วที่ยาวที่สุด แล้ววัดจากผนังถึงเส้น ได้กี่เซนติเมตรครับ', {
+      chips: Array.from({ length: 11 }, (_, i) => ({ label: `${17 + i} ซม.` })),
+    })
+  if (said === T.exchange) return shop('ได้ครับ ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่ให้ กดขอเปลี่ยนได้ในหน้าคำสั่งซื้อ', { chips: AGAIN })
+
   const n = Number(text.match(/\d+(\.\d+)?/)?.[0])
   const brand = BRANDS.find((b) => text.toLowerCase().includes(b.name.toLowerCase()))
   if (brand && n >= 20 && n <= 50) {
     const eu = sizeFromBrand(brand.id, n)
-    return { from: 'shop', text: `ใส่ ${brand.name} เบอร์ ${n} แนะนำ KNOWNA เบอร์ ${eu} ครับ (ตารางเทียบเป็นตัวอย่างสำหรับเว็บสาธิต)`, size: eu }
+    return shop(`ใส่ ${brand.name} เบอร์ ${n} แนะนำ KNOWNA เบอร์ ${eu} ครับ (ตารางเทียบเป็นตัวอย่างสำหรับเว็บสาธิต)`, { size: eu, chips: AGAIN })
   }
-  const grade = GRADES.find((g) => text.replace(/\s/g, '').includes(g.label))
-  if (grade) return { from: 'shop', text: `นักเรียน ${grade.label} ส่วนใหญ่ใส่ EU ${grade.range[0]}–${grade.range[1]} ครับ ถ้าวัดความยาวเท้าแล้วบอกเป็นเซนติเมตร จะแนะนำได้เบอร์เดียวที่แม่นกว่า` }
+  if (brand)
+    return shop(`ใส่ ${brand.name} เบอร์อะไรอยู่ครับ`, {
+      chips: SIZES.filter((s) => s >= 30 && s <= 44).map((s) => ({ label: String(s), text: `${brand.name} ${s}` })),
+    })
+  const grade = GRADES.find((g) => said.replace(/\s/g, '').includes(g.label))
+  if (grade)
+    return shop(`นักเรียน ${grade.label} ส่วนใหญ่ใส่ EU ${grade.range[0]}–${grade.range[1]} ครับ ถ้าวัดความยาวเท้าได้ จะแนะนำได้เบอร์เดียวที่แม่นกว่า`, {
+      chips: [{ label: T.measure }, ...AGAIN],
+    })
   if (n >= 15 && n <= 32) {
     const eu = sizeForFoot(n + 0.5)
-    return { from: 'shop', text: `เท้ายาว ${n} ซม. เผื่อโตอีก 0.5 ซม. แนะนำเบอร์ ${eu} ครับ ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ`, size: eu }
+    return shop(`เท้ายาว ${n} ซม. เผื่อโตอีก 0.5 ซม. แนะนำเบอร์ ${eu} ครับ ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ`, { size: eu, chips: AGAIN })
   }
-  return { from: 'shop', text: 'ขอข้อมูลเพิ่มนิดนึงครับ: ความยาวเท้า (ซม.), แบรนด์กับเบอร์ที่ใส่อยู่ หรือระดับชั้นของน้อง' }
+  return shop('ยังไม่เข้าใจคำถามครับ ลองเลือกหัวข้อด้านล่างนะครับ', { chips: MENU })
 }
 
 export function SizeChat() {
@@ -37,11 +63,8 @@ export function SizeChat() {
     end.current?.scrollIntoView({ block: 'end' })
   }, [msgs, typing, open])
 
-  const send = (e: React.FormEvent) => {
-    e.preventDefault()
-    const text = draft.trim()
+  const say = (text: string) => {
     if (!text || typing) return
-    setDraft('')
     setMsgs((m) => [...m, { from: 'me', text }])
     setTyping(true)
     setTimeout(() => {
@@ -49,6 +72,12 @@ export function SizeChat() {
       setTyping(false)
     }, 700)
   }
+  const send = (e: React.FormEvent) => {
+    e.preventDefault()
+    say(draft.trim())
+    setDraft('')
+  }
+  const last = msgs[msgs.length - 1]
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
@@ -74,6 +103,19 @@ export function SizeChat() {
                 )}
               </div>
             ))}
+            {!typing && last.from === 'shop' && last.chips && (
+              <div className="flex flex-wrap gap-2" aria-label="ตัวเลือกคำตอบ">
+                {last.chips.map((c) => (
+                  <button
+                    key={c.label}
+                    onClick={() => say(c.text ?? c.label)}
+                    className="rounded-full border border-ink/25 bg-card px-3.5 py-1.5 text-sm font-medium transition hover:border-ink hover:bg-ink hover:text-paper"
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            )}
             {typing && <p className="text-xs text-sub">กำลังพิมพ์…</p>}
             <div ref={end} />
           </div>
@@ -81,7 +123,7 @@ export function SizeChat() {
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="เช่น 22.5 หรือ นันยาง 36"
+              placeholder="กดตัวเลือกด้านบน หรือพิมพ์เอง"
               aria-label="ข้อความ"
               className="h-11 min-w-0 flex-1 rounded-full border border-line bg-card px-4 text-sm outline-none placeholder:text-sub/45 focus:border-ink"
             />
