@@ -1,57 +1,69 @@
-# KNOWNA — Boys' School Shoes (Prototype)
+# KNOWNA — รองเท้าผ้าใบนักเรียนชาย (เว็บต้นแบบ)
 
-A clickable e-commerce prototype for **KNOWNA Classic**, a canvas school shoe for boys from ป.1 to ม.6
-(course project ITDS294). One model in three colours (black, white, brown), sizes EU 28–45,
-**฿259 per pair with shipping included**.
+เว็บ E-Commerce ต้นแบบของแบรนด์ **KNOWNA** รายวิชา ITDS294 Fundamental of Electronic Commerce System
 
-The selling point: parents cannot try shoes on when they buy online, so KNOWNA helps pick the size
-before buying, and **if the size is wrong, exchanges it free once per order** (the brand pays shipping for the new pair).
+**เว็บไซต์:** https://newn26.github.io/Knowna/
 
-Live demo: https://newn26.github.io/Knowna/
+รองเท้า **KNOWNA Classic** สำหรับนักเรียนชาย ป.1–ม.6 มี 3 สี (ดำ ขาว น้ำตาล) ไซส์ EU 28–45
+ราคา **คู่ละ 259 บาท รวมค่าจัดส่งแล้ว** ขายผ่านเว็บไซต์ของแบรนด์เท่านั้น ชำระด้วยพร้อมเพย์
 
-> Prototype only. There is **no backend**. Data lives in your browser's `localStorage`, payments are simulated,
-> no SMS is sent, and product images are AI-generated.
+**จุดเด่น:** ซื้อรองเท้าออนไลน์ลองใส่ไม่ได้ KNOWNA จึงช่วยเลือกไซส์ก่อนซื้อ และถ้าได้รับแล้วไซส์ไม่พอดี
+**เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ภายใน 3 วันหลังได้รับสินค้า** โดยแบรนด์ออกค่าส่งคู่ใหม่
 
-## Run
+> เว็บสาธิตเท่านั้น: ไม่มีเซิร์ฟเวอร์ ข้อมูลเก็บในเบราว์เซอร์ (`localStorage`) การชำระเงินและการส่ง SMS เป็นการจำลอง
+> ภาพสินค้าสร้างด้วย AI
+
+## ฟีเจอร์
+
+| ฟีเจอร์ | รายละเอียด |
+|---|---|
+| ซื้อรองเท้า | เลือกสี ไซส์ จำนวน (ตรวจสต็อก) → ตะกร้า → กรอกที่อยู่ → QR พร้อมเพย์ → หน้าคำสั่งซื้อ |
+| ติดตามพัสดุ | ค้นด้วยเลขคำสั่งซื้อ + เบอร์โทร ดูสถานะจัดส่ง |
+| เปลี่ยนไซส์ฟรี | 1 ครั้งต่อคำสั่งซื้อ หลังได้รับสินค้า ภายใน 3 วัน ไซส์ใหม่ต้องต่างจากเดิมและมีของ |
+| ช่วยเลือกไซส์ 3 วิธี | ตามชั้นเรียน, วัดความยาวเท้า, เทียบกับแบรนด์ที่ใส่อยู่ (นันยาง, Breaker, Gold City, Tiger) |
+| แชตถามไซส์ | ปุ่มมุมขวาล่างทุกหน้า กดตัวเลือกได้โดยไม่ต้องพิมพ์ |
+| บัญชีของฉัน | ประวัติการซื้อ รองเท้าของฉัน บันทึกไซส์เท้าลูก แจ้งเตือนก่อนเปิดเทอม (1 เมษายน) |
+| คำถามที่พบบ่อย | ราคา ไซส์ การชำระเงิน การจัดส่ง การเปลี่ยนไซส์ |
+
+Flow การทำงานแบบละเอียด พร้อมแผนภาพและลำดับการสาธิต: [docs/FLOW.md](docs/FLOW.md)
+
+## ลองใช้งาน
+
+- บัญชีเดโม: หน้า "บัญชีของฉัน" → "เข้าสู่ระบบบัญชีเดโม" (มีคำสั่งซื้อที่ได้รับเมื่อวาน ไว้ลองขอเปลี่ยนไซส์)
+- ติดตามพัสดุตัวอย่าง: `KN-250502-0107` + `0812345678`
+- ล้างข้อมูลเดโม: ลิงก์ "รีเซ็ตข้อมูลเดโม" ท้ายเว็บ
+
+## รันบนเครื่อง
 
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # pricing, sizes, size chat, reminders, order flow, size exchange
-npm run build    # type-check and build to dist/
+npm test         # 11 เทสต์: ราคา ไซส์ แชต วันแจ้งเตือน การสั่งซื้อ กติกาเปลี่ยนไซส์
+npm run build    # ตรวจ type แล้ว build ไปที่ dist/
 ```
 
-## Demo walkthrough
+push เข้า `main` แล้ว GitHub Actions จะ deploy ขึ้น GitHub Pages ให้อัตโนมัติ
 
-1. **Home** → price, the free size exchange, and the grade-to-size teaser.
-2. **หาไซส์** (`/size`) → three ways to pick a size: by grade, by measuring the foot, or by the brand the child wears now.
-3. **ถามไซส์** (button on every page) → a mock chat that answers with a size from foot length, brand + size, or grade.
-4. **Product** → choose colour and size, buy (stock-checked).
-5. **Checkout** → home delivery (included in the price) → PromptPay QR for the exact amount (simulated) → order page; demo orders advance every ~30 s.
-6. **คำถามที่พบบ่อย** (`/help`, footer) → price, sizes, payment, delivery and the size exchange, all from the report.
-7. **Account** (one-click demo login) → every pair bought, the free size exchange on a delivered order,
-   each child's saved foot size and the pre-term reminder.
-
-Order lookup sample: `KN-250502-0107` + `0812345678`. The footer has a *reset demo data* link.
-
-## Code structure
+## โครงสร้างโค้ด
 
 ```
 src/
   lib/
-    types.ts     data shapes shared by UI and API
-    catalog.ts   product, colours, sizes, grade→size table, brand comparison, reminder dates
-    pricing.ts   totals (shipping is included in the price)
-    status.ts    order and exchange progress steps
-    api.ts       async mock API — the only module the UI calls for data
-    db.ts        localStorage "database" and seed data (only api.ts imports it)
-    store.ts     client state: cart, session, children's foot sizes
-  components/    Layout, SizeChat, MeasureStory, Shoe (SVG), shared UI
-  pages/         one file per page
+    catalog.ts   ข้อมูลสินค้า สี ไซส์ ตารางชั้นเรียน ตารางเทียบแบรนด์ กติกาเปลี่ยนไซส์ วันแจ้งเตือน
+    pricing.ts   คิดยอด (ค่าส่งรวมในราคาแล้ว)
+    api.ts       API จำลอง เป็นทางเดียวที่หน้าเว็บใช้ดึงข้อมูล
+    db.ts        ฐานข้อมูลจำลองใน localStorage และข้อมูลตัวอย่าง
+    status.ts    ขั้นสถานะคำสั่งซื้อและการเปลี่ยนไซส์
+    store.ts     ตะกร้า การเข้าสู่ระบบ ไซส์เท้าลูก
+    types.ts     รูปแบบข้อมูล
+  components/    Layout, SizeChat (แชตถามไซส์), MeasureStory (วิธีวัดเท้า), UI กลาง
+  pages/         หน้าละไฟล์
+scripts/order.test.ts   เทสต์ทั้งหมด
 ```
 
-### Connecting a real backend
+## ต่อกับระบบจริง
 
-Every function in `src/lib/api.ts` is `async`, returns plain data and has its intended REST route in a comment
-(`GET /api/stock`, `POST /api/orders`, ...). Replace each body with a `fetch` call, delete `db.ts`, and the pages
-stay the same. The server must re-check stock and re-compute totals rather than trust the client's numbers.
+ทุกฟังก์ชันใน `src/lib/api.ts` เป็น `async` และมีเส้นทาง REST ที่ควรเป็นเขียนไว้ในคอมเมนต์
+(`GET /api/stock`, `POST /api/orders`, ...) เปลี่ยนแต่ละฟังก์ชันเป็น `fetch` แล้วลบ `db.ts` ได้เลย โดยหน้าเว็บไม่ต้องแก้
+ฝั่งเซิร์ฟเวอร์ต้องตรวจสต็อก คิดยอดเงิน และตรวจกติกาเปลี่ยนไซส์เอง ห้ามเชื่อตัวเลขจากฝั่งเบราว์เซอร์
+ส่วนการชำระเงินจริงให้ยืนยันผ่าน webhook ของ Omise
