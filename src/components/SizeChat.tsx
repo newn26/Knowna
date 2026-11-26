@@ -2,7 +2,6 @@ import { MessageCircle, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BRANDS, GRADES, SIZES, sizeForFoot, sizeFromBrand } from '../lib/catalog'
-
 /** A tap-to-answer button: `label` is shown, `text` is what gets sent (defaults to the label). */
 type Chip = { label: string; text?: string }
 type Msg = { from: 'shop' | 'me'; text: string; size?: number; chips?: Chip[] }
@@ -59,9 +58,17 @@ export function SizeChat() {
   const [draft, setDraft] = useState('')
   const [typing, setTyping] = useState(false)
   const end = useRef<HTMLDivElement>(null)
+  const input = useRef<HTMLInputElement>(null)
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
   }, [msgs, typing, open])
+  useEffect(() => {
+    if (!open) return
+    input.current?.focus()
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    window.addEventListener('keydown', esc)
+    return () => window.removeEventListener('keydown', esc)
+  }, [open])
 
   const say = (text: string) => {
     if (!text || typing) return
@@ -80,7 +87,8 @@ export function SizeChat() {
   const last = msgs[msgs.length - 1]
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    // z-30: below the header (40) and every dialog/drawer (50), so overlays always cover it
+    <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-3">
       {open && (
         <section className="flex h-[460px] w-[340px] animate-rise flex-col overflow-hidden rounded-3xl border border-line bg-paper shadow-2xl" aria-label="แชตถามไซส์">
           <header className="flex items-center justify-between bg-ink px-5 py-3 text-paper">
@@ -121,6 +129,7 @@ export function SizeChat() {
           </div>
           <form onSubmit={send} className="flex gap-2 border-t border-line p-3">
             <input
+              ref={input}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="กดตัวเลือกด้านบน หรือพิมพ์เอง"

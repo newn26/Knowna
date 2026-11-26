@@ -105,7 +105,7 @@ export function MeasureStory() {
             </div>
           </figure>
         </Container>
-        <p className="absolute bottom-3 right-4 text-[11px] text-sub">ภาพประกอบ: รองเท้า KNOWNA (ภาพ AI) แทนตำแหน่งเท้า</p>
+        <p className="absolute bottom-3 right-4 text-xs text-sub">ภาพประกอบ: รองเท้า KNOWNA (ภาพ AI) แทนตำแหน่งเท้า</p>
       </div>
     </section>
   )

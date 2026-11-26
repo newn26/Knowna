@@ -8,15 +8,16 @@ import { baht } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
 import { Summary } from './Cart'
 
-function Choice({ on, onClick, icon: Icon, title, sub }: { on: boolean; onClick: () => void; icon: typeof Truck; title: string; sub: string }) {
+/** The only delivery and payment method (report: website only, PromptPay only), shown as a fact, not a choice. */
+function Choice({ icon: Icon, title, sub }: { icon: typeof Truck; title: string; sub: string }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={on} className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition ${on ? 'border-ink bg-stone' : 'border-line hover:border-sub'}`}>
+    <div className="flex items-start gap-3 rounded-2xl border border-ink bg-stone p-4">
       <Icon size={20} className="mt-0.5 shrink-0" />
       <span>
         <span className="block font-semibold">{title}</span>
         <span className="block text-sm text-sub">{sub}</span>
       </span>
-    </button>
+    </div>
   )
 }
 
@@ -93,7 +94,7 @@ export default function Checkout() {
             <section>
               <h2 className="font-semibold">2 · ที่อยู่จัดส่ง</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <Choice on onClick={() => {}} icon={Truck} title="จัดส่งถึงบ้าน" sub="รวมในราคาแล้ว ไม่มีค่าส่งเพิ่ม" />
+                <Choice icon={Truck} title="จัดส่งถึงบ้าน" sub="รวมในราคาแล้ว ไม่มีค่าส่งเพิ่ม" />
               </div>
               <div className="mt-4">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -128,7 +129,7 @@ export default function Checkout() {
             <section>
               <h2 className="font-semibold">3 · ชำระเงิน</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <Choice on onClick={() => {}} icon={QrCode} title="พร้อมเพย์ (PromptPay)" sub="สแกน QR จ่ายผ่านระบบรับชำระเงิน Omise" />
+                <Choice icon={QrCode} title="พร้อมเพย์ (PromptPay)" sub="สแกน QR จ่ายผ่านระบบรับชำระเงิน Omise" />
               </div>
               <p className="mt-3 text-xs text-sub">เว็บสาธิต: ไม่มีการตัดเงินจริง</p>
             </section>

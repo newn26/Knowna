@@ -74,11 +74,11 @@ function BrandCompare() {
           <LinkButton to={`/product?size=${eu}`}>ซื้อเบอร์ {eu}</LinkButton>
         </div>
       </div>
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-line">
+      <div className="-mx-6 mt-8 overflow-x-auto border-t border-line sm:-mx-8">
         <table className="w-full text-sm tabular">
-          <thead className="bg-stone text-left text-xs text-sub">
+          <thead className="text-left text-xs text-sub">
             <tr>
-              <th className="px-4 py-3">KNOWNA (EU)</th>
+              <th className="py-3 pl-6 pr-4 sm:pl-8">KNOWNA (EU)</th>
               {BRANDS.map((b) => (
                 <th key={b.id} className="px-4 py-3">
                   {b.name}
@@ -86,10 +86,10 @@ function BrandCompare() {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-line border-t border-line">
             {SIZES.filter((s) => s >= 30 && s <= 43).map((s) => (
               <tr key={s} className={s === eu ? 'bg-ink text-paper' : ''}>
-                <td className="px-4 py-2 font-semibold">{s}</td>
+                <td className="py-2 pl-6 pr-4 font-semibold sm:pl-8">{s}</td>
                 {BRANDS.map((b) => {
                   const theirs = s - b.offset
                   return (

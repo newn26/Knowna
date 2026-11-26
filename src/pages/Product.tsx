@@ -1,5 +1,6 @@
 import { ArrowRight, ChevronDown, RefreshCw, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
@@ -56,7 +57,8 @@ function Accordion({ title, children, open = false }: { title: string; children:
 
 function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () => void }) {
   const ref = useDialog<HTMLDivElement>(onClose)
-  return (
+  // portal: <main> has a transform (page transition), which would trap `fixed` and z-index inside it
+  return createPortal(
     <div ref={ref} className="fixed inset-0 z-50 grid place-items-end sm:place-items-center" role="dialog" aria-modal aria-label="ตารางไซส์">
       <div className="absolute inset-0 animate-fade bg-black/40" onClick={onClose} />
       <div className="relative max-h-[85dvh] w-full max-w-lg animate-rise overflow-y-auto rounded-t-3xl bg-paper p-6 sm:rounded-3xl">
@@ -68,10 +70,11 @@ function SizeGuideDialog({ size, onClose }: { size: number | null; onClose: () =
         </div>
         <SizeTable highlight={size} />
         <Link to="/size" className="mt-4 block text-center text-sm font-medium underline underline-offset-4">
-          ใช้ Size Finder วัดเท้า →
+          ไปหน้าหาไซส์ วัดเท้า →
         </Link>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

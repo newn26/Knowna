@@ -189,7 +189,7 @@ export function useReveal<T extends HTMLElement>() {
 /** A fact the report (Ecommerce Report.pdf) has not filled in yet. Search PENDING-PDF to fill them later. */
 export const Pending = ({ label }: { label: string }) => (
   <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-line px-2 py-0.5 text-xs text-sub">
-    {label}: <i className="not-italic opacity-70">รอข้อมูลจากรายงาน</i>
+    {label}: <i className="not-italic">รอข้อมูลจากรายงาน</i>
   </span>
 )
 
