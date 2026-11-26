@@ -1,11 +1,9 @@
-import { ArrowRight, Check, Layers } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Check, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoeFlat } from '../components/Shoe'
-import { DovetailSection, SoleSwapDemo } from '../components/SoleRail'
-import { Container, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
-import { COLORS, GRADES, PRODUCT, SIZES, SOLE } from '../lib/catalog'
-import { PHOTOS, USED } from '../lib/photos'
+import { Container, ExchangeRule, LinkButton, Num, SWATCH, useReveal } from '../components/ui'
+import { COLORS, EXCHANGE, GRADES, PRODUCT, SIZES } from '../lib/catalog'
+import { PHOTOS } from '../lib/photos'
 import { baht } from '../lib/pricing'
 import type { ColorId } from '../lib/types'
 
@@ -21,33 +19,33 @@ function Hero() {
           <div className="relative z-10 order-1">
             <p className="animate-rise inline-flex items-center gap-2 rounded-full border border-line bg-card px-3 py-1.5 text-xs font-medium">
               <span className="h-1.5 w-1.5 rounded-full bg-signal" />
-              พื้นถอดเปลี่ยนได้ · รางสไลด์ + ล็อกท้าย
+              {EXCHANGE.short} · แบรนด์ออกค่าส่งคู่ใหม่
             </p>
-            <h1 className="mt-6 font-display text-[clamp(3.2rem,11vw,8.5rem)] font-black uppercase leading-[0.84] tracking-tightest [word-spacing:0.14em]" style={display}>
-              <span className="block animate-rise [animation-delay:80ms]">Step up.</span>
+            <h1 className="mt-6 font-display text-[clamp(3rem,9vw,7rem)] font-black leading-[1.12] tracking-tightest" style={display}>
+              <span className="block animate-rise [animation-delay:80ms]">ไซซ์ผิด</span>
               <span className="block animate-rise [animation-delay:180ms]">
-                <span className="text-sub/70">Swap</span> it<span className="text-signal">.</span>
+                <span className="text-sub/70">เปลี่ยน</span>ฟรี<span className="text-signal">.</span>
               </span>
             </h1>
           </div>
           <div className="order-3">
             <p className="mt-2 max-w-md animate-rise text-lg text-sub [animation-delay:160ms] lg:mt-6">
-              รองเท้าผ้าใบนักเรียนชาย ป.1–ป.6 ที่พื้นถอดเปลี่ยนได้ ดอกยางสึกเมื่อไร ซื้อแค่พื้นใหม่ <b className="text-ink">{baht(SOLE.price)}</b> สไลด์เข้าเองที่บ้าน ไม่ต้องทิ้งทั้งคู่
+              รองเท้าผ้าใบนักเรียนชายที่มาพร้อมบริการหลังการขาย ถ้าสั่งไซซ์ผิด เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ให้ผู้ปกครองมั่นใจในการซื้อรองเท้าออนไลน์มากขึ้น
             </p>
             <div className="mt-8 flex animate-rise flex-wrap gap-3 [animation-delay:240ms]">
               <LinkButton to="/shop" size="lg">
                 ซื้อคู่ใหม่ <ArrowRight size={18} />
               </LinkButton>
-              <LinkButton to="/soles" size="lg" variant="outline">
-                พื้นรองเท้า
+              <LinkButton to="/#exchange" size="lg" variant="outline">
+                เปลี่ยนไซซ์ยังไง
               </LinkButton>
             </div>
             <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
               {(
                 [
                   [PRODUCT.price, baht, 'คู่ใหม่'],
-                  [SOLE.price, baht, 'พื้นใหม่ทั้งชุด'],
-                  [3, (n: number) => `${n} ขั้น`, 'เปลี่ยนพื้นเองที่บ้าน'],
+                  [1, (n: number) => `${n} ครั้ง`, 'เปลี่ยนไซซ์ฟรีต่อบิล'],
+                  [0, baht, 'ค่าส่งคู่ใหม่ แบรนด์ออกให้'],
                 ] as const
               ).map(([v, f, l]) => (
                 <div key={l}>
@@ -90,7 +88,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['คู่ใหม่', 'พื้นถอดเปลี่ยนได้', 'รางสไลด์ + ล็อกท้าย', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', `พื้นใหม่ ${baht(SOLE.price)}`]
+  const words = ['คู่ใหม่', 'ไซซ์ผิด เปลี่ยนฟรี', '1 ครั้งต่อบิล', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ส่งคู่ใหม่ฟรี']
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>
@@ -156,185 +154,40 @@ function Spotlight() {
   )
 }
 
-function TwoStores() {
-  return (
-    <section className="pb-20 sm:pb-28">
-      <Container className="grid gap-4 lg:grid-cols-2">
-        <Link to="/shop" className="fixed-tone reveal group relative flex min-h-[420px] [--rim-a:0.55] flex-col justify-between overflow-hidden rounded-3xl bg-ink p-8 text-paper sm:p-10">
-          <div>
-            <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
-              คู่ใหม่
-              <br />
-              กล่องใหม่
-            </h3>
-            <p className="mt-3 max-w-xs text-paper/70">ผ้าใบ หัวยางหุ้มปลายเท้า มาพร้อมพื้นหนึ่งชุดในราง</p>
-          </div>
-          <img src={PHOTOS.black.side.src} alt="" className="absolute -bottom-4 -right-12 w-[82%] transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-2" />
-          <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink">
-            {baht(PRODUCT.price)} · ช้อปเลย <ArrowRight size={16} />
-          </span>
-        </Link>
-        <Link to="/soles" className="reveal group relative flex min-h-[420px] flex-col justify-between overflow-hidden rounded-3xl border border-line bg-card p-8 sm:p-10">
-          <div>
-            <h3 className="mt-0 font-display text-5xl font-black uppercase leading-[0.9] sm:text-6xl" style={display}>
-              พื้นใหม่
-              <br />
-              คู่เดิม
-            </h3>
-            <p className="mt-3 max-w-xs text-sub">ดอกยางสึกแต่ผ้าใบยังดี? ซื้อแค่พื้นอะไหล่ กดสลัก ดึงออก สไลด์พื้นใหม่เข้า จบ</p>
-          </div>
-          <ShoeFlat color="brown" side="sole" className="absolute -bottom-6 -right-16 w-[88%] -rotate-6 transition duration-700 group-hover:-translate-x-3 group-hover:-rotate-3" />
-          <span className="relative inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
-            {baht(SOLE.price)} · ดูวิธีเปลี่ยน <ArrowRight size={16} />
-          </span>
-        </Link>
-      </Container>
-    </section>
-  )
-}
-
-const CHAPTERS = [
-  { id: 'worn', label: 'พื้นสึก', h: 'ผ้ายังดี แต่พื้นเรียบแล้ว', d: 'ใส่วิ่งเล่นมาทั้งเทอม ดอกยางใต้ส้นกับปลายเท้าหายก่อนผ้าใบจะขาด อย่าเพิ่งทิ้ง' },
-  { id: 'unlock', label: 'ปลดล็อก', h: 'กดสลักที่ส้น', d: 'กดปุ่มสลักด้านหลังส้นค้างไว้ พื้นจะหลุดจากตัวล็อก' },
-  { id: 'swap', label: 'สไลด์', h: 'ดึงออก สไลด์เข้า', d: 'ดึงพื้นเก่าออกทางส้น แล้วสไลด์พื้นใหม่เข้าจากส้นไปหาปลายเท้า' },
-  { id: 'done', label: 'คลิก', h: 'คลิก แล้วใส่ต่อ', d: 'ได้ยินเสียงคลิกแปลว่าล็อกแล้ว รองเท้าคู่เดิม พื้นใหม่ พร้อมไปโรงเรียน' },
-] as const
-
-// The shoe's pose along the scroll (t = 0…1): x/y in vw/vh, scale, tilt (rz) and spin (ry) in degrees.
-const POSES = [
-  { t: 0, x: 8, y: -6, s: 0.86, rz: -8, ry: 0 },
-  { t: 0.14, x: 8, y: -7, s: 0.9, rz: -6, ry: 0 },
-  { t: 0.4, x: 6, y: -10, s: 1.05, rz: 0, ry: 360 },
-  { t: 0.64, x: 24, y: -12, s: 0.6, rz: -16, ry: 360 },
-  { t: 0.86, x: 8, y: -8, s: 0.86, rz: 4, ry: 720 },
-  { t: 1, x: 60, y: -6, s: 0.7, rz: 16, ry: 720 },
+const STEPS = [
+  { h: 'สั่งซื้อตามไซซ์ที่เลือก', d: 'ใช้หน้าหาไซซ์ช่วยเลือกก่อนสั่ง เพื่อให้ได้ไซซ์ที่พอดีตั้งแต่ครั้งแรก' },
+  { h: 'ได้รับแล้วไซซ์ไม่พอดี', d: 'เปิดหน้าคำสั่งซื้อ กด "ขอเปลี่ยนไซซ์" แล้วเลือกไซซ์ใหม่' },
+  { h: 'รับคู่ใหม่ ไม่เสียค่าส่ง', d: 'แบรนด์เป็นผู้ออกค่าจัดส่งรองเท้าคู่ใหม่ให้ ใช้ได้ 1 ครั้งต่อคำสั่งซื้อ' },
 ]
-const ease = (u: number) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2)
-function poseAt(p: number, sideways: number) {
-  const i = Math.max(0, POSES.findIndex((k) => k.t >= p) - 1)
-  const a = POSES[i]
-  const b = POSES[Math.min(i + 1, POSES.length - 1)]
-  const u = b.t === a.t ? 1 : ease((p - a.t) / (b.t - a.t))
-  const m = (k: 'x' | 'y' | 's' | 'rz' | 'ry') => a[k] + (b[k] - a[k]) * u
-  return `translate3d(${m('x') * sideways}vw, ${m('y')}vh, 0) rotateZ(${m('rz')}deg) rotateY(${m('ry')}deg) scale(${m('s')})`
-}
 
-/** Full-screen, scroll-scrubbed: the pair spins and travels while four short chapters swap beside it. */
-function SoleStory() {
-  const ref = useRef<HTMLElement>(null)
-  const shoe = useRef<HTMLDivElement>(null)
-  const [chapter, setChapter] = useState(0)
-  useEffect(() => {
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
-    let raf = 0
-    const update = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => {
-        const r = ref.current!.getBoundingClientRect()
-        const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)))
-        if (shoe.current) shoe.current.style.transform = still ? 'none' : poseAt(p, innerWidth < 640 ? 0.25 : 1) // phones: the shoe already fills the width, so travel less
-        setChapter(Math.min(CHAPTERS.length - 1, Math.floor(p * CHAPTERS.length)))
-      })
-    }
-    update()
-    addEventListener('scroll', update, { passive: true })
-    addEventListener('resize', update)
-    return () => {
-      cancelAnimationFrame(raf)
-      removeEventListener('scroll', update)
-      removeEventListener('resize', update)
-    }
-  }, [])
-  const at = CHAPTERS[chapter].id
-  const fade = (on: boolean) =>
-    `transition-[opacity,transform,filter] duration-700 ease-[cubic-bezier(.16,1,.3,1)] motion-reduce:transition-none ${on ? 'opacity-100 translate-y-0 blur-0' : 'pointer-events-none opacity-0 translate-y-4 blur-sm'}`
+/** The free size exchange: what it is and the three steps to use it. */
+function ExchangeHow() {
   return (
-    <section ref={ref} aria-label="เปลี่ยนพื้นยังไง" className="relative bg-stone" style={{ height: `${CHAPTERS.length * 90}vh` }}>
-      <div className="sticky top-16 h-[calc(100dvh-4rem)] overflow-hidden [perspective:1600px]">
-        <div className="absolute inset-0 grid place-items-center" aria-hidden>
-          <div ref={shoe} className="relative w-[120vw] max-w-[1400px] will-change-transform sm:w-[84vw]">
-            <img src={USED.src} alt="" className="w-full drop-shadow-[0_30px_30px_rgba(0,0,0,.2)]" />
-            <img src={PHOTOS.brown.side.src} alt="" className={`absolute inset-0 w-full transition-opacity duration-1000 ${at === 'done' ? 'opacity-100' : 'opacity-0'}`} />
-          </div>
-        </div>
-
-        <Container className="relative flex h-full flex-col justify-between py-6 sm:py-10">
-          <ol className="flex gap-2" aria-hidden>
-            {CHAPTERS.map((c, i) => (
-              <li key={c.id} className="flex-1 sm:max-w-40">
-                <span className="block h-1 overflow-hidden rounded-full bg-ink/10">
-                  <span className={`block h-full origin-left bg-ink transition-transform duration-500 ${i <= chapter ? 'scale-x-100' : 'scale-x-0'}`} />
-                </span>
-                <span className={`mt-2 block text-xs font-semibold transition-colors ${i === chapter ? 'text-ink' : 'text-sub'}`}>{c.label}</span>
-              </li>
-            ))}
-          </ol>
-
-          <div className="grid">
-            {CHAPTERS.map((c, i) => (
-              <div key={c.id} className={`max-w-xl [grid-area:1/1] ${fade(i === chapter)}`} aria-hidden={i !== chapter}>
-                <h2 className="font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-7xl" style={display}>
-                  {c.h}
-                </h2>
-                <p className="mt-3 max-w-md text-sub sm:text-lg">{c.d}</p>
-              </div>
-            ))}
-            <div className="mt-5 flex min-h-12 flex-wrap items-center gap-2 [grid-area:2/1]">
-              {at === 'unlock' && (
-                <span className="flex animate-rise items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-medium shadow-sm">
-                  <Check size={14} className="text-ok" /> ไม่ต้องใช้เครื่องมือ
-                </span>
-              )}
-              {at === 'swap' && (
-                <p className="animate-rise font-display text-3xl font-black tabular sm:text-4xl" style={display}>
-                  <span className="text-sub line-through decoration-2">{baht(PRODUCT.price)}</span> <span className="text-signal">{baht(SOLE.price)}</span>
-                </p>
-              )}
-              {at === 'done' && (
-                <Link to="/soles#buy" className="inline-flex animate-rise items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-paper">
-                  สั่งพื้นใหม่ {baht(SOLE.price)} <ArrowRight size={16} />
-                </Link>
-              )}
-            </div>
-          </div>
-        </Container>
-      </div>
-    </section>
-  )
-}
-
-function HowItLocks() {
-  return (
-    <section id="how-it-locks" className="scroll-mt-16 bg-stone py-20 sm:py-28">
+    <section id="exchange" className="scroll-mt-16 bg-stone py-20 sm:py-28">
       <Container>
         <div className="reveal max-w-3xl">
-          <h2 className="mt-0 font-display text-4xl font-black uppercase leading-[0.92] tracking-tight sm:text-7xl" style={display}>
-            รางสไลด์ + ล็อกท้าย<span className="text-signal">.</span>
+          <h2 className="mt-0 font-display text-4xl font-black leading-[0.95] tracking-tight sm:text-6xl" style={display}>
+            สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้ง<span className="text-signal">.</span>
           </h2>
-          <p className="mt-4 text-lg text-sub">ใต้รองเท้ามีรางรูปหางเหยี่ยว (dovetail) แบบลิ้นชักหรือรางกล้อง พื้นสไลด์เข้าจากส้นไปหาปลายเท้า แล้วมีสลักกดล็อกที่ส้น</p>
+          <ExchangeRule className="mt-5 text-lg text-sub" />
         </div>
-        <div className="reveal mt-12">
-          <SoleSwapDemo />
-        </div>
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <div className="reveal rounded-3xl bg-card p-6 sm:p-8">
-            <DovetailSection className="w-full" />
-          </div>
-          <div className="reveal grid gap-3 text-sm">
-            {[
-              ['ยิ่งเหยียบ ยิ่งแน่น', 'ลิ้นของพื้นกว้างด้านในแคบที่ปากราง แรงเหยียบดันพื้นเข้ารางให้แนบขึ้น พื้นจึงหลุดลงไม่ได้'],
-              ['ออกได้ทางเดียว', 'พื้นไหลออกได้ทางส้นเท่านั้น และมีสลักล็อกกั้นไว้ วิ่งเล่นแล้วพื้นไม่เลื่อน'],
-              ['ต้องดูแลราง', 'ทรายหรือเศษดินอาจเข้าไปติดในราง ถอดพื้นเคาะทุกสัปดาห์ หรือล้างด้วยน้ำเปล่า'],
-            ].map(([h, d], i) => (
-              <div key={h} className={`rounded-2xl p-5 ${i === 2 ? 'border border-dashed border-line' : 'bg-card'}`}>
-                <p className="font-semibold">{h}</p>
-                <p className="mt-1 text-sub">{d}</p>
-              </div>
-            ))}
-            <LinkButton to="/soles" variant="signal" className="mt-1">
-              ดูวิธีเปลี่ยนพื้นและสั่งพื้นใหม่ <ArrowRight size={16} />
-            </LinkButton>
-          </div>
+        <ol className="mt-12 grid gap-3 sm:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <li key={s.h} className="reveal relative rounded-3xl bg-card p-6 sm:p-8" style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="font-display text-sm font-bold text-signal tabular">0{i + 1}</span>
+              <p className="mt-6 text-xl font-semibold leading-tight">{s.h}</p>
+              <p className="mt-2 text-sm text-sub">{s.d}</p>
+              {i < STEPS.length - 1 && <ArrowRight size={16} className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-stone text-sub sm:block" />}
+            </li>
+          ))}
+        </ol>
+        <div className="reveal mt-8 flex flex-wrap gap-3">
+          <LinkButton to="/size" variant="signal">
+            หาไซซ์ก่อนสั่ง <ArrowRight size={16} />
+          </LinkButton>
+          <LinkButton to="/account" variant="outline">
+            ลองขอเปลี่ยนไซซ์กับบัญชีเดโม
+          </LinkButton>
         </div>
       </Container>
     </section>
@@ -388,53 +241,22 @@ function SizeTeaser() {
   )
 }
 
-const LOOP = ['ซื้อคู่ใหม่', 'ใส่จนพื้นสึก', 'กดสลัก ดึงพื้นออก', 'สไลด์พื้นใหม่เข้า', 'ใส่ต่อจนเท้าโต']
-
-function OnePair() {
-  return (
-    <section id="one-pair" className="fixed-tone overflow-hidden bg-ink py-20 text-paper sm:py-28">
-      <Container>
-        <div className="reveal grid gap-10 lg:grid-cols-2">
-          <div>
-            <h2 className="mt-0 font-display text-5xl font-black uppercase leading-[0.88] tracking-tight sm:text-7xl" style={display}>
-              ผ้าคู่เดิม
-              <br />
-              <span className="text-paper/40">พื้นใหม่ได้</span>
-            </h2>
-          </div>
-          <p className="self-end text-lg text-paper/70">
-            เด็กวิ่งเล่นทั้งวัน พื้นรองเท้ามักสึกก่อนผ้าใบจะเสีย แต่รองเท้าทั่วไปเปลี่ยนพื้นไม่ได้ เลยต้องซื้อใหม่ทั้งคู่ KNOWNA แยกพื้นออกมา จ่ายแค่ส่วนที่หมดจริง
-          </p>
-        </div>
-        <ol className="mt-14 grid gap-3 sm:grid-cols-5">
-          {LOOP.map((s, i) => (
-            <li key={s} className="reveal relative rounded-2xl border border-paper/15 p-5" style={{ transitionDelay: `${i * 90}ms` }}>
-              <span className="font-display text-sm font-bold text-signal tabular">0{i + 1}</span>
-              <p className="mt-6 font-semibold leading-tight">{s}</p>
-              {i < LOOP.length - 1 && <ArrowRight size={16} className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-ink text-paper/40 sm:block" />}
-            </li>
-          ))}
-        </ol>
-      </Container>
-    </section>
-  )
-}
-
 function FinalCTA() {
   return (
     <section className="pt-20 sm:pt-28">
       <Container>
         <div className="reveal relative overflow-hidden rounded-[2rem] bg-stone px-6 py-16 text-center sm:px-16 sm:py-24">
-          <Layers className="mx-auto text-signal" size={28} />
-          <h2 className="mx-auto mt-4 max-w-3xl font-display text-5xl font-black uppercase leading-[0.9] tracking-tight sm:text-7xl" style={display}>
-            เปิดเทอมนี้ คู่ใหม่ หรือแค่พื้นใหม่
+          <RefreshCw className="mx-auto text-signal" size={28} />
+          <h2 className="mx-auto mt-4 max-w-3xl font-display text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl" style={display}>
+            ซื้อออนไลน์ได้ ไม่ต้องกลัวไซซ์ผิด
           </h2>
+          <p className="mx-auto mt-4 max-w-xl text-sub">{EXCHANGE.rule}</p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <LinkButton to="/shop" size="lg">
               ซื้อคู่ใหม่
             </LinkButton>
-            <LinkButton to="/soles" size="lg" variant="signal">
-              ซื้อพื้นใหม่ {baht(SOLE.price)}
+            <LinkButton to="/size" size="lg" variant="signal">
+              หาไซซ์ที่ใช่
             </LinkButton>
           </div>
         </div>
@@ -450,11 +272,8 @@ export default function Home() {
       <Hero />
       <Marquee />
       <Spotlight />
-      <TwoStores />
-      <SoleStory />
-      <HowItLocks />
+      <ExchangeHow />
       <SizeTeaser />
-      <OnePair />
       <FinalCTA />
     </div>
   )

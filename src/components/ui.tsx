@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { COLORS } from '../lib/catalog'
+import { COLORS, EXCHANGE } from '../lib/catalog'
 import { baht } from '../lib/pricing'
 import type { Step } from '../lib/status'
 import type { ColorId } from '../lib/types'
@@ -184,6 +184,27 @@ export function useReveal<T extends HTMLElement>() {
     return () => io.disconnect()
   })
   return ref
+}
+
+/** A fact the report (Ecommerce Report.pdf) has not filled in yet. Search PENDING-PDF to fill them later. */
+export const Pending = ({ label }: { label: string }) => (
+  <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-line px-2 py-0.5 text-xs text-sub">
+    {label}: <i className="not-italic opacity-70">รอข้อมูลจากรายงาน</i>
+  </span>
+)
+
+/** The free size exchange rule, with the parts the report has not settled shown as pending. */
+export function ExchangeRule({ className = '' }: { className?: string }) {
+  return (
+    <div className={`text-sm ${className}`}>
+      <p>{EXCHANGE.rule}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {EXCHANGE.pending.map((p) => (
+          <Pending key={p} label={p} />
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export const Container = ({ children, className = '' }: { children: ReactNode; className?: string }) => (

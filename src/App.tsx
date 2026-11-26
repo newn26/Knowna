@@ -8,7 +8,6 @@ import { Account, OrderDetail, Track } from './pages/Orders'
 import Product from './pages/Product'
 import Shop from './pages/Shop'
 import SizeFinder from './pages/SizeFinder'
-import Soles from './pages/Soles'
 import NotFound from './pages/NotFound'
 
 function ScrollManager() {
@@ -44,7 +43,6 @@ export default function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product" element={<Product />} />
           <Route path="/size" element={<SizeFinder />} />
-          <Route path="/soles" element={<Soles />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/track" element={<Track />} />

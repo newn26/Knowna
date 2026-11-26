@@ -2,8 +2,8 @@
 // the mock API (src/lib/api.ts) for HTTP calls should not touch the UI.
 
 export type ColorId = 'black' | 'white' | 'brown'
-/** A whole new pair, or a replacement sole pair that slides into the rail under the shoe. */
-export type Kind = 'new' | 'sole'
+/** Only new pairs are sold. Kept as a field so old cart/order shapes still read the same. */
+export type Kind = 'new'
 
 export interface ColorInfo {
   id: ColorId
@@ -44,6 +44,17 @@ export interface Order {
   fulfilment: Fulfilment
   payment: Payment
   /** Seed orders are fully delivered; demo orders advance with the clock (see status.ts). */
+  timeScale: 'demo' | 'real'
+  /** The one free size exchange this order may use (one per order, not per pair). */
+  exchange?: Exchange
+}
+
+export interface Exchange {
+  lineKey: string
+  color: ColorId
+  fromSize: number
+  toSize: number
+  requestedAt: string
   timeScale: 'demo' | 'real'
 }
 

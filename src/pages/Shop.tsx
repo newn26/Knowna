@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { PHOTOS } from '../lib/photos'
 import { Container, PageHead, SWATCH, useReveal } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
-import { COLORS, PRODUCT, SIZES, SOLE } from '../lib/catalog'
+import { COLORS, EXCHANGE, PRODUCT, SIZES } from '../lib/catalog'
 import { baht } from '../lib/pricing'
 import type { ColorId } from '../lib/types'
 
@@ -21,7 +21,7 @@ export default function Shop() {
 
   return (
     <div ref={ref}>
-      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 พื้นถอดเปลี่ยนได้ทุกคู่ ด้วยรางสไลด์ + ล็อกท้าย" />
+      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ" />
       <Container>
         <div className="sticky top-16 z-20 -mx-4 flex flex-wrap items-center gap-2 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
           {COLORS.length > 1 && (['all', ...COLORS.map((c) => c.id)] as const).map((c) => (
@@ -84,26 +84,23 @@ export default function Shop() {
                     <p className="font-semibold tabular">{baht(PRODUCT.price)}</p>
                   </div>
                   <p className="mt-2 text-xs text-sub">
-                    มีของ {left.length}/{SIZES.length} ไซซ์ · พื้นอะไหล่ {baht(SOLE.price)}
+                    มีของ {left.length}/{SIZES.length} ไซซ์ · {EXCHANGE.short}
                   </p>
-                </Link>
-                <Link to={`/soles?color=${c.id}${size ? `&size=${size}` : ''}#buy`} className="mt-3 inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline">
-                  มีคู่นี้แล้ว? ซื้อแค่พื้นใหม่ <ArrowRight size={14} />
                 </Link>
               </article>
             )
           })}
         </div>
 
-        <Link to="/soles" className="reveal group mt-16 flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-8 text-paper sm:flex-row sm:items-center sm:p-10">
+        <Link to="/#exchange" className="reveal group mt-16 flex flex-col items-start justify-between gap-6 rounded-3xl bg-ink p-8 text-paper sm:flex-row sm:items-center sm:p-10">
           <div>
-            <p className="text-sm text-paper/60">พื้นรองเท้าอะไหล่</p>
+            <p className="text-sm text-paper/60">บริการหลังการขาย</p>
             <p className="mt-1 font-display text-3xl font-black uppercase sm:text-4xl" style={{ fontStretch: '80%' }}>
-              พื้นสึก เปลี่ยนแค่พื้น
+              สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้ง
             </p>
           </div>
           <span className="inline-flex items-center gap-2 rounded-full bg-paper px-5 py-3 text-sm font-semibold text-ink transition group-hover:gap-3">
-            {baht(SOLE.price)} · ดูวิธีเปลี่ยน <ArrowRight size={16} />
+            ดูเงื่อนไข <ArrowRight size={16} />
           </span>
         </Link>
       </Container>

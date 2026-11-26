@@ -4,6 +4,7 @@
 import { colorInfo } from './catalog'
 import { DEMO_USER, load, resetDB, save, stockKey } from './db'
 import { totals } from './pricing'
+import { orderSteps, reached } from './status'
 import type { CartLine, ColorId, Customer, Fulfilment, Order, Payment, User } from './types'
 
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms))
@@ -78,6 +79,27 @@ export async function listOrders(userId: string): Promise<Order[]> {
   return load()
     .orders.filter((o) => o.userId === userId)
     .map((o) => structuredClone(o))
+}
+
+// POST /api/orders/:id/exchange
+/** The free size exchange: once per order, only after the order has arrived, only for a pair in it. */
+export async function requestExchange(orderId: string, lineKey: string, toSize: number): Promise<Order> {
+  await wait(600)
+  const db = load()
+  const o = db.orders.find((x) => x.id === orderId)
+  if (!o) throw new ApiError('ไม่พบคำสั่งซื้อ')
+  if (o.exchange) throw new ApiError('คำสั่งซื้อนี้ใช้สิทธิ์เปลี่ยนไซซ์ไปแล้ว (ได้ 1 ครั้งต่อคำสั่งซื้อ)')
+  const steps = orderSteps(o)
+  if (reached(steps) < steps.length) throw new ApiError('ขอเปลี่ยนไซซ์ได้หลังได้รับสินค้าแล้ว')
+  const line = o.lines.find((l) => l.key === lineKey)
+  if (!line) throw new ApiError('ไม่พบรองเท้าคู่นี้ในคำสั่งซื้อ')
+  if (toSize === line.size) throw new ApiError('เลือกไซซ์ใหม่ที่ต่างจากเดิม')
+  if ((db.stock[stockKey(line.color, toSize)] ?? 0) < 1) throw new ApiError(`เบอร์ ${toSize} สี${colorInfo(line.color).nameTh} หมด เลือกไซซ์อื่น`)
+
+  db.stock[stockKey(line.color, toSize)] -= 1
+  o.exchange = { lineKey, color: line.color, fromSize: line.size, toSize, requestedAt: new Date().toISOString(), timeScale: 'demo' }
+  save()
+  return structuredClone(o)
 }
 
 // POST /api/auth/demo

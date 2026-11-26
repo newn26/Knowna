@@ -3,12 +3,12 @@
 import { COLORS, PRODUCT, SIZES } from './catalog'
 import type { ColorId, Order, User } from './types'
 
-const KEY = 'kw.db.v4'
+const KEY = 'kw.db.v5' // v5: sole kind removed, orders can carry one size exchange
 
 export interface DB {
   users: User[]
   orders: Order[]
-  stock: Record<string, number> // `${color}-${size}` → new pairs left (replacement soles are not stock-limited)
+  stock: Record<string, number> // `${color}-${size}` → new pairs left
 }
 
 export const stockKey = (color: ColorId, size: number) => `${color}-${size}`

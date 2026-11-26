@@ -102,7 +102,7 @@ export default function Checkout() {
               <h2 className="font-semibold">2 · รับสินค้า</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Choice on={fulfilment === 'delivery'} onClick={() => setFulfilment('delivery')} icon={Truck} title="จัดส่งถึงบ้าน" sub={`฿50 · ฟรีเมื่อครบ ฿${FREE_SHIPPING_FROM.toLocaleString()}`} />
-                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub="ฟรี · ลองไซซ์ได้ · ให้พนักงานช่วยเปลี่ยนพื้นได้" />
+                <Choice on={fulfilment === 'pickup'} onClick={() => setFulfilment('pickup')} icon={Store} title="รับที่สาขา" sub="ฟรี · ลองไซซ์ได้" />
               </div>
               <div className="mt-4">
                 {fulfilment === 'delivery' ? (
@@ -161,7 +161,7 @@ export default function Checkout() {
               {cart.map((l) => (
                 <li key={l.key} className="flex justify-between gap-3 py-3">
                   <span>
-                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'พื้นอะไหล่'} × {l.qty}
+                    สี{colorInfo(l.color).nameTh} · EU {l.size} · คู่ใหม่ × {l.qty}
                   </span>
                   <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
                 </li>

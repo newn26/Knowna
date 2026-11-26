@@ -1,12 +1,12 @@
-import { CheckCircle2, LogOut, Package } from 'lucide-react'
+import { CheckCircle2, LogOut, Package, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Shoe, ShoeFlat } from '../components/Shoe'
-import { Button, Container, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
-import { findOrder, getOrder, listOrders, loginDemo } from '../lib/api'
-import { colorInfo } from '../lib/catalog'
+import { Shoe } from '../components/Shoe'
+import { Button, Container, ExchangeRule, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
+import { ApiError, findOrder, getOrder, listOrders, loginDemo, requestExchange } from '../lib/api'
+import { SIZES, colorInfo } from '../lib/catalog'
 import { baht } from '../lib/pricing'
-import { orderSteps, reached } from '../lib/status'
+import { exchangeSteps, orderSteps, reached } from '../lib/status'
 import { actions, useStore } from '../lib/store'
 import type { ColorId, Order } from '../lib/types'
 
@@ -66,7 +66,7 @@ export function Track() {
         <div className="rounded-3xl bg-stone p-6 text-sm text-sub sm:p-8">
           <Package className="text-ink" />
           <p className="mt-4 font-semibold text-ink">มีบัญชีอยู่แล้ว?</p>
-          <p className="mt-1">ดูทุกคำสั่งซื้อ และสั่งพื้นใหม่ให้คู่ที่เคยซื้อได้ในหน้าบัญชี</p>
+          <p className="mt-1">ดูทุกคำสั่งซื้อ และขอเปลี่ยนไซซ์ฟรีได้ในหน้าบัญชี</p>
           <Link to="/account" className="mt-4 inline-block font-semibold text-ink underline underline-offset-4">
             ไปหน้าบัญชี →
           </Link>
@@ -135,6 +135,7 @@ export function OrderDetail() {
             <h2 className="mb-5 font-semibold">{o.fulfilment === 'pickup' ? 'สถานะการรับที่สาขา' : 'สถานะการจัดส่ง'}</h2>
             <Timeline steps={steps} now={now} />
           </section>
+          <ExchangePanel order={o} delivered={reached(steps, now) === steps.length} now={now} onChange={setO} />
         </div>
 
         <aside className="space-y-4">
@@ -144,10 +145,11 @@ export function OrderDetail() {
               {o.lines.map((l) => (
                 <li key={l.key} className="flex items-center gap-3 text-sm">
                   <div className="grid h-14 w-16 shrink-0 place-items-center rounded-xl bg-card">
-                    {l.kind === 'sole' ? <ShoeFlat color={l.color} side="sole" className="w-14" /> : <Shoe color={l.color} className="w-14" shadow={false} />}
+                    <Shoe color={l.color} className="w-14" shadow={false} />
                   </div>
                   <p className="min-w-0 flex-1 font-medium">
-                    สี{colorInfo(l.color).nameTh} · EU {l.size} · {l.kind === 'new' ? 'คู่ใหม่' : 'พื้นอะไหล่'} × {l.qty}
+                    สี{colorInfo(l.color).nameTh} · EU {l.size} · คู่ใหม่ × {l.qty}
+                    {o.exchange?.lineKey === l.key && <span className="block text-xs font-normal text-sub">เปลี่ยนเป็น EU {o.exchange.toSize} แล้ว</span>}
                   </p>
                   <span className="tabular">{baht(l.unitPrice * l.qty)}</span>
                 </li>
@@ -176,10 +178,120 @@ export function OrderDetail() {
               {o.customer.address}
             </p>
           </div>
-          <p className="px-1 text-xs text-sub">พื้นสึกเมื่อไร สั่งพื้นอะไหล่ไซซ์เดียวกับรองเท้าได้ที่หน้าพื้นรองเท้า</p>
         </aside>
       </div>
     </Container>
+  )
+}
+
+/** The one free size exchange of an order: ask for it once the order has arrived, then follow it like a delivery. */
+function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; delivered: boolean; now: number; onChange: (o: Order) => void }) {
+  const [open, setOpen] = useState(false)
+  const [lineKey, setLineKey] = useState(o.lines[0]?.key ?? '')
+  const line = o.lines.find((l) => l.key === lineKey)
+  const [toSize, setToSize] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  const head = (
+    <div className="flex items-start gap-3">
+      <RefreshCw size={20} className="mt-0.5 shrink-0 text-signal" />
+      <div>
+        <h2 className="font-semibold">เปลี่ยนไซซ์ฟรี 1 ครั้ง</h2>
+        <ExchangeRule className="mt-1 text-sub" />
+      </div>
+    </div>
+  )
+
+  if (o.exchange)
+    return (
+      <section className="rounded-3xl border border-line bg-card p-6">
+        {head}
+        <p className="mt-5 inline-block rounded-full bg-stone px-3 py-1 text-xs font-semibold">ใช้สิทธิ์เปลี่ยนไซซ์ของคำสั่งซื้อนี้แล้ว</p>
+        <div className="mt-5">
+          <Timeline steps={exchangeSteps(o)} now={now} />
+        </div>
+      </section>
+    )
+
+  const submit = async () => {
+    if (!line || toSize === null) return
+    setBusy(true)
+    setError('')
+    try {
+      onChange(await requestExchange(o.id, line.key, toSize))
+      actions.toast('ส่งคำขอเปลี่ยนไซซ์แล้ว')
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'ส่งคำขอไม่สำเร็จ ลองอีกครั้ง')
+    }
+    setBusy(false)
+  }
+
+  return (
+    <section className="rounded-3xl border border-line bg-card p-6">
+      {head}
+      {!delivered ? (
+        <p className="mt-5 text-sm text-sub">ขอเปลี่ยนไซซ์ได้หลังได้รับสินค้าแล้ว</p>
+      ) : !open ? (
+        <Button className="mt-5" onClick={() => setOpen(true)}>
+          ขอเปลี่ยนไซซ์ (ฟรี 1 ครั้ง)
+        </Button>
+      ) : (
+        <div className="mt-5 space-y-5">
+          {o.lines.length > 1 && (
+            <div>
+              <p className="mb-2 text-sm font-semibold">คู่ไหนไซซ์ไม่พอดี</p>
+              <div className="flex flex-wrap gap-2">
+                {o.lines.map((l) => (
+                  <button
+                    key={l.key}
+                    onClick={() => {
+                      setLineKey(l.key)
+                      setToSize(null)
+                    }}
+                    aria-pressed={l.key === lineKey}
+                    className={`h-10 rounded-full border px-4 text-sm font-medium transition ${l.key === lineKey ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink'}`}
+                  >
+                    สี{colorInfo(l.color).nameTh} · EU {l.size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {line && (
+            <div>
+              <p className="mb-2 text-sm font-semibold">ไซซ์ใหม่ (เดิม EU {line.size})</p>
+              <div className="flex flex-wrap gap-2">
+                {SIZES.filter((s) => s !== line.size).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setToSize(s)}
+                    aria-pressed={s === toSize}
+                    className={`h-10 w-12 rounded-xl border text-sm font-semibold tabular transition ${s === toSize ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink'}`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="text-xs text-sub">ใช้สิทธิ์ได้ 1 ครั้งต่อคำสั่งซื้อ ยืนยันแล้วเปลี่ยนไซซ์อีกไม่ได้</p>
+          {error && (
+            <p className="text-sm text-bad" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={submit} disabled={toSize === null || busy}>
+              {busy ? <Spinner /> : toSize === null ? 'เลือกไซซ์ใหม่ก่อน' : `ยืนยันเปลี่ยนเป็น EU ${toSize}`}
+            </Button>
+            <Button variant="ghost" onClick={() => setOpen(false)} disabled={busy}>
+              ยกเลิก
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -197,15 +309,20 @@ export function Account() {
     if (!user) return
     listOrders(user.id).then(setOrders)
   }, [user])
-  // every new pair this account bought, newest first: these are the shoes a sole can be ordered for
-  const pairs: { key: string; color: ColorId; size: number; at: string }[] = (orders ?? []).flatMap((o) =>
-    o.lines.filter((l) => l.kind === 'new').flatMap((l) => Array.from({ length: l.qty }, (_, i) => ({ key: `${o.id}-${l.key}-${i}`, color: l.color, size: l.size, at: o.createdAt }))),
+  // every pair this account bought, newest first; an exchanged pair shows its new size
+  const pairs: { key: string; orderId: string; color: ColorId; size: number; at: string; exchanged: boolean }[] = (orders ?? []).flatMap((o) =>
+    o.lines.flatMap((l) =>
+      Array.from({ length: l.qty }, (_, i) => {
+        const exchanged = o.exchange?.lineKey === l.key && i === 0
+        return { key: `${o.id}-${l.key}-${i}`, orderId: o.id, color: l.color, size: exchanged ? o.exchange!.toSize : l.size, at: o.createdAt, exchanged }
+      }),
+    ),
   )
 
   if (!user)
     return (
       <>
-        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ และสั่งพื้นใหม่ให้คู่ที่ใช้อยู่ได้ในคลิกเดียว" />
+        <PageHead title="บัญชีของฉัน" sub="ดูประวัติการสั่งซื้อ และขอเปลี่ยนไซซ์ฟรี 1 ครั้งต่อคำสั่งซื้อ" />
         <Container className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-line bg-card p-6 sm:p-8">
             <p className="font-semibold">เข้าสู่ระบบ (เดโม)</p>
@@ -254,16 +371,19 @@ export function Account() {
             {pairs.map((u) => (
               <div key={u.key} className="w-64 shrink-0 snap-start rounded-3xl border border-line bg-card p-4 sm:w-auto">
                 <div className="grid aspect-[4/3] place-items-center rounded-2xl bg-stone">
-                  <Shoe color={u.color} wear={8} className="w-[85%]" shadow={false} />
+                  <Shoe color={u.color} className="w-[85%]" shadow={false} />
                 </div>
                 <div className="mt-3 text-sm">
                   <p className="font-semibold">
                     สี{colorInfo(u.color).nameTh} · EU {u.size}
                   </p>
-                  <p className="text-xs text-sub">ซื้อเมื่อ {new Date(u.at).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</p>
+                  <p className="text-xs text-sub">
+                    ซื้อเมื่อ {new Date(u.at).toLocaleDateString('th-TH', { dateStyle: 'medium' })}
+                    {u.exchanged && ' · เปลี่ยนไซซ์แล้ว'}
+                  </p>
                 </div>
-                <Link to={`/soles?color=${u.color}&size=${u.size}#buy`} className="mt-3 block rounded-full border border-ink py-2 text-center text-xs font-semibold transition hover:bg-ink hover:text-paper">
-                  พื้นสึกแล้ว? สั่งพื้นใหม่
+                <Link to={`/order/${u.orderId}`} className="mt-3 block rounded-full border border-ink py-2 text-center text-xs font-semibold transition hover:bg-ink hover:text-paper">
+                  ดูคำสั่งซื้อ / เปลี่ยนไซซ์
                 </Link>
               </div>
             ))}
@@ -313,7 +433,7 @@ function OrderList({ orders }: { orders: Order[] | null }) {
               <span className="font-semibold tabular">{o.id}</span>
               <span className="text-sm text-sub">{new Date(o.createdAt).toLocaleDateString('th-TH', { dateStyle: 'medium' })}</span>
               <span className="text-sm text-sub">{o.lines.reduce((n, l) => n + l.qty, 0)} ชิ้น</span>
-              {o.lines.some((l) => l.kind === 'sole') && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">พื้นอะไหล่</span>}
+              {o.exchange && <span className="rounded-full bg-signal/10 px-2 py-0.5 text-xs font-semibold text-signal">เปลี่ยนไซซ์แล้ว</span>}
               <span className={`ml-auto text-sm ${done ? 'text-ok' : 'font-semibold'}`}>{done ? 'สำเร็จ' : s[reached(s) - 1]?.label}</span>
               <span className="w-20 text-right font-semibold tabular">{baht(o.total)}</span>
             </Link>

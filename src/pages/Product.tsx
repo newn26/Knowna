@@ -1,10 +1,10 @@
-import { ArrowRight, ChevronDown, Layers, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
+import { ArrowRight, ChevronDown, RefreshCw, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
-import { Button, ColorPicker, Container, Price, Qty, SizeGrid, useDialog } from '../components/ui'
+import { Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
-import { COLORS, FREE_SHIPPING_FROM, PRODUCT, SIZES, SOLE, colorInfo } from '../lib/catalog'
+import { COLORS, EXCHANGE, FREE_SHIPPING_FROM, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
 import type { ColorId } from '../lib/types'
 import { SizeTable } from './SizeFinder'
@@ -179,11 +179,11 @@ export default function Product() {
               <Qty value={qty} onChange={setQty} max={Math.max(1, Math.min(10, left ?? 10))} />
             </div>
 
-            <Link to={`/soles?color=${color}${size ? `&size=${size}` : ''}`} className="group flex gap-4 rounded-2xl border border-line p-4 transition hover:border-ink">
-              <Layers size={20} className="mt-0.5 shrink-0 text-signal" />
+            <Link to="/#exchange" className="group flex gap-4 rounded-2xl border border-line p-4 transition hover:border-ink">
+              <RefreshCw size={20} className="mt-0.5 shrink-0 text-signal" />
               <span className="flex-1">
-                <span className="block font-semibold">พื้นถอดเปลี่ยนได้</span>
-                <span className="mt-1 block text-sm text-sub">รางสไลด์ + ล็อกท้าย พื้นสึกเมื่อไร ซื้อแค่พื้นใหม่ {baht(SOLE.price)} เปลี่ยนเองที่บ้านได้</span>
+                <span className="block font-semibold">{EXCHANGE.short}</span>
+                <span className="mt-1 block text-sm text-sub">ได้รับแล้วไซซ์ไม่พอดี ขอเปลี่ยนได้ในหน้าคำสั่งซื้อ 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
               </span>
               <ArrowRight size={18} className="mt-0.5 shrink-0 transition group-hover:translate-x-1" />
             </Link>
@@ -207,10 +207,10 @@ export default function Product() {
                 <Truck size={16} /> ส่งฟรีเมื่อครบ {baht(FREE_SHIPPING_FROM)}
               </li>
               <li className="flex items-center gap-2">
-                <Ruler size={16} /> เปลี่ยนไซซ์ฟรี 14 วัน
+                <Ruler size={16} /> เปลี่ยนไซซ์ฟรี 1 ครั้ง/บิล
               </li>
               <li className="flex items-center gap-2">
-                <ShieldCheck size={16} /> รับประกันสลักล็อก 6 เดือน
+                <ShieldCheck size={16} /> ส่งคู่ใหม่ฟรี
               </li>
             </ul>
 
@@ -232,11 +232,8 @@ export default function Product() {
                   ))}
                 </dl>
               </Accordion>
-              <Accordion title="เปลี่ยนพื้นยังไง">
-                กดสลักที่ส้นค้างไว้ ดึงพื้นเก่าออกทางส้น แล้วสไลด์พื้นใหม่เข้าจากส้นไปหาปลายเท้าจนได้ยินเสียงคลิก พื้นอะไหล่ชุดละ {baht(SOLE.price)} ต้องไซซ์เดียวกับรองเท้า{' '}
-                <Link to="/soles" className="text-ink underline">
-                  ดูวิธีเปลี่ยนแบบภาพ
-                </Link>
+              <Accordion title="เงื่อนไขเปลี่ยนไซซ์">
+                <ExchangeRule />
               </Accordion>
             </div>
           </div>

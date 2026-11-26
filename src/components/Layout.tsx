@@ -5,13 +5,13 @@ import { colorInfo } from '../lib/catalog'
 import { resetDemo } from '../lib/api'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
-import { Shoe, ShoeFlat } from './Shoe'
+import { Shoe } from './Shoe'
 import { buttonClass, Container, Num, useDialog } from './ui'
 
 const NAV = [
   { to: '/shop', label: 'ซื้อคู่ใหม่' },
-  { to: '/soles', label: 'พื้นรองเท้า' },
   { to: '/size', label: 'หาไซซ์' },
+  { to: '/#exchange', label: 'เปลี่ยนไซซ์ฟรี' },
   { to: '/track', label: 'ติดตามพัสดุ' },
 ]
 
@@ -67,9 +67,11 @@ function Header() {
             <NavLink
               key={n.to}
               to={n.to}
-              className={({ isActive }) =>
-                `relative rounded-full px-3.5 py-2 text-sm font-medium transition hover:text-ink before:absolute before:inset-x-3.5 before:bottom-1 before:h-px before:origin-left before:bg-current before:transition-transform before:duration-300 hover:before:scale-x-100 ${isActive ? 'text-ink before:scale-x-100' : 'text-sub before:scale-x-0'} ${n.to === '/soles' ? 'after:absolute after:right-1.5 after:top-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-signal' : ''}`
-              }
+              end
+              className={({ isActive: active }) => {
+                const isActive = active && !n.to.includes('#') // the exchange link points into Home, so it is never "the current page"
+                return `relative rounded-full px-3.5 py-2 text-sm font-medium transition hover:text-ink before:absolute before:inset-x-3.5 before:bottom-1 before:h-px before:origin-left before:bg-current before:transition-transform before:duration-300 hover:before:scale-x-100 ${isActive ? 'text-ink before:scale-x-100' : 'text-sub before:scale-x-0'} ${n.to === '/#exchange' ? 'after:absolute after:right-1.5 after:top-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-signal' : ''}`
+              }}
             >
               {n.label}
             </NavLink>
@@ -138,7 +140,6 @@ function CartSheet({ leaving }: { leaving: boolean }) {
   const navigate = useNavigate()
   const ref = useDialog<HTMLDivElement>(() => actions.openCart(false))
   const t = totals(cart)
-  const hasSole = cart.some((l) => l.kind === 'sole')
   return (
     <div ref={ref} className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="ตะกร้าสินค้า">
       <div className={`absolute inset-0 animate-fade bg-black/40 transition-opacity duration-300 ${leaving ? 'opacity-0' : ''}`} onClick={() => actions.openCart(false)} />
@@ -163,14 +164,14 @@ function CartSheet({ leaving }: { leaving: boolean }) {
               {cart.map((l) => (
                 <li key={l.key} className="flex gap-4 py-4">
                   <div className="grid h-20 w-24 shrink-0 place-items-center rounded-xl bg-stone">
-                    {l.kind === 'sole' ? <ShoeFlat color={l.color} side="sole" className="w-20" /> : <Shoe color={l.color} className="w-20" shadow={false} />}
+                    <Shoe color={l.color} className="w-20" shadow={false} />
                   </div>
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="font-semibold">
                       สี{colorInfo(l.color).nameTh} · EU {l.size}
                     </p>
                     <p className="text-sub">
-                      {l.kind === 'new' ? `คู่ใหม่ · ${l.qty} คู่` : `พื้นอะไหล่ · ${l.qty} ชุด`}
+                      คู่ใหม่ · {l.qty} คู่
                     </p>
                     <p className="mt-1 tabular">{baht(l.unitPrice * l.qty)}</p>
                   </div>
@@ -184,14 +185,9 @@ function CartSheet({ leaving }: { leaving: boolean }) {
         </div>
         {cart.length > 0 && (
           <div className="border-t border-line px-5 py-4">
-            {!hasSole && (
-              <Link to="/soles" className="mb-3 flex items-center justify-between rounded-xl bg-stone px-4 py-3 text-sm transition hover:bg-line">
-                <span>
-                  พื้นคู่เดิมสึกแล้ว? <b>พื้นใหม่ ฿199</b>
-                </span>
-                <span>→</span>
-              </Link>
-            )}
+            <p className="mb-3 rounded-xl bg-stone px-4 py-3 text-sm">
+              ไซซ์ไม่พอดี? <b>เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</b>
+            </p>
             <dl className="space-y-1 text-sm tabular">
               <div className="flex justify-between">
                 <dt className="text-sub">ยอดสินค้า</dt>
@@ -238,11 +234,11 @@ function Footer() {
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Wordmark className="text-4xl" />
-            <p className="mt-4 max-w-xs text-sm text-paper/60">รองเท้านักเรียนชายคู่เดียวที่ตั้งใจทำให้ดีที่สุด พื้นสึกเมื่อไร เปลี่ยนแค่พื้น ไม่ต้องทิ้งทั้งคู่</p>
+            <p className="mt-4 max-w-xs text-sm text-paper/60">รองเท้านักเรียนที่มาพร้อมบริการหลังการขาย สั่งไซซ์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ</p>
           </div>
           {[
-            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/soles#buy', 'พื้นอะไหล่'], ['/size', 'หาไซซ์']]],
-            ['พื้นรองเท้า', [['/soles', 'วิธีเปลี่ยนพื้น'], ['/#how-it-locks', 'รางสไลด์ + ล็อกท้าย'], ['/soles', 'การดูแลราง']]],
+            ['ช้อป', [['/shop', 'รองเท้าใหม่'], ['/size', 'หาไซซ์']]],
+            ['เปลี่ยนไซซ์', [['/#exchange', 'เงื่อนไขเปลี่ยนไซซ์ฟรี'], ['/account', 'ขอเปลี่ยนไซซ์']]],
             ['ช่วยเหลือ', [['/track', 'ติดตามพัสดุ'], ['/account', 'ประวัติการสั่งซื้อ'], ['/size', 'วิธีวัดเท้า']]],
           ].map(([h, links]) => (
             <div key={h as string}>

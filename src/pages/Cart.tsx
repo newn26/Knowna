@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe, ShoeFlat } from '../components/Shoe'
+import { Shoe } from '../components/Shoe'
 import { Container, LinkButton, Num, PageHead, Qty } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
 import { colorInfo } from '../lib/catalog'
@@ -39,7 +39,6 @@ export function Summary({ lines, shipping, children }: { lines: CartLine[]; ship
 
 export default function Cart() {
   const cart = useStore((s) => s.cart)
-  const hasSole = cart.some((l) => l.kind === 'sole')
   const [stock, setStock] = useState<Record<string, number> | null>(null)
   useEffect(() => {
     getStock().then(setStock)
@@ -48,11 +47,11 @@ export default function Cart() {
   if (!cart.length)
     return (
       <>
-        <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ หรือพื้นอะไหล่สำหรับคู่เดิม" />
+        <PageHead title="ตะกร้าว่าง" sub="เลือกรองเท้าคู่ใหม่ ไม่แน่ใจไซซ์ ใช้หน้าหาไซซ์ช่วยเลือกก่อนได้" />
         <Container className="flex gap-3">
           <LinkButton to="/shop">ซื้อคู่ใหม่</LinkButton>
-          <LinkButton to="/soles" variant="outline">
-            ซื้อพื้นอะไหล่
+          <LinkButton to="/size" variant="outline">
+            หาไซซ์
           </LinkButton>
         </Container>
       </>
@@ -66,8 +65,8 @@ export default function Cart() {
           <ul className="divide-y divide-line border-y border-line">
             {cart.map((l) => (
               <li key={l.key} className="flex gap-4 py-5">
-                <Link to={l.kind === 'sole' ? `/soles?color=${l.color}&size=${l.size}#buy` : `/product?color=${l.color}&size=${l.size}`} aria-label={`ดูสี${colorInfo(l.color).nameTh} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
-                  {l.kind === 'sole' ? <ShoeFlat color={l.color} side="sole" className="w-[88%]" /> : <Shoe color={l.color} className="w-[88%]" shadow={false} />}
+                <Link to={`/product?color=${l.color}&size=${l.size}`} aria-label={`ดูสี${colorInfo(l.color).nameTh} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
+                  <Shoe color={l.color} className="w-[88%]" shadow={false} />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex justify-between gap-3">
@@ -75,12 +74,12 @@ export default function Cart() {
                       <p className="font-semibold">
                         สี{colorInfo(l.color).nameTh} · EU {l.size}
                       </p>
-                      <p className="text-sm text-sub">{l.kind === 'new' ? 'รองเท้าคู่ใหม่' : 'พื้นอะไหล่ (ซ้าย + ขวา)'}</p>
+                      <p className="text-sm text-sub">รองเท้าคู่ใหม่</p>
                     </div>
                     <p className="font-semibold tabular">{baht(l.unitPrice * l.qty)}</p>
                   </div>
                   <div className="mt-auto flex items-center justify-between pt-3">
-                    <Qty value={l.qty} onChange={(n) => actions.setQty(l.key, n)} max={l.kind === 'sole' ? 10 : stock ? Math.min(10, stockOf(stock, l.color, l.size)) : l.qty} />
+                    <Qty value={l.qty} onChange={(n) => actions.setQty(l.key, n)} max={stock ? Math.min(10, stockOf(stock, l.color, l.size)) : l.qty} />
                     <button onClick={() => actions.removeLine(l.key)} className="grid h-10 w-10 place-items-center rounded-full text-sub hover:bg-ink/5 hover:text-ink" aria-label="ลบ">
                       <Trash2 size={18} />
                     </button>
@@ -89,15 +88,13 @@ export default function Cart() {
               </li>
             ))}
           </ul>
-          {!hasSole && (
-            <Link to="/soles#buy" className="mt-6 flex items-center justify-between rounded-2xl bg-ink p-5 text-paper transition hover:bg-ink/90">
-              <span>
-                <b>มีคู่เดิมที่พื้นสึกแล้ว?</b>
-                <span className="block text-sm text-paper/70">สั่งพื้นใหม่มาด้วยเลย ส่งพร้อมกันในกล่องเดียว</span>
-              </span>
-              <span className="font-semibold">พื้นใหม่ ฿199 →</span>
-            </Link>
-          )}
+          <Link to="/size" className="mt-6 flex items-center justify-between rounded-2xl bg-ink p-5 text-paper transition hover:bg-ink/90">
+            <span>
+              <b>ไม่แน่ใจไซซ์?</b>
+              <span className="block text-sm text-paper/70">ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซซ์ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
+            </span>
+            <span className="font-semibold">หาไซซ์ →</span>
+          </Link>
         </div>
         <div className="lg:sticky lg:top-24 lg:self-start">
           <Summary lines={cart}>
