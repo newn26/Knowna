@@ -16,7 +16,11 @@ function ScrollManager() {
   useEffect(() => {
     if (hash) {
       const el = document.getElementById(hash.slice(1))
-      if (el) return el.scrollIntoView({ behavior: 'smooth' })
+      // no `return el.scrollIntoView()`: newer browsers return a promise, and React would call it as the cleanup
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
     }
     window.scrollTo(0, 0)
   }, [pathname, hash])
