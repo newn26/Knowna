@@ -26,11 +26,15 @@ export const PRODUCT = {
 
 /** Free size exchange from Ecommerce Report.pdf: once per order, brand pays shipping for the new pair. */
 export const EXCHANGE = {
+  days: 3, // ask within 3 days of receiving the order (owner, 2026-11-27)
   short: 'สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้ง',
-  rule: 'เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ หากสั่งไซส์ผิด แบรนด์เป็นผู้ออกค่าจัดส่งรองเท้าคู่ใหม่',
+  rule: 'เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ภายใน 3 วันหลังได้รับสินค้า หากสั่งไซส์ผิด แบรนด์เป็นผู้ออกค่าจัดส่งรองเท้าคู่ใหม่',
   // PENDING-PDF: the report has not filled these in yet; keep them as pending labels, do not guess
-  pending: ['ระยะเวลาที่ขอเปลี่ยนได้', 'ค่าส่งรองเท้าคู่เดิมกลับ', 'ต้องส่งคู่เดิมคืนก่อนหรือไม่'],
+  pending: ['ค่าส่งรองเท้าคู่เดิมกลับ', 'ต้องส่งคู่เดิมคืนก่อนหรือไม่'],
 }
+
+/** Last moment the free exchange can be asked for: EXCHANGE.days after the order arrived. */
+export const exchangeDeadline = (deliveredAt: number) => deliveredAt + EXCHANGE.days * 86400000
 
 export const ALL_COLORS: ColorInfo[] = [
   { id: 'brown', name: 'Brown', nameTh: 'น้ำตาล', hint: 'ชุดลูกเสือ และโรงเรียนที่ใช้ผ้าใบน้ำตาล', code: 'BR' },

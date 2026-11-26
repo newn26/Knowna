@@ -1,9 +1,9 @@
 // Run with `npm test`. Checks pricing, addresses, the mock order flow and the free size exchange end to end.
 import assert from 'node:assert/strict'
-import { ApiError, findOrder, getStock, placeOrder, requestExchange, stockOf } from '../src/lib/api'
+import { ApiError, findOrder, getStock, listOrders, placeOrder, requestExchange, stockOf } from '../src/lib/api'
 import { resetDB } from '../src/lib/db'
 import { totals } from '../src/lib/pricing'
-import { GRADES, PRODUCT, PROVINCES, SIZES, formatAddress, needsRemeasure, nextReminder, sizeForFoot, sizeFromBrand } from '../src/lib/catalog'
+import { GRADES, PRODUCT, PROVINCES, SIZES, exchangeDeadline, formatAddress, needsRemeasure, nextReminder, sizeForFoot, sizeFromBrand } from '../src/lib/catalog'
 import { replyTo } from '../src/components/SizeChat'
 import type { CartLine } from '../src/lib/types'
 
@@ -97,19 +97,26 @@ await test('exchange: not before delivery', async () => {
   await rejects(requestExchange(o.id, o.lines[0].key, 36))
 })
 
-await test('exchange: once per order on a delivered seed order, takes stock of the new size', async () => {
-  // seed order KN-240510-0031 was delivered long ago and has two brown pairs (EU 33 and 35)
-  const id = 'KN-240510-0031'
+// the seed's recent order arrived ~1 day ago (inside the 3-day window) and has two brown pairs (EU 33 and 35)
+const recentId = (await listOrders('u-demo')).find((o) => o.id.endsWith('-0218'))!.id
+
+await test('exchange: same size is refused', async () => {
+  await assert.rejects(requestExchange(recentId, `${recentId}-0`, 33), /ต่างจากเดิม/)
+})
+
+await test('exchange: once per order within 3 days of delivery, takes stock of the new size', async () => {
   const before = stockOf(await getStock(), 'brown', 34) // the seed pins brown 34 at 24 pairs
-  const o = await requestExchange(id, `${id}-0`, 34)
+  const o = await requestExchange(recentId, `${recentId}-0`, 34)
   assert.equal(o.exchange?.fromSize, 33)
   assert.equal(o.exchange?.toSize, 34)
   assert.equal(stockOf(await getStock(), 'brown', 34), before - 1)
-  await rejects(requestExchange(id, `${id}-1`, 36)) // the other pair cannot use a second exchange
+  await assert.rejects(requestExchange(recentId, `${recentId}-1`, 36), /ใช้สิทธิ์/) // the other pair cannot use a second exchange
 })
 
-await test('exchange: same size is refused', async () => {
-  await rejects(requestExchange('KN-250502-0107', 'KN-250502-0107-0', 36))
+await test('exchange: refused more than 3 days after delivery', async () => {
+  await assert.rejects(requestExchange('KN-240510-0031', 'KN-240510-0031-0', 34), /เลยกำหนด/)
+  const deliveredAt = Date.UTC(2026, 0, 1)
+  assert.equal(exchangeDeadline(deliveredAt) - deliveredAt, 3 * 86400000)
 })
 
 console.log(`\n${passed} passed`)

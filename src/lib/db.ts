@@ -3,7 +3,7 @@
 import { COLORS, PRODUCT, SIZES } from './catalog'
 import type { ColorId, Order, User } from './types'
 
-const KEY = 'kw.db.v6' // v6: price 259 incl. shipping, no store pickup, PromptPay only, EU 28–45
+const KEY = 'kw.db.v7' // v7: 3-day exchange window, plus a recent demo order still inside it
 
 export interface DB {
   users: User[]
@@ -59,7 +59,11 @@ function seed(): DB {
       timeScale: 'real',
     }
   }
+  // placed 5 days before the seed, so it arrived ~1 day ago and is still inside the 3-day exchange window
+  const recent = new Date(Date.now() - 5 * 86400000)
+  const recentId = `KN-${recent.toISOString().slice(2, 10).replace(/-/g, '')}-0218`
   const orders = [
+    pastOrder(recentId, recent.toISOString(), [['brown', 33], ['brown', 35]], DEMO_USER.id),
     pastOrder('KN-250502-0107', '2025-05-02T14:40:00+07:00', [['white', 36]], DEMO_USER.id),
     pastOrder('KN-240510-0031', '2024-05-10T10:12:00+07:00', [['brown', 33], ['brown', 35]], DEMO_USER.id),
     pastOrder('KN-240623-0412', '2024-06-23T16:20:00+07:00', [['brown', 38]], null),

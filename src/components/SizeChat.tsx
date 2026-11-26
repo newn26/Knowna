@@ -28,7 +28,7 @@ export function replyTo(text: string): Msg {
     return shop('ให้ลูกยืนบนกระดาษ ส้นเท้าชิดผนัง ขีดเส้นที่ปลายนิ้วที่ยาวที่สุด แล้ววัดจากผนังถึงเส้น ได้กี่เซนติเมตรครับ', {
       chips: Array.from({ length: 11 }, (_, i) => ({ label: `${17 + i} ซม.` })),
     })
-  if (said === T.exchange) return shop('ได้ครับ ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่ให้ กดขอเปลี่ยนได้ในหน้าคำสั่งซื้อ', { chips: AGAIN })
+  if (said === T.exchange) return shop('ได้ครับ ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ ภายใน 3 วันหลังได้รับสินค้า แบรนด์ออกค่าส่งคู่ใหม่ให้ กดขอเปลี่ยนได้ในหน้าคำสั่งซื้อ', { chips: AGAIN })
 
   const n = Number(text.match(/\d+(\.\d+)?/)?.[0])
   const brand = BRANDS.find((b) => text.toLowerCase().includes(b.name.toLowerCase()))

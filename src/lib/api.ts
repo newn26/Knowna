@@ -1,7 +1,7 @@
 // The one place the UI gets data from. Every function is async and returns plain
 // data, so moving to a real backend means replacing each body with a fetch() call
 // (suggested REST route in the comment above each function) and deleting db.ts.
-import { colorInfo } from './catalog'
+import { EXCHANGE, colorInfo, exchangeDeadline } from './catalog'
 import { DEMO_USER, load, resetDB, save, stockKey } from './db'
 import { totals } from './pricing'
 import { orderSteps, reached } from './status'
@@ -89,6 +89,7 @@ export async function requestExchange(orderId: string, lineKey: string, toSize: 
   if (o.exchange) throw new ApiError('คำสั่งซื้อนี้ใช้สิทธิ์เปลี่ยนไซส์ไปแล้ว (ได้ 1 ครั้งต่อคำสั่งซื้อ)')
   const steps = orderSteps(o)
   if (reached(steps) < steps.length) throw new ApiError('ขอเปลี่ยนไซส์ได้หลังได้รับสินค้าแล้ว')
+  if (Date.now() > exchangeDeadline(steps[steps.length - 1].at)) throw new ApiError(`เลยกำหนดแล้ว ขอเปลี่ยนไซส์ได้ภายใน ${EXCHANGE.days} วันหลังได้รับสินค้า`)
   const line = o.lines.find((l) => l.key === lineKey)
   if (!line) throw new ApiError('ไม่พบรองเท้าคู่นี้ในคำสั่งซื้อ')
   if (toSize === line.size) throw new ApiError('เลือกไซส์ใหม่ที่ต่างจากเดิม')

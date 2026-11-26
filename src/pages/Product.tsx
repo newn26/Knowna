@@ -165,7 +165,7 @@ export default function Product() {
               <RefreshCw size={20} className="mt-0.5 shrink-0 text-signal" />
               <span className="flex-1">
                 <span className="block font-semibold">{EXCHANGE.short}</span>
-                <span className="mt-1 block text-sm text-sub">ได้รับแล้วไซส์ไม่พอดี ขอเปลี่ยนได้ในหน้าคำสั่งซื้อ 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
+                <span className="mt-1 block text-sm text-sub">ได้รับแล้วไซส์ไม่พอดี ขอเปลี่ยนได้ในหน้าคำสั่งซื้อภายใน 3 วัน 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
               </span>
               <ArrowRight size={18} className="mt-0.5 shrink-0 transition group-hover:translate-x-1" />
             </Link>

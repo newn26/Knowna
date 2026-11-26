@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PHOTOS } from '../lib/photos'
 import { Button, Container, ExchangeRule, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
 import { ApiError, findOrder, getOrder, listOrders, loginDemo, requestExchange } from '../lib/api'
-import { GRADES, SIZES, colorInfo, needsRemeasure, nextReminder, sizeForFoot } from '../lib/catalog'
+import { EXCHANGE, GRADES, SIZES, colorInfo, exchangeDeadline, needsRemeasure, nextReminder, sizeForFoot } from '../lib/catalog'
 import { baht } from '../lib/pricing'
 import { exchangeSteps, orderSteps, reached } from '../lib/status'
 import { actions, useStore } from '../lib/store'
@@ -192,6 +192,10 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
   const [toSize, setToSize] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const steps = orderSteps(o)
+  const deadline = exchangeDeadline(steps[steps.length - 1].at)
+  const expired = delivered && now > deadline
+  const until = new Date(deadline).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' })
 
   const head = (
     <div className="flex items-start gap-3">
@@ -231,11 +235,14 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     <section className="rounded-3xl border border-line bg-card p-6">
       {head}
       {!delivered ? (
-        <p className="mt-5 text-sm text-sub">ขอเปลี่ยนไซส์ได้หลังได้รับสินค้าแล้ว</p>
+        <p className="mt-5 text-sm text-sub">ขอเปลี่ยนไซส์ได้หลังได้รับสินค้าแล้ว ภายใน {EXCHANGE.days} วัน</p>
+      ) : expired ? (
+        <p className="mt-5 inline-block rounded-full bg-stone px-3 py-1 text-xs font-semibold">หมดเวลาขอเปลี่ยนไซส์แล้ว (ขอได้ถึง {until})</p>
       ) : !open ? (
-        <Button className="mt-5" onClick={() => setOpen(true)}>
-          ขอเปลี่ยนไซส์ (ฟรี 1 ครั้ง)
-        </Button>
+        <div className="mt-5 flex flex-wrap items-center gap-4">
+          <Button onClick={() => setOpen(true)}>ขอเปลี่ยนไซส์ (ฟรี 1 ครั้ง)</Button>
+          <p className="text-sm text-sub">ขอได้ถึง {until}</p>
+        </div>
       ) : (
         <div className="mt-5 space-y-5">
           {o.lines.length > 1 && (
