@@ -1,6 +1,6 @@
 import { ArrowDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { PHOTOS } from '../lib/photos'
+import { FOOT } from '../lib/photos'
 import { Container } from './ui'
 
 // The same two steps the size page already lists, split into four scroll chapters.
@@ -11,9 +11,12 @@ const CHAPTERS = [
   { id: 'done', label: 'ได้ไซส์', h: 'กรอกตัวเลข ได้เบอร์', d: 'เลื่อนลงไปกรอกความยาวเท้า ระบบบอกเบอร์ที่แนะนำให้ ถ้าได้รับแล้วไม่พอดี เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ' },
 ] as const
 
-// Where the shoe sits inside brown-side.webp (alpha bounding box), in % of the image: the toe is on the left, the heel on the right.
-const TOE = 2
-const HEEL = 98
+// Where the foot sits inside foot-side.webp (alpha bounding box), in % of the image: the toes are on the left, the heel on the right.
+const TOE = 1
+const HEEL = 99
+// The example reading the ruler shows: wall (heel) to the toe line.
+const EXAMPLE_CM = 22.5
+const MARKS = [0, 5, 10, 15, 20]
 
 /** Full-screen, scroll-driven: the photo stays put while the measuring marks draw in, one chapter at a time. */
 export function MeasureStory() {
@@ -88,24 +91,33 @@ export function MeasureStory() {
             <div className={`absolute -top-[30%] bottom-[-10%] w-3 rounded-sm bg-ink/80 ${show(at('paper'))}`} style={{ left: `calc(${HEEL}% + 2px)` }}>
               <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-sub">ผนัง</span>
             </div>
-            <img src={PHOTOS.brown.side.src} alt="" className="relative w-full drop-shadow-[0_24px_24px_rgba(0,0,0,.18)]" />
+            <img src={FOOT.src} alt="" className="relative w-full drop-shadow-[0_24px_24px_rgba(0,0,0,.18)]" />
             {/* pen line at the toe */}
             <div className={`absolute bottom-[-6%] top-[30%] w-0 border-l-[3px] border-dashed border-signal ${show(at('mark'))}`} style={{ left: `${TOE}%` }}>
               <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-signal">เส้นปลายนิ้ว</span>
             </div>
             {/* ruler + arrow from the wall to the line */}
             <div className={`absolute inset-x-0 top-[104%] ${show(at('measure'))}`}>
-              <div className="relative h-9 rounded-sm bg-[#e9d9a8] shadow-sm" style={{ marginLeft: `${TOE}%`, marginRight: `${100 - HEEL}%` }}>
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(0,0,0,.55)_0_1px,transparent_1px_4.166%)] [mask-image:linear-gradient(to_bottom,black_0_45%,transparent_45%)]" />
-                <div className="absolute inset-y-[58%] right-0 h-[3px] origin-right bg-signal" style={{ width: '100%', transform: `scaleX(${grow})` }} />
+              {/* 0 cm at the wall (right), counting toward the toes (left); one tick per cm */}
+              <div className="relative h-10 rounded-sm bg-[#e9d9a8] text-[#3b3324] shadow-sm" style={{ marginLeft: `${TOE}%`, marginRight: `${100 - HEEL}%` }}>
+                {Array.from({ length: Math.floor(EXAMPLE_CM) + 1 }, (_, cm) => (
+                  <span key={cm} className={`absolute top-0 w-px bg-black/60 ${cm % 5 === 0 ? 'h-[55%]' : 'h-[30%]'}`} style={{ right: `${(cm / EXAMPLE_CM) * 100}%` }} />
+                ))}
+                {MARKS.map((cm) => (
+                  <span key={cm} className="absolute bottom-1.5 translate-x-1/2 text-[12px] font-bold leading-none tabular" style={{ right: `${(cm / EXAMPLE_CM) * 100}%` }}>
+                    {cm}
+                  </span>
+                ))}
+                <div className="absolute -bottom-1.5 right-0 h-[3px] origin-right rounded-full bg-signal" style={{ width: '100%', transform: `scaleX(${grow})` }} />
               </div>
               <p className="mt-3 text-center text-sm font-semibold">
-                ความยาวเท้า = ระยะจากผนังถึงเส้น <span className="text-sub">(หน่วยเซนติเมตร)</span>
+                ความยาวเท้า = ระยะจากผนังถึงเส้น{' '}
+                <span className={`inline-block rounded-full bg-signal px-2.5 py-0.5 text-paper tabular transition-opacity duration-500 ${grow >= 1 ? 'opacity-100' : 'opacity-0'}`}>ตัวอย่าง: {EXAMPLE_CM} ซม.</span>
               </p>
             </div>
           </figure>
         </Container>
-        <p className="absolute bottom-3 right-4 text-xs text-sub">ภาพประกอบ: รองเท้า KNOWNA (ภาพ AI) แทนตำแหน่งเท้า</p>
+        <p className="absolute bottom-3 left-4 text-xs text-sub sm:left-6 lg:left-10">ภาพเท้า: Foot-outside.jpg จาก Wikimedia Commons (สาธารณสมบัติ)</p>
       </div>
     </section>
   )
