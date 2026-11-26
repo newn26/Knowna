@@ -1,4 +1,4 @@
-import { QrCode, Truck } from 'lucide-react'
+import { QrCode, Truck, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
@@ -82,6 +82,11 @@ export default function Checkout() {
     }
   }
   const total = totals(cart).total
+  // demo shortcut for showing the flow quickly: the demo parent's details (same as the demo account)
+  const fillDemo = () => {
+    setForm({ name: 'คุณนภา ใจดี', phone: '0812345678', email: 'napa@example.com', line: '99/12 ซ.ลาดพร้าว 71', subdistrict: 'ลาดพร้าว', district: 'ลาดพร้าว', province: 'กรุงเทพมหานคร', zip: '10230' })
+    setErrors({})
+  }
 
   return (
     <>
@@ -89,6 +94,12 @@ export default function Checkout() {
       <Container>
         <form onSubmit={submit} noValidate className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div className="space-y-10">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-line px-4 py-3">
+              <p className="text-sm text-sub">เว็บสาธิต: กรอกทุกช่องด้วยข้อมูลตัวอย่างในคลิกเดียว</p>
+              <Button type="button" size="sm" variant="outline" onClick={fillDemo}>
+                <Wand2 size={15} /> กรอกข้อมูลตัวอย่าง
+              </Button>
+            </div>
             <section>
               <h2 className="font-semibold">1 · ข้อมูลผู้สั่งซื้อ</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
