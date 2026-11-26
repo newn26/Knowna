@@ -207,8 +207,8 @@ export function ExchangeRule({ className = '' }: { className?: string }) {
   )
 }
 
-export const Container = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
-  <div className={`mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-10 ${className}`}>{children}</div>
+export const Container = ({ children, className = '', id }: { children: ReactNode; className?: string; id?: string }) => (
+  <div id={id} className={`mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-10 ${className}`}>{children}</div>
 )
 
 export function PageHead({ title, sub }: { title: ReactNode; sub?: ReactNode }) {

@@ -1,6 +1,7 @@
 import { Footprints, Ruler } from 'lucide-react'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { MeasureStory } from '../components/MeasureStory'
 import { Container, LinkButton, PageHead } from '../components/ui'
 import { GRADES, SIZES, footLengthFor, sizeForFoot } from '../lib/catalog'
 
@@ -41,7 +42,8 @@ export default function SizeFinder() {
   return (
     <>
       <PageHead title="หาไซส์ที่ใช่" sub="รองเท้าคับทำให้เดินเจ็บ หลวมไปก็หลุดตอนวิ่ง ใช้ 2 วิธีนี้ หรือดูตารางเต็มด้านล่าง ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนได้ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่" />
-      <Container className="grid gap-6 lg:grid-cols-2">
+      <MeasureStory />
+      <Container id="measure" className="mt-16 grid scroll-mt-24 gap-6 lg:grid-cols-2">
         <section className="rounded-3xl border border-line bg-card p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <Footprints size={20} />
