@@ -231,7 +231,8 @@ function Toast() {
 function Footer() {
   return (
     <footer className="fixed-tone mt-24 bg-ink text-paper">
-      <Container className="footer-reveal py-16">
+      {/* pb-28: the last footer row stays above the fixed "ถามไซส์" button */}
+      <Container className="footer-reveal pb-28 pt-16">
         <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Wordmark className="text-4xl" />
