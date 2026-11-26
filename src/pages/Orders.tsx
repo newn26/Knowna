@@ -19,7 +19,7 @@ const useNow = (ms = 1000) => {
   return now
 }
 
-const PAY = { promptpay: 'PromptPay', card: 'บัตรเครดิต', cod: 'เก็บเงินปลายทาง' }
+const PAY = { promptpay: 'พร้อมเพย์' }
 
 export function Track() {
   const [params] = useSearchParams()
@@ -132,7 +132,7 @@ export function OrderDetail() {
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <section className="rounded-3xl border border-line bg-card p-6">
-            <h2 className="mb-5 font-semibold">{o.fulfilment === 'pickup' ? 'สถานะการรับที่สาขา' : 'สถานะการจัดส่ง'}</h2>
+            <h2 className="mb-5 font-semibold">สถานะการจัดส่ง</h2>
             <Timeline steps={steps} now={now} />
           </section>
           <ExchangePanel order={o} delivered={reached(steps, now) === steps.length} now={now} onChange={setO} />
@@ -162,7 +162,7 @@ export function OrderDetail() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-sub">ค่าจัดส่ง</dt>
-                <dd>{o.shipping ? baht(o.shipping) : 'ฟรี'}</dd>
+                <dd>{o.shipping ? baht(o.shipping) : 'รวมในราคาแล้ว'}</dd>
               </div>
               <div className="flex justify-between pt-1 text-base font-semibold">
                 <dt>ชำระแล้ว ({PAY[o.payment]})</dt>
@@ -171,7 +171,7 @@ export function OrderDetail() {
             </dl>
           </div>
           <div className="rounded-3xl border border-line p-6 text-sm">
-            <p className="font-semibold">{o.fulfilment === 'pickup' ? 'รับที่สาขา' : 'ส่งถึง'}</p>
+            <p className="font-semibold">ส่งถึง</p>
             <p className="mt-1 text-sub">
               {o.customer.name} · {o.customer.phone}
               <br />

@@ -1,10 +1,9 @@
-import { FREE_SHIPPING_FROM, SHIPPING_FEE } from './catalog'
-import type { CartLine, Fulfilment } from './types'
+import type { CartLine } from './types'
 
-export function totals(lines: CartLine[], fulfilment: Fulfilment = 'delivery') {
+/** The price already includes shipping (report 4.1.2), so there is no shipping line to add. */
+export function totals(lines: CartLine[]) {
   const subtotal = lines.reduce((s, l) => s + l.unitPrice * l.qty, 0)
-  const shipping = fulfilment === 'pickup' || lines.length === 0 || subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_FEE
-  return { subtotal, shipping, total: subtotal + shipping }
+  return { subtotal, shipping: 0, total: subtotal }
 }
 
 export const baht = (n: number) => '฿' + n.toLocaleString('th-TH')

@@ -21,7 +21,7 @@ export default function Shop() {
 
   return (
     <div ref={ref}>
-      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ป.6 สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ" />
+      <PageHead title="รองเท้าใหม่" sub="ผ้าใบนักเรียนชาย ป.1–ม.6 คู่ละ 259 บาท รวมค่าส่ง สั่งไซส์ผิด เปลี่ยนฟรี 1 ครั้งต่อคำสั่งซื้อ" />
       <Container>
         <div className="sticky top-16 z-20 -mx-4 flex flex-wrap items-center gap-2 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-full sm:border sm:px-3">
           {COLORS.length > 1 && (['all', ...COLORS.map((c) => c.id)] as const).map((c) => (

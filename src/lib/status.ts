@@ -15,17 +15,10 @@ const DAY = 86400 * SEC
 export function orderSteps(o: Order): Step[] {
   const t0 = new Date(o.createdAt).getTime()
   const unit = o.timeScale === 'demo' ? SEC : DAY / 30 // real: spread over a few days
-  if (o.fulfilment === 'pickup')
-    return [
-      { id: 'placed', label: 'รับคำสั่งซื้อ', detail: 'ชำระเงินเรียบร้อย', at: t0 },
-      { id: 'packed', label: 'เตรียมสินค้า', detail: 'หยิบสินค้าตามไซส์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
-      { id: 'ready', label: 'พร้อมรับที่สาขา', detail: 'แสดงเลขคำสั่งซื้อที่เคาน์เตอร์', at: t0 + 60 * unit },
-      { id: 'done', label: 'รับสินค้าแล้ว', detail: 'ขอบคุณที่อุดหนุน', at: t0 + 120 * unit },
-    ]
   return [
     { id: 'placed', label: 'รับคำสั่งซื้อ', detail: 'ชำระเงินเรียบร้อย', at: t0 },
     { id: 'packed', label: 'แพ็กสินค้า', detail: 'หยิบสินค้าตามไซส์ เช็กความเรียบร้อย', at: t0 + 30 * unit },
-    { id: 'shipped', label: 'กำลังจัดส่ง', detail: 'ไรเดอร์กำลังไปหาคุณ', at: t0 + 60 * unit },
+    { id: 'shipped', label: 'กำลังจัดส่ง', detail: 'ส่งกับ Flash Express รวมในราคาแล้ว', at: t0 + 60 * unit },
     {
       id: 'done',
       label: 'ส่งถึงแล้ว',

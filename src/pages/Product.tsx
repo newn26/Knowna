@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Shoe, type ShoeView } from '../components/Shoe'
 import { Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
-import { COLORS, EXCHANGE, FREE_SHIPPING_FROM, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
+import { COLORS, EXCHANGE, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
 import { actions, useStore } from '../lib/store'
 import type { ColorId } from '../lib/types'
 import { SizeTable } from './SizeFinder'
@@ -145,6 +145,7 @@ export default function Product() {
           </h1>
           <p className="mt-4 text-2xl">
             <Price value={PRODUCT.price} />
+            <span className="ml-2 text-sm text-sub">รวมค่าส่งแล้ว</span>
           </p>
 
           <div className="mt-8 space-y-7">
@@ -204,7 +205,7 @@ export default function Product() {
 
             <ul className="grid gap-3 text-sm text-sub sm:grid-cols-3">
               <li className="flex items-center gap-2">
-                <Truck size={16} /> ส่งฟรีเมื่อครบ {baht(FREE_SHIPPING_FROM)}
+                <Truck size={16} /> ราคารวมค่าส่งแล้ว
               </li>
               <li className="flex items-center gap-2">
                 <Ruler size={16} /> เปลี่ยนไซส์ฟรี 1 ครั้ง/บิล

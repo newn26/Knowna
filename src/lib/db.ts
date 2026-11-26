@@ -3,7 +3,7 @@
 import { COLORS, PRODUCT, SIZES } from './catalog'
 import type { ColorId, Order, User } from './types'
 
-const KEY = 'kw.db.v5' // v5: sole kind removed, orders can carry one size exchange
+const KEY = 'kw.db.v6' // v6: price 259 incl. shipping, no store pickup, PromptPay only, EU 28–45
 
 export interface DB {
   users: User[]
@@ -48,12 +48,13 @@ function seed(): DB {
       id,
       userId,
       createdAt: date,
-      customer: userId ? { name: DEMO_USER.name, phone: DEMO_USER.phone, email: DEMO_USER.email, address: DEMO_USER.address } : { name: 'ลูกค้าหน้าร้าน', phone: '0899999999', email: '', address: '' },
+      customer: userId
+        ? { name: DEMO_USER.name, phone: DEMO_USER.phone, email: DEMO_USER.email, address: DEMO_USER.address }
+        : { name: 'คุณสมชาย ไม่มีบัญชี', phone: '0899999999', email: '', address: '15 ถ.มิตรภาพ ต.ในเมือง อ.เมืองขอนแก่น จ.ขอนแก่น 40000' },
       lines,
       subtotal,
       shipping: 0,
       total: subtotal,
-      fulfilment: userId ? 'delivery' : 'pickup',
       payment: 'promptpay',
       timeScale: 'real',
     }

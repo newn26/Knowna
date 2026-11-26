@@ -29,8 +29,8 @@ export interface Customer {
   address: string
 }
 
-export type Fulfilment = 'delivery' | 'pickup'
-export type Payment = 'promptpay' | 'card' | 'cod'
+/** Website only, no stores; PromptPay through a payment gateway is the only payment (report 3.1.3, 4.1.3). */
+export type Payment = 'promptpay'
 
 export interface Order {
   id: string
@@ -41,7 +41,6 @@ export interface Order {
   subtotal: number
   shipping: number
   total: number
-  fulfilment: Fulfilment
   payment: Payment
   /** Seed orders are fully delivered; demo orders advance with the clock (see status.ts). */
   timeScale: 'demo' | 'real'

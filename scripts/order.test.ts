@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { ApiError, findOrder, getStock, placeOrder, requestExchange, stockOf } from '../src/lib/api'
 import { resetDB } from '../src/lib/db'
 import { totals } from '../src/lib/pricing'
-import { PROVINCES, formatAddress } from '../src/lib/catalog'
+import { GRADES, PRODUCT, PROVINCES, SIZES, formatAddress, sizeForFoot, sizeFromBrand } from '../src/lib/catalog'
 import type { CartLine } from '../src/lib/types'
 
 let passed = 0
@@ -18,13 +18,22 @@ const test = async (name: string, fn: () => unknown) => {
   }
 }
 
-const line = (qty = 1, size = 35): CartLine => ({ key: `new-brown-${size}`, kind: 'new', color: 'brown', size, qty, unitPrice: 390 })
+const line = (qty = 1, size = 35): CartLine => ({ key: `new-brown-${size}`, kind: 'new', color: 'brown', size, qty, unitPrice: PRODUCT.price })
 
-await test('shipping is free for pickup and from ฿700', () => {
-  assert.equal(totals([line()], 'delivery').shipping, 50)
-  assert.equal(totals([line()], 'pickup').shipping, 0)
-  assert.equal(totals([line(2)], 'delivery').shipping, 0)
-  assert.equal(totals([line(2)], 'delivery').total, 780)
+await test('price is 259 per pair with shipping included', () => {
+  assert.equal(PRODUCT.price, 259)
+  assert.equal(totals([line()]).shipping, 0)
+  assert.equal(totals([line(2)]).total, 518)
+})
+
+await test('sizes run EU 28–45 for ป.1–ม.6; brand comparison stays in range', () => {
+  assert.equal(SIZES[0], 28)
+  assert.equal(SIZES[SIZES.length - 1], 45)
+  assert.equal(GRADES[GRADES.length - 1].label, 'ม.6')
+  for (const g of GRADES) assert.ok(SIZES.includes(g.range[0]) && SIZES.includes(g.range[1]), g.label)
+  assert.equal(sizeForFoot(40), 45)
+  assert.equal(sizeFromBrand('goldcity', 45), 45)
+  assert.equal(sizeFromBrand('tiger', 28), 28)
 })
 
 await test('address: 77 provinces, Bangkok uses แขวง/เขต, others ต./อ./จ.', () => {
@@ -41,10 +50,9 @@ await test('order: new pair takes stock, order is findable by phone', async () =
     userId: 'u-demo',
     customer: { name: 'ทดสอบ', phone: '081-234-5678', email: '', address: 'x' },
     lines: [line()],
-    fulfilment: 'delivery',
     payment: 'promptpay',
   })
-  assert.equal(o.subtotal, 390)
+  assert.equal(o.subtotal, 259)
   assert.equal(stockOf(await getStock(), 'brown', 35), before - 1)
   assert.ok(await findOrder(o.id, '0812345678'))
   assert.equal(await findOrder(o.id, '0800000000'), null)
@@ -53,7 +61,7 @@ await test('order: new pair takes stock, order is findable by phone', async () =
 const rejects = (p: Promise<unknown>) => assert.rejects(p, ApiError)
 
 await test('exchange: not before delivery', async () => {
-  const o = await placeOrder({ userId: null, customer: { name: 'ทดสอบ', phone: '0811111111', email: '', address: 'x' }, lines: [line()], fulfilment: 'delivery', payment: 'promptpay' })
+  const o = await placeOrder({ userId: null, customer: { name: 'ทดสอบ', phone: '0811111111', email: '', address: 'x' }, lines: [line()], payment: 'promptpay' })
   await rejects(requestExchange(o.id, o.lines[0].key, 36))
 })
 

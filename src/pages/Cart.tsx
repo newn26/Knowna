@@ -10,9 +10,8 @@ import { actions, useStore } from '../lib/store'
 import type { CartLine } from '../lib/types'
 
 /** Order summary used by the cart and checkout pages. */
-export function Summary({ lines, shipping, children }: { lines: CartLine[]; shipping?: number; children?: React.ReactNode }) {
+export function Summary({ lines, children }: { lines: CartLine[]; children?: React.ReactNode }) {
   const t = totals(lines)
-  const ship = shipping ?? t.shipping
   return (
     <div className="rounded-3xl bg-stone p-6">
       <p className="font-display text-lg font-black uppercase">สรุปคำสั่งซื้อ</p>
@@ -23,12 +22,12 @@ export function Summary({ lines, shipping, children }: { lines: CartLine[]; ship
         </div>
         <div className="flex justify-between">
           <dt className="text-sub">ค่าจัดส่ง</dt>
-          <dd>{ship ? baht(ship) : 'ฟรี'}</dd>
+          <dd>รวมในราคาแล้ว</dd>
         </div>
         <div className="flex justify-between border-t border-line pt-3 text-lg font-semibold">
           <dt>ยอดชำระ</dt>
           <dd>
-            <Num value={t.subtotal + ship} format={baht} />
+            <Num value={t.total} format={baht} />
           </dd>
         </div>
       </dl>

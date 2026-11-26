@@ -43,7 +43,7 @@ function Hero() {
             <dl className="mt-10 grid max-w-md animate-rise grid-cols-3 gap-4 border-t border-line pt-6 [animation-delay:320ms]">
               {(
                 [
-                  [PRODUCT.price, baht, 'คู่ใหม่'],
+                  [PRODUCT.price, baht, 'ต่อคู่ รวมค่าส่งแล้ว'],
                   [1, (n: number) => `${n} ครั้ง`, 'เปลี่ยนไซส์ฟรีต่อบิล'],
                   [0, baht, 'ค่าส่งคู่ใหม่ แบรนด์ออกให้'],
                 ] as const
@@ -88,7 +88,7 @@ function Hero() {
 }
 
 function Marquee() {
-  const words = ['คู่ใหม่', 'ไซส์ผิด เปลี่ยนฟรี', '1 ครั้งต่อบิล', 'ป.1 – ป.6', 'EU 28 – 40', 'ดำ · ขาว · น้ำตาล', 'ส่งคู่ใหม่ฟรี']
+  const words = ['คู่ละ 259 รวมส่ง', 'ไซส์ผิด เปลี่ยนฟรี', '1 ครั้งต่อบิล', 'ป.1 – ม.6', 'EU 28 – 45', 'ดำ · ขาว · น้ำตาล', 'ส่งคู่ใหม่ฟรี']
   return (
     <div className="fixed-tone overflow-hidden border-y border-line bg-ink py-4 text-paper" aria-hidden>
       <div className="flex w-max animate-marquee gap-10 whitespace-nowrap font-display text-2xl font-black uppercase" style={display}>

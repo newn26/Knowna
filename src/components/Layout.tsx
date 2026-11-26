@@ -194,7 +194,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
                 <dd>{baht(t.subtotal)}</dd>
               </div>
               <div className="flex justify-between pt-1 text-base font-semibold">
-                <dt>รวม (ก่อนค่าส่ง)</dt>
+                <dt>รวม (รวมค่าส่งแล้ว)</dt>
                 <dd>
                   <Num value={t.subtotal} format={baht} />
                 </dd>

@@ -5,7 +5,7 @@ import { colorInfo } from './catalog'
 import { DEMO_USER, load, resetDB, save, stockKey } from './db'
 import { totals } from './pricing'
 import { orderSteps, reached } from './status'
-import type { CartLine, ColorId, Customer, Fulfilment, Order, Payment, User } from './types'
+import type { CartLine, ColorId, Customer, Order, Payment, User } from './types'
 
 const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms))
 
@@ -21,7 +21,6 @@ export interface PlaceOrderInput {
   userId: string | null
   customer: Customer
   lines: CartLine[]
-  fulfilment: Fulfilment
   payment: Payment
 }
 
@@ -34,7 +33,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<Order> {
     if (l.kind === 'new' && (db.stock[stockKey(l.color, l.size)] ?? 0) < l.qty)
       throw new ApiError(`เบอร์ ${l.size} สี${colorInfo(l.color).nameTh} เหลือไม่พอ กรุณาแก้ตะกร้า`)
 
-  const t = totals(input.lines, input.fulfilment)
+  const t = totals(input.lines)
   const now = new Date()
   const id = `KN-${now.toISOString().slice(2, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 9000) + 1000)}`
   for (const l of input.lines) if (l.kind === 'new') db.stock[stockKey(l.color, l.size)] -= l.qty
@@ -48,7 +47,6 @@ export async function placeOrder(input: PlaceOrderInput): Promise<Order> {
     subtotal: t.subtotal,
     shipping: t.shipping,
     total: t.total,
-    fulfilment: input.fulfilment,
     payment: input.payment,
     timeScale: 'demo',
   }
