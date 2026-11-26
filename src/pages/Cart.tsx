@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
+import { PHOTOS } from '../lib/photos'
 import { Container, LinkButton, Num, PageHead, Qty } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
 import { colorInfo } from '../lib/catalog'
@@ -65,7 +65,7 @@ export default function Cart() {
             {cart.map((l) => (
               <li key={l.key} className="flex gap-4 py-5">
                 <Link to={`/product?color=${l.color}&size=${l.size}`} aria-label={`ดูสี${colorInfo(l.color).nameTh} EU ${l.size}`} className="grid h-24 w-28 shrink-0 place-items-center rounded-2xl bg-stone sm:h-28 sm:w-36">
-                  <Shoe color={l.color} className="w-[88%]" shadow={false} />
+                  <img src={PHOTOS[l.color].side.src} alt={PHOTOS[l.color].side.alt} className="w-[88%]" />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex justify-between gap-3">

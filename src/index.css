@@ -28,7 +28,6 @@
   --signal: 240 112 70;
   --ok: 92 186 140;
   --bad: 236 104 104;
-  --rim-a: 0.55; /* light edge on the shoe illustration so dark shoes read on dark surfaces */
   color-scheme: dark;
 }
 

@@ -1,7 +1,6 @@
 import { ArrowRight, ChevronDown, RefreshCw, Ruler, ShieldCheck, Truck, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Shoe, type ShoeView } from '../components/Shoe'
 import { Button, ColorPicker, Container, ExchangeRule, Price, Qty, SizeGrid, useDialog } from '../components/ui'
 import { getStock, stockOf } from '../lib/api'
 import { COLORS, EXCHANGE, PRODUCT, SIZES, colorInfo } from '../lib/catalog'
@@ -11,12 +10,9 @@ import { SizeTable } from './SizeFinder'
 import { PHOTOS } from '../lib/photos'
 import { baht } from '../lib/pricing'
 
-// Photos first; the drawn toe and heel views fill the angles not photographed yet.
-const viewsFor = (color: ColorId): { id: string; label: string; photo?: { src: string; alt: string }; shoe?: ShoeView }[] => [
+const viewsFor = (color: ColorId) => [
   { id: 'pair', label: 'ทั้งคู่', photo: PHOTOS[color].pair },
   { id: 'side', label: 'ด้านข้าง', photo: PHOTOS[color].side },
-  { id: 'toe', label: 'หัวรองเท้า', shoe: 'toe' },
-  { id: 'heel', label: 'ส้น', shoe: 'heel' },
 ]
 
 function Gallery({ color }: { color: ColorId }) {
@@ -26,14 +22,8 @@ function Gallery({ color }: { color: ColorId }) {
   return (
     <div className="lg:sticky lg:top-24">
       <div className="relative grid aspect-[5/4] place-items-center overflow-hidden rounded-3xl bg-stone">
-        {v.photo ? (
-          <img key={color + id} src={v.photo.src} alt={v.photo.alt} className={`animate-swap ${id === 'side' ? 'w-[92%]' : 'h-full w-full object-cover'}`} />
-        ) : (
-          <div key={color + id} className="w-[88%] animate-swap">
-            <Shoe color={color} view={v.shoe!} className="w-full" />
-          </div>
-        )}
-        <span className={`absolute bottom-4 left-4 rounded-full px-2.5 py-1 text-xs ${v.photo ? 'bg-card/90 text-ink' : 'text-sub'}`}>{v.photo ? 'ภาพตัวอย่างสินค้า สร้างด้วย AI' : 'ภาพประกอบสินค้า'}</span>
+        <img key={color + id} src={v.photo.src} alt={v.photo.alt} className={`animate-swap ${id === 'side' ? 'w-[92%]' : 'h-full w-full object-cover'}`} />
+        <span className="absolute bottom-4 left-4 rounded-full bg-card/90 px-2.5 py-1 text-xs text-ink">ภาพตัวอย่างสินค้า สร้างด้วย AI</span>
       </div>
       <div className="mt-3 grid grid-cols-4 gap-3">
         {VIEWS.map((x) => (
@@ -42,9 +32,9 @@ function Gallery({ color }: { color: ColorId }) {
             onClick={() => setId(x.id)}
             aria-label={`ดูมุม${x.label}`}
             aria-pressed={id === x.id}
-            className={`grid aspect-square place-items-center overflow-hidden rounded-2xl bg-stone ring-2 transition ${x.photo && x.id === 'pair' ? '' : 'p-2'} ${id === x.id ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
+            className={`grid aspect-square place-items-center overflow-hidden rounded-2xl bg-stone ring-2 transition ${x.id === 'pair' ? '' : 'p-2'} ${id === x.id ? 'ring-ink' : 'ring-transparent hover:ring-line'}`}
           >
-            {x.photo ? <img src={x.photo.src} alt="" className={x.id === 'pair' ? 'h-full w-full object-cover' : 'w-full'} /> : <Shoe color={color} view={x.shoe!} className="w-full" shadow={false} />}
+            <img src={x.photo.src} alt="" className={x.id === 'pair' ? 'h-full w-full object-cover' : 'w-full'} />
           </button>
         ))}
       </div>

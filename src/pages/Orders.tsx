@@ -1,7 +1,7 @@
 import { Bell, CheckCircle2, LogOut, Package, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Shoe } from '../components/Shoe'
+import { PHOTOS } from '../lib/photos'
 import { Button, Container, ExchangeRule, Field, LinkButton, PageHead, Spinner, Timeline } from '../components/ui'
 import { ApiError, findOrder, getOrder, listOrders, loginDemo, requestExchange } from '../lib/api'
 import { GRADES, SIZES, colorInfo, needsRemeasure, nextReminder, sizeForFoot } from '../lib/catalog'
@@ -145,7 +145,7 @@ export function OrderDetail() {
               {o.lines.map((l) => (
                 <li key={l.key} className="flex items-center gap-3 text-sm">
                   <div className="grid h-14 w-16 shrink-0 place-items-center rounded-xl bg-card">
-                    <Shoe color={l.color} className="w-14" shadow={false} />
+                    <img src={PHOTOS[l.color].side.src} alt={PHOTOS[l.color].side.alt} className="w-14" />
                   </div>
                   <p className="min-w-0 flex-1 font-medium">
                     สี{colorInfo(l.color).nameTh} · EU {l.size} · คู่ใหม่ × {l.qty}
@@ -371,7 +371,7 @@ export function Account() {
             {pairs.map((u) => (
               <div key={u.key} className="w-64 shrink-0 snap-start rounded-3xl border border-line bg-card p-4 sm:w-auto">
                 <div className="grid aspect-[4/3] place-items-center rounded-2xl bg-stone">
-                  <Shoe color={u.color} className="w-[85%]" shadow={false} />
+                  <img src={PHOTOS[u.color].side.src} alt={PHOTOS[u.color].side.alt} className="w-[85%]" />
                 </div>
                 <div className="mt-3 text-sm">
                   <p className="font-semibold">

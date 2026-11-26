@@ -5,7 +5,7 @@ import { colorInfo } from '../lib/catalog'
 import { resetDemo } from '../lib/api'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
-import { Shoe } from './Shoe'
+import { PHOTOS } from '../lib/photos'
 import { SizeChat } from './SizeChat'
 import { buttonClass, Container, Num, useDialog } from './ui'
 
@@ -154,7 +154,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
         <div className="flex-1 overflow-y-auto px-5">
           {cart.length === 0 ? (
             <div className="py-16 text-center">
-              <Shoe color="brown" className="mx-auto w-48 opacity-30" shadow={false} />
+              <img src={PHOTOS.brown.side.src} alt="" className="mx-auto w-48 opacity-30" />
               <p className="mt-4 text-sub">ยังไม่มีรองเท้าในตะกร้า</p>
               <Link to="/shop" className={`${buttonClass('solid', 'sm')} mt-5`}>
                 เลือกรองเท้า
@@ -165,7 +165,7 @@ function CartSheet({ leaving }: { leaving: boolean }) {
               {cart.map((l) => (
                 <li key={l.key} className="flex gap-4 py-4">
                   <div className="grid h-20 w-24 shrink-0 place-items-center rounded-xl bg-stone">
-                    <Shoe color={l.color} className="w-20" shadow={false} />
+                    <img src={PHOTOS[l.color].side.src} alt={PHOTOS[l.color].side.alt} className="w-20" />
                   </div>
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="font-semibold">
