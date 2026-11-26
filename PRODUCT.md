@@ -17,57 +17,52 @@ Speak to the child in the story and imagery. Speak to the parent wherever money,
 
 ## Product Purpose
 
-KNOWNA is a single-model boys' canvas school shoe brand for primary school whose sole can be swapped. Children wear the tread down long before the canvas gives out. Instead of buying a whole new pair, parents buy a replacement sole and slide it in at home.
+KNOWNA is a single-model boys' canvas school shoe brand sold on its own website. Its selling point comes from the group's report (`Ecommerce Report.pdf`): buying shoes online is risky because the parent cannot try them on, so KNOWNA helps pick the size before buying and, **if the size ordered turns out wrong, exchanges it for free once per order, with the brand paying shipping for the new pair.**
 
-The sole mechanism is a **slide rail + heel latch**: under the shoe is a dovetail rail (like a drawer or a camera rail). The sole slides in from the heel toward the toe, and a latch at the heel clicks it in place. Body weight pushes the sole into the rail, so it gets tighter as the child walks. The honest drawback: sand and grit can get stuck in the rail, so the site tells parents how to clean it.
+**Source of truth:** the report PDF. The site must match it exactly. Do not add or embellish facts. Where the report is still blank, show the `Pending` label ("รอข้อมูลจากรายงาน", search `PENDING-PDF`) instead of guessing. The report is not finished yet.
 
 This site is a course project and demo for an instructor, not a live business. Success means the demo clearly shows two flows working end to end:
 
 - buying a new pair
-- understanding the sole swap and buying a replacement sole
-
-The demo must also show these flows as credible and easy for a parent.
+- asking for the free size exchange on a delivered order (once per order; the button disappears after use)
 
 ## Positioning
 
-One canvas model in three colours, all sizes from ป.1 to ป.6, at an everyday price. When the sole wears out, replace only the sole: ฿199 against ฿390 for a new pair.
+One canvas model in three colours. Ordered the wrong size? Exchange it free, once per order; the brand pays shipping for the new pair.
 
 ## Operating Context
 
-- **Product:** a canvas school shoe (ผ้าใบนักเรียน) with a rubber sole and a rubber toe cap. Canvas, rather than leather, matches the product photos the brand owner generated; Thai primary schools commonly use brown, black or white canvas.
-- **Colours:** brown (scout days and schools using brown canvas), black (normal school days) and white (PE and schools requiring white).
-- **Price:** ฿390 a new pair; replacement sole ฿199 a set (left + right); free delivery from ฿700 (two pairs).
-- **Sizes:** EU 28–40. A replacement sole must match the shoe's size and fits KNOWNA Classic only.
-- **Sole swap:** press the heel latch, pull the old sole out toward the heel, knock grit out of the rail, slide the new sole in toward the toe until it clicks.
-- **Care:** knock out or rinse the rail with plain water; let it dry before sliding the sole back in.
-
+- **Product:** a canvas school shoe (ผ้าใบนักเรียน) with a rubber sole and a rubber toe cap.
+- **Colours:** brown (scout days), black and white.
+- **Size exchange:** once per order (not per pair), only after the order has arrived, any other size in stock. Still pending in the report: how many days the exchange window is, who pays to send the old pair back, whether the old pair must come back first.
+- **Price, sizes, shipping, payment, store pickup:** still the earlier values (฿390, EU 28–40, free shipping from ฿700, pickup at 3 stores). The report says ฿259, P.1–M.6, no stores, PromptPay only; the owner chose to align these later.
 ## Capabilities and Constraints
 
 - **Stack:** React 18, Vite, TypeScript, Tailwind and react-router (HashRouter). It deploys to GitHub Pages at https://newn26.github.io/rub-job/ on every push to main.
 - **Data:** all data is mock data kept in localStorage, behind an async API layer (`src/lib/api.ts`) so a real backend can replace it later. No real payments are taken.
-- **Pages:** Home, Shop, Product, Soles (how it works + buy), Size Finder, Cart, Checkout, Order detail, Track, and Account/order history.
-- **Language:** the UI is Thai. Buttons, navigation, steps and labels should be Thai. English stays only for brand-style display headlines (for example "STEP UP. SWAP IT.").
+- **Pages:** Home (with the #exchange section), Shop, Product, Size Finder, Cart, Checkout, Order detail, Track, and Account/order history.
+- **Language:** the UI is Thai. Buttons, navigation, steps and labels should be Thai. English stays only for brand-style display headlines.
 - **Undecided:** real product photography does not exist yet.
 
 ## Brand Commitments
 
 - **Name:** KNOWNA.
-- **Tagline:** "STEP UP. SWAP IT."
 - **Product name:** KNOWNA Classic.
-- **Fixed facts:** sole price ฿199, same-size only, slide in from the heel, latch at the heel. Do not change these in copy.
+- **No English tagline:** the report has none. The hero says "ไซซ์ผิด เปลี่ยนฟรี." from the report's free-exchange promise.
+- **Removed (2026-11-26):** the swappable sole (slide rail + heel latch, ฿199 sole, `/soles`). The report does not have it.
 
 ## Evidence on Hand
 
-- **Product images:** AI-generated by the brand owner, in `src/assets/photos/`: `<colour>.webp` (the pair beside its box) and `<colour>-side.webp` (side cut-outs with transparency) for black, white and brown, plus `brown-used.webp` (a year of wear, used in the worn-sole story) and `brown-worn.webp` (worn out, used on the 404 page). Originals are in the owner's `Downloads/รูปรองเท้า` folder. The site footer and the product gallery label them as AI images; never present them as real photos. Images that show another brand's logo, such as NANYANG, must not be used.
-- **Drawings:** SVG illustrations in `src/components/Shoe.tsx`, and the rail + latch diagrams in `src/components/SoleRail.tsx` (labelled as diagrams, not photos).
-- **Missing, and must not be invented:** real product photos, real photos of the sole mechanism, sole lifespan figures, customer reviews or testimonials, sales numbers, press coverage, and certifications.
+- **Product images:** AI-generated by the brand owner, in `src/assets/photos/`: `<colour>.webp` (the pair beside its box) and `<colour>-side.webp` (side cut-outs with transparency) for black, white and brown, plus `brown-used.webp` (a year of wear, no longer shown) and `brown-worn.webp` (worn out, used on the 404 page). Originals are in the owner's `Downloads/รูปรองเท้า` folder. The site footer and the product gallery label them as AI images; never present them as real photos. Images that show another brand's logo, such as NANYANG, must not be used.
+- **Drawings:** SVG illustrations in `src/components/Shoe.tsx`.
+- **Missing, and must not be invented:** real product photos, customer reviews or testimonials, sales numbers, press coverage, and certifications.
 
 ## Product Principles
 
 1. **Kid-facing story, parent-facing decisions.** Excitement and imagery are for the child. Price, size, condition and rules are written for the parent.
-2. **The swap is the product.** Show how the rail and latch work, step by step, before asking for money.
+2. **The report is the spec.** Every fact on the site comes from the report PDF; blanks stay pending.
 3. **Honest about the demo.** Label mock data, AI images and simulated payments as what they are.
-4. **Honest about the drawback.** Say plainly that grit can get into the rail and how to clean it.
+4. **The exchange is the promise.** Say it plainly: once per order, brand pays shipping for the new pair.
 5. **Thai, plainly.** Use Thai words a parent already uses before any English term.
 
 ## Accessibility & Inclusion
