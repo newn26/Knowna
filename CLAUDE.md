@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 KNOWNA: a clickable e-commerce prototype (course project ITDS294, graded by an instructor) for a boys' canvas school shoe. There is no backend. Data lives in `localStorage`, payments are simulated, and product images are AI-generated.
 
-**Source of truth for content is the group report, `Ecommerce Report.pdf`**, which lives outside the repo in `C:\Users\PC\Downloads\EcomGroupProject\`. Every business fact on the site must come from it. Do not add or embellish facts such as prices, policies, statistics, reviews or sizes. Where the report is still blank, render `<Pending label="…"/>` from `src/components/ui.tsx` ("รอข้อมูลจากรายงาน"), and mark the source with a `PENDING-PDF` comment. The report is still being written. `PRODUCT.md` records which facts already match it and which are still the older values (price ฿390, EU 28–40, free shipping from ฿700, store pickup).
+**Source of truth for content is the group report, `Ecommerce Report.pdf`**, which lives outside the repo in `C:\Users\PC\Downloads\EcomGroupProject\`. Every business fact on the site must come from it. Do not add or embellish facts such as prices, policies, statistics, reviews or sizes. Where the report is still blank, render `<Pending label="…"/>` from `src/components/ui.tsx` ("รอข้อมูลจากรายงาน"), and mark the source with a `PENDING-PDF` comment. The report is still being written. `PRODUCT.md` records which facts already match it and which are still demo estimates.
 
-`README.md` is outdated: it still describes the removed swappable-sole feature. Trust `PRODUCT.md` and `docs/superpowers/specs/` instead.
+
 
 ## Commands
 
@@ -20,7 +20,7 @@ npm run build    # tsc --noEmit + vite build to dist/
 
 There is no lint script. `npm test` is the only automated test, and it covers `src/lib/*` (pricing, addresses, order flow, size exchange). `scripts/shim.js` provides the `localStorage` shim that `db.ts` needs under node. To run a subset of tests, comment tests out in `order.test.ts`, because there is no filter flag.
 
-Pushing to `main` deploys to GitHub Pages (https://newn26.github.io/rub-job/) through `.github/workflows/deploy.yml`. `vite.config.ts` uses `base: './'` plus `HashRouter`, so routes are `#/size`, `#/order/:id` and so on. In-page anchors such as `/#exchange` are scrolled by `ScrollManager` in `App.tsx`.
+Pushing to `main` deploys to GitHub Pages (https://newn26.github.io/Knowna/) through `.github/workflows/deploy.yml`. `vite.config.ts` uses `base: './'` plus `HashRouter`, so routes are `#/size`, `#/order/:id` and so on. In-page anchors such as `/#exchange` are scrolled by `ScrollManager` in `App.tsx`.
 
 ### Visual checks (untracked helpers)
 

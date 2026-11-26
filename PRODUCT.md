@@ -35,10 +35,13 @@ One canvas model in three colours. Ordered the wrong size? Exchange it free, onc
 - **Product:** a canvas school shoe (ผ้าใบนักเรียน) with a rubber sole and a rubber toe cap.
 - **Colours:** brown (scout days), black and white.
 - **Size exchange:** once per order (not per pair), only after the order has arrived, any other size in stock. Still pending in the report: how many days the exchange window is, who pays to send the old pair back, whether the old pair must come back first.
-- **Price, sizes, shipping, payment, store pickup:** still the earlier values (฿390, EU 28–40, free shipping from ฿700, pickup at 3 stores). The report says ฿259, P.1–M.6, no stores, PromptPay only; the owner chose to align these later.
+- **Price, sizes, shipping, payment (aligned with the report 2026-11-27):** ฿259 per pair with shipping included (no shipping line), home delivery only (no stores), PromptPay through Omise only, sizes EU 28–45 for P.1–M.6. The M.1–M.6 size ranges are demo estimates; the report has no numbers.
+- **Size help (report 1.4):** a how-to-measure guide, a size comparison with Nanyang, Breaker, Gold City and Tiger (offsets are demo samples, labelled on the page), and a size chat (auto-reply mock, `src/components/SizeChat.tsx`).
+- **Reminder (report 1.4):** the account page saves each child's foot length and shows the next pre-term reminder (1 April, before the April–May season). Simulated: no SMS is sent.
+
 ## Capabilities and Constraints
 
-- **Stack:** React 18, Vite, TypeScript, Tailwind and react-router (HashRouter). It deploys to GitHub Pages at https://newn26.github.io/rub-job/ on every push to main.
+- **Stack:** React 18, Vite, TypeScript, Tailwind and react-router (HashRouter). It deploys to GitHub Pages at https://newn26.github.io/Knowna/ on every push to main (the repo was renamed from rub-job).
 - **Data:** all data is mock data kept in localStorage, behind an async API layer (`src/lib/api.ts`) so a real backend can replace it later. No real payments are taken.
 - **Pages:** Home (with the #exchange section), Shop, Product, Size Finder, Cart, Checkout, Order detail, Track, and Account/order history.
 - **Language:** the UI is Thai. Buttons, navigation, steps and labels should be Thai. English stays only for brand-style display headlines.
