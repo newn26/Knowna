@@ -28,13 +28,13 @@ This site is a course project and demo for an instructor, not a live business. S
 
 ## Positioning
 
-One canvas model in three colours. Ordered the wrong size? Exchange it free, once per order; the brand pays shipping for the new pair.
+One canvas model in three colours. Ordered the wrong size? Exchange it free, once per order; the customer posts the unused pair back at their own cost, the brand ships the new pair free.
 
 ## Operating Context
 
 - **Product:** a canvas school shoe (ผ้าใบนักเรียน) with a rubber sole and a rubber toe cap.
 - **Colours:** brown (scout days), black and white.
-- **Size exchange:** once per order (not per pair), within 3 days after the order arrives (owner, 2026-11-27), any other size in stock. Still pending in the report: who pays to send the old pair back, whether the old pair must come back first.
+- **Size exchange:** once per order (not per pair), within 3 days after the order arrives (owner, 2026-11-27), any other size in stock. Owner, 2026-11-27: the customer sends the old pair back first (unused, in its box) and pays that shipping; the brand then ships the new pair free.
 - **Price, sizes, shipping, payment (aligned with the report 2026-11-27):** ฿259 per pair with shipping included (no shipping line), home delivery only (no stores), PromptPay through Omise only, sizes EU 28–45 for P.1–M.6. The M.1–M.6 size ranges are demo estimates; the report has no numbers.
 - **Size help (report 1.4):** a how-to-measure guide, a size comparison with Nanyang, Breaker, Gold City and Tiger (offsets are demo samples, labelled on the page), and a size chat (auto-reply mock, `src/components/SizeChat.tsx`).
 - **Reminder (report 1.4):** the account page saves each child's foot length and shows the next pre-term reminder (1 April, before the April–May season). Simulated: no SMS is sent.
@@ -65,7 +65,7 @@ One canvas model in three colours. Ordered the wrong size? Exchange it free, onc
 1. **Kid-facing story, parent-facing decisions.** Excitement and imagery are for the child. Price, size, condition and rules are written for the parent.
 2. **The report is the spec.** Every fact on the site comes from the report PDF; blanks stay pending.
 3. **Honest about the demo.** Label mock data, AI images and simulated payments as what they are.
-4. **The exchange is the promise.** Say it plainly: once per order, brand pays shipping for the new pair.
+4. **The exchange is the promise.** Say it plainly: once per order, customer pays to send the old pair back, brand ships the new pair free.
 5. **Thai, plainly.** Use Thai words a parent already uses before any English term.
 
 ## Accessibility & Inclusion
