@@ -224,7 +224,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
     setError('')
     try {
       onChange(await requestExchange(o.id, line.key, toSize))
-      actions.toast('ส่งคำขอเปลี่ยนไซส์แล้ว')
+      actions.toast('ส่งคำขอแล้ว ส่งคู่เดิมกลับมาที่แบรนด์ได้เลย')
     } catch (e) {
       setError(e instanceof ApiError ? e.message : 'ส่งคำขอไม่สำเร็จ ลองอีกครั้ง')
     }
@@ -282,7 +282,7 @@ function ExchangePanel({ order: o, delivered, now, onChange }: { order: Order; d
               </div>
             </div>
           )}
-          <p className="text-xs text-sub">ใช้สิทธิ์ได้ 1 ครั้งต่อคำสั่งซื้อ ยืนยันแล้วเปลี่ยนไซส์อีกไม่ได้</p>
+          <p className="text-xs text-sub">ใช้สิทธิ์ได้ 1 ครั้งต่อคำสั่งซื้อ ยืนยันแล้วเปลี่ยนไซส์อีกไม่ได้ หลังยืนยัน ส่งคู่เดิมพร้อมกล่องกลับมาที่แบรนด์ (ลูกค้าออกค่าส่งคู่เดิม)</p>
           {error && (
             <p className="text-sm text-bad" role="alert">
               {error}

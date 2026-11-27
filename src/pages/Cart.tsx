@@ -90,7 +90,7 @@ export default function Cart() {
           <Link to="/size" className="mt-6 flex items-center justify-between rounded-2xl bg-ink p-5 text-paper transition hover:bg-ink/90">
             <span>
               <b>ไม่แน่ใจไซส์?</b>
-              <span className="block text-sm text-paper/70">ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซส์ฟรี 1 ครั้งต่อคำสั่งซื้อ แบรนด์ออกค่าส่งคู่ใหม่</span>
+              <span className="block text-sm text-paper/70">ถ้าได้รับแล้วไม่พอดี เปลี่ยนไซส์ได้ 1 ครั้งต่อคำสั่งซื้อ ส่งคู่เดิมกลับ แบรนด์ส่งคู่ใหม่ให้ฟรี</span>
             </span>
             <span className="font-semibold">หาไซส์ →</span>
           </Link>

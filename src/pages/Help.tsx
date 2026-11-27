@@ -5,7 +5,7 @@ import { baht } from '../lib/pricing'
 
 const link = 'font-semibold text-ink underline underline-offset-4'
 
-// Every answer comes from the group report; anything it leaves blank stays pending (see ExchangeRule).
+// Every answer comes from the group report or the owner; the exchange rule lives in EXCHANGE (lib/catalog.ts).
 const TOPICS: { id: string; title: string; items: { q: string; a: React.ReactNode }[] }[] = [
   {
     id: 'order',
@@ -14,7 +14,7 @@ const TOPICS: { id: string; title: string; items: { q: string; a: React.ReactNod
       { q: 'ราคาเท่าไหร่ ต้องจ่ายค่าส่งเพิ่มไหม', a: `คู่ละ ${baht(PRODUCT.price)} รวมค่าจัดส่งแล้ว ไม่มีค่าส่งเพิ่ม` },
       { q: 'มีสีอะไรบ้าง', a: `${COLORS.map((c) => c.nameTh).join(' ')} สีน้ำตาลสำหรับวันลูกเสือ` },
       { q: 'มีไซส์ไหนบ้าง', a: `EU ${SIZES[0]}–${SIZES[SIZES.length - 1]} สำหรับนักเรียนชาย ป.1–ม.6` },
-      { q: 'มีหน้าร้านให้ไปลองไหม', a: 'ไม่มีหน้าร้าน ขายผ่านเว็บไซต์ของแบรนด์เท่านั้น ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนไซส์ได้ฟรี 1 ครั้งต่อคำสั่งซื้อ' },
+      { q: 'มีหน้าร้านให้ไปลองไหม', a: 'ไม่มีหน้าร้าน ขายผ่านเว็บไซต์ของแบรนด์เท่านั้น ถ้าได้รับแล้วไซส์ไม่พอดี เปลี่ยนไซส์ได้ 1 ครั้งต่อคำสั่งซื้อ' },
     ],
   },
   {
@@ -60,7 +60,7 @@ const TOPICS: { id: string; title: string; items: { q: string; a: React.ReactNod
     title: 'การเปลี่ยนไซส์',
     items: [
       { q: 'ไซส์ไม่พอดี เปลี่ยนได้ไหม', a: <ExchangeRule /> },
-      { q: 'ขอเปลี่ยนไซส์อย่างไร', a: 'ภายใน 3 วันหลังได้รับสินค้า เปิดหน้าคำสั่งซื้อ กด "ขอเปลี่ยนไซส์" แล้วเลือกไซส์ใหม่ แบรนด์จะส่งคู่ใหม่ให้โดยไม่เสียค่าส่ง' },
+      { q: 'ขอเปลี่ยนไซส์อย่างไร', a: 'ภายใน 3 วันหลังได้รับสินค้า เปิดหน้าคำสั่งซื้อ กด "ขอเปลี่ยนไซส์" แล้วเลือกไซส์ใหม่ จากนั้นส่งคู่เดิมพร้อมกล่องกลับมาที่แบรนด์ (ลูกค้าออกค่าส่ง) เมื่อแบรนด์ได้รับแล้วจะส่งคู่ใหม่ให้ฟรี' },
       { q: 'สั่งหลายคู่ในคำสั่งซื้อเดียว เปลี่ยนได้กี่คู่', a: 'เปลี่ยนได้ 1 ครั้งต่อคำสั่งซื้อ ไม่ใช่ต่อคู่' },
     ],
   },

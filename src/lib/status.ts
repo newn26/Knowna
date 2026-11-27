@@ -35,9 +35,10 @@ export function exchangeSteps(o: Order): Step[] {
   const t0 = new Date(x.requestedAt).getTime()
   const unit = x.timeScale === 'demo' ? SEC : DAY / 30
   return [
-    { id: 'requested', label: 'รับคำขอเปลี่ยนไซส์', detail: `EU ${x.fromSize} → EU ${x.toSize} · ใช้สิทธิ์ฟรี 1 ครั้งของคำสั่งซื้อนี้`, at: t0 },
-    { id: 'shipped', label: 'ส่งคู่ใหม่แล้ว', detail: 'แบรนด์ออกค่าส่งคู่ใหม่ให้', at: t0 + 30 * unit },
-    { id: 'done', label: 'คู่ใหม่ส่งถึงแล้ว', detail: `ไซส์ใหม่ EU ${x.toSize}`, at: t0 + 60 * unit },
+    { id: 'requested', label: 'รับคำขอเปลี่ยนไซส์', detail: `EU ${x.fromSize} → EU ${x.toSize} · ใช้สิทธิ์ 1 ครั้งของคำสั่งซื้อนี้`, at: t0 },
+    { id: 'returned', label: 'ได้รับคู่เดิมคืนแล้ว', detail: 'ลูกค้าส่งคู่เดิมกลับ (ลูกค้าออกค่าส่ง)', at: t0 + 30 * unit },
+    { id: 'shipped', label: 'ส่งคู่ใหม่แล้ว', detail: 'แบรนด์ออกค่าส่งคู่ใหม่ให้', at: t0 + 45 * unit },
+    { id: 'done', label: 'คู่ใหม่ส่งถึงแล้ว', detail: `ไซส์ใหม่ EU ${x.toSize}`, at: t0 + 75 * unit },
   ]
 }
 

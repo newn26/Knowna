@@ -206,16 +206,16 @@ export const Pending = ({ label }: { label: string }) => (
   </span>
 )
 
-/** The free size exchange rule, with the parts the report has not settled shown as pending. */
+/** The size exchange rule: who pays which shipping and what condition the returned pair must be in. */
 export function ExchangeRule({ className = '' }: { className?: string }) {
   return (
     <div className={`text-sm ${className}`}>
       <p>{EXCHANGE.rule}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {EXCHANGE.pending.map((p) => (
-          <Pending key={p} label={p} />
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        {EXCHANGE.steps.map((s) => (
+          <li key={s}>{s}</li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }
