@@ -347,8 +347,8 @@ export function Account() {
             </Button>
           </div>
           <div className="rounded-3xl bg-stone p-6 text-sm sm:p-8">
-            <p className="font-semibold">สั่งแบบไม่มีบัญชี?</p>
-            <p className="mt-1 text-sub">ติดตามด้วยเลขคำสั่งซื้อกับเบอร์โทร</p>
+            <p className="font-semibold">มีเลขคำสั่งซื้ออยู่แล้ว?</p>
+            <p className="mt-1 text-sub">ติดตามพัสดุได้ด้วยเลขคำสั่งซื้อกับเบอร์โทร โดยไม่ต้องเข้าสู่ระบบ</p>
             <LinkButton to="/track" variant="outline" className="mt-6">
               ติดตามพัสดุ
             </LinkButton>

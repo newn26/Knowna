@@ -92,8 +92,12 @@ await test('order: new pair takes stock, order is findable by phone', async () =
 
 const rejects = (p: Promise<unknown>) => assert.rejects(p, ApiError)
 
+await test('order: refused without a signed-in account', async () => {
+  await rejects(placeOrder({ userId: null, customer: { name: 'ทดสอบ', phone: '0811111111', email: '', address: 'x' }, lines: [line()], payment: 'promptpay' }))
+})
+
 await test('exchange: not before delivery', async () => {
-  const o = await placeOrder({ userId: null, customer: { name: 'ทดสอบ', phone: '0811111111', email: '', address: 'x' }, lines: [line()], payment: 'promptpay' })
+  const o = await placeOrder({ userId: 'u-demo', customer: { name: 'ทดสอบ', phone: '0811111111', email: '', address: 'x' }, lines: [line()], payment: 'promptpay' })
   await rejects(requestExchange(o.id, o.lines[0].key, 36))
 })
 

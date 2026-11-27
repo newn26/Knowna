@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { Button, Container, Field, LinkButton, PageHead, Spinner, useDialog } from '../components/ui'
-import { ApiError, placeOrder } from '../lib/api'
+import { ApiError, loginDemo, placeOrder } from '../lib/api'
 import { PROVINCES, colorInfo, formatAddress } from '../lib/catalog'
 import { baht, totals } from '../lib/pricing'
 import { actions, useStore } from '../lib/store'
@@ -39,6 +39,36 @@ export default function Checkout() {
         <PageHead title="ยังไม่มีสินค้า" />
         <Container>
           <LinkButton to="/shop">เลือกรองเท้า</LinkButton>
+        </Container>
+      </>
+    )
+
+  // Anyone can browse and fill a cart; ordering needs an account so the order shows in history and can be exchanged.
+  if (!user)
+    return (
+      <>
+        <PageHead title="เข้าสู่ระบบก่อนสั่งซื้อ" sub="ดูสินค้าและใส่ตะกร้าได้โดยไม่ต้องเข้าสู่ระบบ แต่การสั่งซื้อต้องใช้บัญชี เพื่อเก็บประวัติคำสั่งซื้อและใช้สิทธิ์เปลี่ยนไซส์" />
+        <Container className="grid gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="rounded-3xl border border-line bg-card p-6 sm:p-8">
+            <p className="font-semibold">เข้าสู่ระบบ (เดโม)</p>
+            <p className="mt-1 text-sm text-sub">บัญชี “คุณนภา” ผู้ปกครองที่ซื้อให้ลูก 2 คน เข้าสู่ระบบแล้วกลับมาที่หน้าชำระเงินนี้ ตะกร้ายังอยู่ครบ</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true)
+                  actions.login(await loginDemo())
+                  setBusy(false)
+                }}
+              >
+                {busy ? <Spinner /> : 'เข้าสู่ระบบบัญชีเดโม'}
+              </Button>
+              <LinkButton to="/shop" variant="outline">
+                ดูสินค้าต่อ
+              </LinkButton>
+            </div>
+          </div>
+          <Summary lines={cart} />
         </Container>
       </>
     )

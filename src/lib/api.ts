@@ -27,6 +27,8 @@ export interface PlaceOrderInput {
 // POST /api/orders
 export async function placeOrder(input: PlaceOrderInput): Promise<Order> {
   await wait(900)
+  // Browsing is open to everyone, but placing an order needs a signed-in account (owner, 2026-11-27).
+  if (!input.userId) throw new ApiError('กรุณาเข้าสู่ระบบก่อนสั่งซื้อ')
   const db = load()
   // Re-check stock: another tab could have bought the last pairs.
   for (const l of input.lines)
